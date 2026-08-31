@@ -1,0 +1,30 @@
+[project]
+name = "open-vs-closed"
+version = "1.0.0"
+description = "A/B harness comparing GLM-5.3 and Fable 5 as the lead model in one-shot website generation"
+readme = "README.md"
+# The oneshot-websites coordinator helpers require 3.11+. uv provides and pins
+# the interpreter so the experiment does not depend on whatever `python3`
+# happens to be first on PATH (this machine's default python3 is 3.9).
+requires-python = ">=3.11"
+
+# The pinned skill's own helpers (prepare_run, validate, test_skill,
+# build_catalog_index, validate_catalog, cleanup_run_tmp) import only the
+# standard library, verified by inspection, so the experiment itself needs no
+# runtime dependencies. Keeping this empty is deliberate: fewer moving parts
+# between the two arms.
+dependencies = []
+
+[dependency-groups]
+# Only needed to run the UPSTREAM repository-wide validation suite, which is
+# broader than the oneshot-websites skill this experiment pins. Install with:
+#   uv sync --group upstream-validation
+upstream-validation = [
+  "openpyxl==3.1.5",
+  "PyYAML==6.0.3",
+  "numpy==2.4.2",
+  "Pillow==12.3.0",
+]
+
+[tool.uv]
+package = false

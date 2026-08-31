@@ -140,12 +140,41 @@ python_ok() {
   "$py" -c 'import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null
 }
 
-# Discover a Python >= 3.11 for the skill helpers and export the override.
+# Resolve a Python >= 3.11 for the skill helpers and export the override.
+#
+# uv is the preferred source: it pins one interpreter for the whole experiment
+# (see .python-version / pyproject.toml) rather than depending on whatever
+# `python3` happens to be first on PATH. This machine's default python3 is 3.9,
+# which the skill helpers reject.
+#
+# ONESHOT_WEBSITES_PYTHON must name a single executable with no flags, per the
+# skill contract, so we resolve uv's interpreter to a concrete path rather than
+# wrapping it in `uv run`.
 ensure_python() {
+  # An explicit caller-provided interpreter always wins.
+  if [ -n "${ONESHOT_WEBSITES_PYTHON:-}" ] && python_ok; then
+    export ONESHOT_WEBSITES_PYTHON
+    return 0
+  fi
+
+  if command -v uv >/dev/null 2>&1; then
+    local uvpy
+    uvpy="$(cd "$EXP_ROOT" && uv python find '>=3.11' 2>/dev/null | head -1)"
+    if [ -z "$uvpy" ] || [ ! -x "$uvpy" ]; then
+      (cd "$EXP_ROOT" && uv python install >/dev/null 2>&1) || true
+      uvpy="$(cd "$EXP_ROOT" && uv python find '>=3.11' 2>/dev/null | head -1)"
+    fi
+    if [ -n "$uvpy" ] && [ -x "$uvpy" ]; then
+      export ONESHOT_WEBSITES_PYTHON="$uvpy"
+      return 0
+    fi
+  fi
+
   if python_ok; then
     export ONESHOT_WEBSITES_PYTHON="${ONESHOT_WEBSITES_PYTHON:-python3}"
     return 0
   fi
+
   local c
   for c in python3.13 python3.12 python3.11 \
            /opt/homebrew/bin/python3.13 /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3.11 \

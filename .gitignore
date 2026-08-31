@@ -20,6 +20,10 @@ Thumbs.db
 /.ruff_cache/
 /.venv/
 /node_modules/
+
+# --- uv ---------------------------------------------------------------------
+/.venv/
+# uv.lock IS committed: it pins the interpreter/dep resolution for both arms.
 /scripts/__pycache__/
 
 # --- temporary worktrees ---------------------------------------------------

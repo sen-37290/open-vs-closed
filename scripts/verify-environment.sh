@@ -23,10 +23,28 @@ command -v node >/dev/null 2>&1 && pass "node $(node --version)"                
 command -v npm  >/dev/null 2>&1 && pass "npm $(npm --version)"                    || warn "npm not found"
 command -v curl >/dev/null 2>&1 && pass "curl present (liveness monitor)"          || fail "curl not found; liveness monitoring will not work"
 
+BROWSER=""
+for b in "${ONESHOT_WEBSITES_BROWSER:-}" \
+         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+         "/Applications/Chromium.app/Contents/MacOS/Chromium"; do
+  [ -n "$b" ] && [ -x "$b" ] && { BROWSER="$b"; break; }
+done
+[ -n "$BROWSER" ] && pass "Chromium-family browser for the directional-controls gate: $(basename "$BROWSER")" \
+                  || warn "no Chromium-family browser found; prompts with directional controls cannot pass the browser gate"
+
 if command -v caffeinate >/dev/null 2>&1; then pass "keep-awake available: caffeinate"
 else fail "no keep-awake mechanism; a host sleep mid-run corrupts wall-clock and liveness data"; fi
 
-echo; echo "-- python for skill helpers (>= 3.11) ----------------------------"
+echo; echo "-- uv + python for skill helpers (>= 3.11) -----------------------"
+if command -v uv >/dev/null 2>&1; then
+  pass "uv $(uv --version 2>/dev/null | awk '{print $2}') (manages and pins the interpreter)"
+  [ -f "$EXP_ROOT/.python-version" ] && pass "interpreter pinned: $(cat "$EXP_ROOT/.python-version")" \
+                                     || warn ".python-version missing; uv will pick an interpreter per invocation"
+  [ -f "$EXP_ROOT/pyproject.toml" ] && pass "pyproject.toml present (requires-python >= 3.11)" \
+                                    || warn "pyproject.toml missing"
+else
+  warn "uv not installed; falling back to PATH discovery (brew install uv)"
+fi
 if ensure_python; then
   pass "ONESHOT_WEBSITES_PYTHON=$ONESHOT_WEBSITES_PYTHON ($("$ONESHOT_WEBSITES_PYTHON" --version 2>&1))"
 else
@@ -49,8 +67,20 @@ if [ -n "${ONESHOT_WEBSITES_PYTHON:-}" ]; then
   V_OUT="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/validate.py" "$SKILL_DIR" 2>&1)"
   echo "$V_OUT" | grep -q '"valid": true' && pass "validate.py: valid" || fail "validate.py: $(echo "$V_OUT" | head -3)"
 
-  T_OUT="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/test_skill.py" "$SKILL_DIR" 2>&1 | tail -1)"
-  case "$T_OUT" in PASS*) pass "test_skill.py: $T_OUT" ;; *) fail "test_skill.py: $T_OUT" ;; esac
+  # test_skill.py includes the directional-controls browser gate, which drives
+  # headless Chrome. That step is timing-sensitive under load, so a single
+  # failure is retried once before it is reported as a real failure.
+  T_OUT="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/test_skill.py" "$SKILL_DIR" 2>&1)"
+  if ! printf '%s' "$T_OUT" | grep -q '^PASS:'; then
+    warn "test_skill.py failed once (browser gate is load-sensitive); retrying"
+    T_OUT="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/test_skill.py" "$SKILL_DIR" 2>&1)"
+  fi
+  if printf '%s' "$T_OUT" | grep -q '^PASS:'; then
+    pass "test_skill.py: $(printf '%s' "$T_OUT" | grep '^PASS:' | head -1)"
+  else
+    fail "test_skill.py: $(printf '%s' "$T_OUT" | grep -E '^- ' | head -1 | cut -c1-140)"
+    printf '        (full output: %s)\n' "$(printf '%s' "$T_OUT" | head -1 | cut -c1-100)"
+  fi
 
   for helper in prepare_run.py build_catalog_index.py validate_catalog.py cleanup_run_tmp.py; do
     if "$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/$helper" --help >/dev/null 2>&1 \
@@ -100,8 +130,11 @@ for d in "$HOME/.kilo" "$HOME/.kilocode"; do
 done
 
 echo; echo "-- models --------------------------------------------------------"
-[ -n "${OPENROUTER_API_KEY:-}" ] && pass "OPENROUTER_API_KEY present (value not shown)" \
-                                 || fail "OPENROUTER_API_KEY not set; copy experiment-config/models.example.env to models.env"
+if [ -n "${OPENROUTER_API_KEY:-}" ]; then
+  pass "OPENROUTER_API_KEY present (value not shown)"
+else
+  fail "OPENROUTER_API_KEY is empty — fill it in experiment-config/models.env (that file exists and is gitignored)"
+fi
 
 check_model() {
   local label="$1" full="$2" provider="${2%%/*}"

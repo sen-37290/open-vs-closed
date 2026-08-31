@@ -29,14 +29,26 @@ running anything. It is the experimental contract.
 ## Quick start
 
 ```bash
-npm install -g @kilocode/cli@7.5.6
+brew install uv                     # manages the Python the skill helpers need
+npm install -g @kilocode/cli@7.5.6  # the coding-agent harness
 
-cp experiment-config/models.example.env experiment-config/models.env
-$EDITOR experiment-config/models.env        # add your OpenRouter key
+uv python install                   # installs the pinned interpreter (3.13)
 
-./scripts/verify-environment.sh             # must be all-PASS
+$EDITOR experiment-config/models.env   # set OPENROUTER_API_KEY (file is gitignored)
+
+./scripts/verify-environment.sh        # must be all-PASS
 ./scripts/run-one.sh glm-5.3 prompts/pilot.md
 ```
+
+`experiment-config/models.env` already exists with every default filled in; the
+only value you must supply is `OPENROUTER_API_KEY`. It is gitignored, and
+`models.example.env` is the committed placeholder copy.
+
+Python is managed by **uv**: `pyproject.toml` declares `requires-python >=3.11`
+and `.python-version` pins 3.13, so the experiment never depends on whichever
+`python3` happens to be first on PATH (this machine's default is 3.9, which the
+skill helpers reject). The pinned skill's helpers import only the standard
+library, so there are no runtime dependencies to install.
 
 ## Layout
 
@@ -140,7 +152,7 @@ accident.
 
 ## Requirements
 
-macOS or Linux, Kilo CLI 7.5.6, git, curl, Python ≥ 3.11 for the skill helpers
+macOS or Linux, uv, Kilo CLI 7.5.6, git, curl, Python ≥ 3.11 for the skill helpers
 (auto-discovered; override with `ONESHOT_WEBSITES_PYTHON`), and a keep-awake
 mechanism (`caffeinate` on macOS) so a host sleep cannot corrupt wall-clock and
 liveness measurements mid-run.
