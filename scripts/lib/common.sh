@@ -20,10 +20,25 @@ warn() { printf '  WARN  %s\n' "$*"; }
 
 # --- configuration ----------------------------------------------------------
 # Loads models.env (untracked, real values). Never echoes values.
+# Loads models.env WITHOUT clobbering variables the caller already set, so
+# `RUN_TIMEOUT_SECONDS=600 ./scripts/run-one.sh ...` actually takes effect.
+# An explicit environment value always wins over the file.
 load_config() {
   local envfile="${MODELS_ENV:-$EXP_ROOT/experiment-config/models.env}"
   if [ -f "$envfile" ]; then
-    set -a; . "$envfile"; set +a
+    local line key val
+    while IFS= read -r line || [ -n "$line" ]; do
+      case "$line" in ''|'#'*) continue ;; esac
+      case "$line" in *=*) ;; *) continue ;; esac
+      key="${line%%=*}"
+      val="${line#*=}"
+      key="$(printf '%s' "$key" | tr -d '[:space:]')"
+      case "$key" in ''|*[!A-Za-z0-9_]*) continue ;; esac
+      # Only set it if the caller has not already provided a non-empty value.
+      if [ -z "$(eval "printf '%s' \"\${$key:-}\"")" ]; then
+        eval "export $key=\$val"
+      fi
+    done < "$envfile"
   fi
   : "${GLM_PROVIDER:=openrouter}"
   : "${FABLE_PROVIDER:=openrouter}"

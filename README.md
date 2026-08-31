@@ -103,7 +103,7 @@ Each was probed on this machine before the harness was built, not assumed:
 | Per-subagent model selection, coordinator fixed | supported | coordinator on one model read back a different model id from its subagent |
 | Recursive delegation (lead → critic) | supported | grandchild subagent wrote a file; **requires** raising `subagent_depth` from its default of `1` |
 | Autonomous, no approval prompts | supported | `--auto` + pre-approved permissions; `question` denied |
-| Background with observable status | supported | harness HTTP server `/api/session/active` |
+| Background with observable status | supported | harness session store (`kilo session list`); note `kilo run` opens no HTTP server, only `kilo serve` does |
 | Both arms on one provider | supported | `z-ai/glm-5.3` and `anthropic/claude-fable-5` both visible via OpenRouter |
 
 The `subagent_depth` default is the dangerous one: at `1`, the lead cannot spawn

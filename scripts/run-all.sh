@@ -14,6 +14,16 @@
 
 set -euo pipefail
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
+
+# ---------------------------------------------------------------------------
+# EDIT-SAFETY: the entire body lives inside main(), invoked as `main "$@"` on
+# the last line. Bash reads a script incrementally by byte offset, so editing a
+# plain script while a long run is executing it makes the running shell resume
+# at a shifted offset and re-execute arbitrary blocks. Bash parses a complete
+# function definition before executing it, so wrapping the body makes an
+# in-flight run immune to edits of this file.
+# ---------------------------------------------------------------------------
+main() {
 load_config
 ensure_python || die "no Python >= 3.11 available for the skill helpers"
 
@@ -51,13 +61,24 @@ printf 'arm\tprompt\trun_id\tstatus\texit_code\n' > "$SUMMARY"
 
 log "batch $BATCH_ID  parallelism=$MAX_PARALLEL  arms=[$ARMS]"
 
-running=0
+# macOS ships bash 3.2, which has no `wait -n`. Track PIDs and poll instead, so
+# a finished run frees its slot immediately rather than forcing whole waves.
+PIDS=""
+inflight() {
+  local alive="" n=0 p
+  for p in $PIDS; do
+    if kill -0 "$p" 2>/dev/null; then alive="$alive $p"; n=$((n + 1)); fi
+  done
+  PIDS="$alive"
+  echo "$n"
+}
+wait_for_slot() {
+  while [ "$(inflight)" -ge "$MAX_PARALLEL" ]; do sleep 5; done
+}
+
 for prompt in $PROMPTS; do
   for arm in $ARMS; do
-    while [ "$running" -ge "$MAX_PARALLEL" ]; do
-      wait -n 2>/dev/null || wait
-      running=$((running - 1))
-    done
+    wait_for_slot
 
     out="$BATCH_DIR/$(basename "$prompt" .md).$arm.out"
     (
@@ -68,15 +89,13 @@ for prompt in $PROMPTS; do
       printf '%s\t%s\t%s\t%s\t%s\n' "$arm" "$(basename "$prompt")" \
         "${rid:-<none>}" "${st:-UNKNOWN}" "$rc" >> "$SUMMARY"
     ) &
-    running=$((running + 1))
-    log "started $arm  $(basename "$prompt")  (in flight: $running/$MAX_PARALLEL)"
+    PIDS="$PIDS $!"
+    log "started $arm  $(basename "$prompt")  (in flight: $(inflight)/$MAX_PARALLEL)"
   done
 done
 
-while [ "$running" -gt 0 ]; do
-  wait -n 2>/dev/null || wait
-  running=$((running - 1))
-done
+log "all runs dispatched; waiting for the last ones to finish"
+wait
 
 TOTAL=$(($(wc -l < "$SUMMARY") - 1))
 OKC=$(awk -F'\t' 'NR>1 && $4=="OK"' "$SUMMARY" | wc -l | tr -d ' ')
@@ -89,3 +108,6 @@ echo "-------------------------------------------------------------------"
 echo "total: $TOTAL   OK: $OKC   not-OK (preserved, not retried): $BAD"
 echo "batch record: $BATCH_DIR"
 echo "==================================================================="
+}
+
+main "$@"

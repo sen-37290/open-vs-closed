@@ -10,6 +10,16 @@
 set -euo pipefail
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
 
+# ---------------------------------------------------------------------------
+# EDIT-SAFETY: the entire body lives inside main(), invoked as `main "$@"` on
+# the last line. Bash reads a script incrementally by byte offset, so editing a
+# plain script while a long run is executing it makes the running shell resume
+# at a shifted offset and re-execute arbitrary blocks. Bash parses a complete
+# function definition before executing it, so wrapping the body makes an
+# in-flight run immune to edits of this file.
+# ---------------------------------------------------------------------------
+main() {
+
 # ---------------------------------------------------------------- 1. arguments
 [ $# -ge 2 ] || die "usage: run-one.sh MODEL_ALIAS PROMPT_FILE [RUN_LABEL]"
 MODEL_ALIAS="$1"
@@ -81,11 +91,25 @@ log "sealed digest verified"
 START_ISO="$(now_iso)"; START_EPOCH="$(epoch)"
 EXIT_CODE=""; TIMEOUT_HIT=0; MONITOR_PID=""
 
+NORMALIZED=0
+normalize_records() {
+  [ "$NORMALIZED" = "1" ] && return 0
+  NORMALIZED=1
+  "$ONESHOT_WEBSITES_PYTHON" "$EXP_ROOT/scripts/normalize-records.py" \
+    --run-dir "$RUN_DIR" --log "$NORMALIZE_LOG" --timeout-hit "$TIMEOUT_HIT" \
+    >/dev/null 2>>"$STDERR_LOG" || warn "normalize-records.py reported a problem"
+}
+
 finalize_metadata() {
   local rc="$1"
   local end_iso end_epoch wall
   end_iso="$(now_iso)"; end_epoch="$(epoch)"; wall=$((end_epoch - START_EPOCH))
   [ -n "$MONITOR_PID" ] && kill "$MONITOR_PID" 2>/dev/null || true
+
+  # A run killed or crashed before writing a terminal status must still land on
+  # one. normalize-records.py turns a stranded PLANNED/RUNNING into ERROR and
+  # logs why. Without this an aborted run keeps a non-terminal status forever.
+  normalize_records
 
   ONESHOT_WEBSITES_PYTHON="$ONESHOT_WEBSITES_PYTHON" \
   "$ONESHOT_WEBSITES_PYTHON" "$EXP_ROOT/scripts/assemble_metadata.py" \
@@ -122,6 +146,16 @@ except Exception:
 PY
   log "status: $(cat "$STATUS_FILE")  wall_clock=${wall}s  run=$RUN_DIR"
 }
+
+on_signal() {
+  local sig="$1"
+  record_intervention "signal" "received_sig$sig" "run terminated by signal"
+  EXIT_CODE=$((128 + $2))
+  finalize_metadata "$EXIT_CODE" || true
+  exit "$EXIT_CODE"
+}
+trap 'on_signal TERM 15' TERM
+trap 'on_signal INT 2'  INT
 
 on_exit() {
   local rc=$?
@@ -172,14 +206,13 @@ print(json.dumps({"agent":{
 }}))' "$LEAD_MODEL" "$CRITIC_MODEL")"
 export KILO_CONFIG_CONTENT
 
-PORT="$(( 47000 + RANDOM % 1500 ))"
 export TMPDIR="$RUN_DIR/.tmp" TMP="$RUN_DIR/.tmp" TEMP="$RUN_DIR/.tmp"
 
 log "launching coordinator: coordinator=$COORDINATOR_MODEL lead=$LEAD_MODEL critic=$CRITIC_MODEL timeout=${RUN_TIMEOUT_SECONDS}s"
 record_intervention "dispatch" "coordinator_launch" "lead=$LEAD_MODEL"
 
 # External bounded liveness monitor (content-free: it only observes).
-"$EXP_ROOT/scripts/monitor-liveness.sh" "$PORT" "$RUN_DIR" "$INTERVENTIONS" \
+"$EXP_ROOT/scripts/monitor-liveness.sh" "$RUN_DIR" "$INTERVENTIONS" "$RUN_ID" "$$" \
   >>"$STDERR_LOG" 2>&1 &
 MONITOR_PID=$!
 
@@ -192,7 +225,6 @@ run_with_timeout "$RUN_TIMEOUT_SECONDS" \
     --auto \
     --agent code \
     --model "$COORDINATOR_MODEL" \
-    --port "$PORT" \
     --format json \
     --title "$RUN_ID" \
     "$(cat "$BRIEF")" \
@@ -213,9 +245,7 @@ grep -o 'ses_[A-Za-z0-9]\{20,\}' "$AGENT_LOG" 2>/dev/null | head -1 > "$RUN_DIR/
 
 # ------------------------------------------------------ 7. verify finalization
 record_intervention "finalization_check" "post_exit" ""
-"$ONESHOT_WEBSITES_PYTHON" "$EXP_ROOT/scripts/normalize-records.py" \
-  --run-dir "$RUN_DIR" --log "$NORMALIZE_LOG" --timeout-hit "$TIMEOUT_HIT" \
-  || warn "normalize-records.py reported a problem"
+normalize_records
 
 # ----------------------------------------- 8. catalogue validate + rebuild
 set +e
@@ -237,3 +267,6 @@ echo "arm:      $MODEL_ALIAS ($LEAD_MODEL)"
 echo "status:   $(cat "$STATUS_FILE")"
 echo "metadata: $META_FILE"
 exit 0
+}
+
+main "$@"

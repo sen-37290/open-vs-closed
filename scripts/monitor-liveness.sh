@@ -1,101 +1,88 @@
 #!/usr/bin/env bash
 #
-# monitor-liveness.sh PORT RUN_DIR INTERVENTIONS_FILE
+# monitor-liveness.sh RUN_DIR INTERVENTIONS_FILE RUN_ID COORDINATOR_PID
 #
 # Bounded, content-free liveness monitoring for one in-flight run.
 #
-# The skill requires the coordinator to perform bounded liveness checks every
-# 2-5 minutes. Kilo's `task` tool is synchronous: while the lead subagent runs,
-# the coordinator model cannot act. So the liveness observer runs OUTSIDE the
-# coordinator session and reads that session's live state from the harness's
-# own HTTP server. It is content-free by construction: it only reads status and
-# appends heartbeat records. It never sends anything to the coordinator or the
-# lead, so it cannot leak guidance into either arm.
+# WHY THIS RUNS OUTSIDE THE COORDINATOR
+# The skill requires bounded coordinator liveness checks every 2-5 minutes.
+# Kilo's `task` tool is synchronous: while the lead subagent runs, the
+# coordinator model cannot act, so it cannot heartbeat about its own lead.
+# The observer therefore runs as a separate process.
 #
-# Interval is fixed at 180s (mid-band) and identical for both arms.
+# WHY IT IS SAFE FOR AN A/B
+# It is content-free by construction. It has no channel to the coordinator or
+# the lead and can only read: filesystem progress, harness session state, and
+# process liveness. It cannot leak guidance into either arm, which is the
+# property the content-free-nudge rule exists to protect.
+#
+# NOTE: `kilo run` does not expose an HTTP server (only `kilo serve` does), so
+# harness state is read from the session store via `kilo session list`.
 
 set -uo pipefail
-PORT="$1"; RUN_DIR="$2"; INTERVENTIONS="$3"
+RUN_DIR="$1"; INTERVENTIONS="$2"; RUN_ID="$3"; COORD_PID="${4:-}"
 INTERVAL="${MONITOR_INTERVAL_SECONDS:-180}"
-BASE="http://127.0.0.1:$PORT"
-
-hb() {
-  printf '{"time":"%s","type":"heartbeat","trigger":"periodic_liveness_check","detail":%s}\n' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" >> "$INTERVENTIONS"
-}
-
-# Wait for the harness server to come up before the first heartbeat.
-for _ in $(seq 1 60); do
-  curl -sf -m 3 "$BASE/api/health" >/dev/null 2>&1 && break
-  sleep 2
-done
 
 while :; do
   sleep "$INTERVAL"
 
-  ACTIVE="$(curl -sf -m 8 "$BASE/api/session/active" 2>/dev/null || echo '')"
-  SESSIONS="$(curl -sf -m 8 "$BASE/api/session" 2>/dev/null || echo '')"
+  # Has the coordinator process gone? Then the run is over; stop observing.
+  if [ -n "$COORD_PID" ] && ! kill -0 "$COORD_PID" 2>/dev/null; then
+    exit 0
+  fi
 
-  DETAIL="$(ACTIVE_JSON="$ACTIVE" SESSIONS_JSON="$SESSIONS" python3 - "$RUN_DIR" <<PY 2>/dev/null || echo '{"observed":"unavailable"}'
-import json, os, sys, subprocess, pathlib
+  SESSIONS="$(kilo session list 2>/dev/null | grep -v '^INFO' | grep -c '^ses_')"
+  SESSION_SEEN="$(kilo session list 2>/dev/null | grep -c "$RUN_ID")"
+
+  DETAIL="$(RUN_ID="$RUN_ID" SESSIONS="$SESSIONS" SESSION_SEEN="$SESSION_SEEN" \
+            python3 - "$RUN_DIR" <<'PY' 2>/dev/null || echo '{"observed":"unavailable"}'
+import json, os, sys, time, pathlib
 run = pathlib.Path(sys.argv[1])
 
-def newest(rel):
+def scan(rel):
     p = run / rel
     if not p.exists():
-        return None
-    newest_t = 0.0
-    for dirpath, _dirnames, filenames in os.walk(p):
+        return 0, 0, 0.0
+    files = bytes_ = 0
+    newest = 0.0
+    for dirpath, _dn, filenames in os.walk(p):
         for f in filenames:
+            fp = os.path.join(dirpath, f)
             try:
-                newest_t = max(newest_t, os.path.getmtime(os.path.join(dirpath, f)))
+                st = os.stat(fp)
             except OSError:
-                pass
-    return newest_t or None
+                continue
+            files += 1
+            bytes_ += st.st_size
+            newest = max(newest, st.st_mtime)
+    return files, bytes_, newest
 
-def count(rel):
-    p = run / rel
-    if not p.exists():
-        return 0
-    return sum(len(fs) for _d, _dn, fs in os.walk(p))
+ws_f, ws_b, ws_t = scan("workspace")
+ar_f, ar_b, ar_t = scan("artifact")
+newest = max(ws_t, ar_t)
 
-active_raw = os.environ.get("ACTIVE_JSON", "")
-sessions_raw = os.environ.get("SESSIONS_JSON", "")
-out = {
-    "harnessReachable": bool(sessions_raw),
-    "workspaceFiles": count("workspace"),
-    "artifactFiles": count("artifact"),
-    "tmpPresent": (run / ".tmp").exists(),
-}
-for key, raw in (("activeSessions", active_raw), ("sessions", sessions_raw)):
+def as_int(name):
     try:
-        d = json.loads(raw)
-        out[key] = len(d) if isinstance(d, list) else 1
-    except Exception:
-        out[key] = None
-try:
-    d = json.loads(sessions_raw)
-    if isinstance(d, list) and d:
-        tot = {"input": 0, "output": 0}
-        cost = 0.0
-        for s in d:
-            t = (s or {}).get("tokens") or {}
-            tot["input"] += t.get("input") or 0
-            tot["output"] += t.get("output") or 0
-            cost += (s or {}).get("cost") or 0
-        out["tokens"] = tot
-        out["cost"] = cost
-except Exception:
-    pass
-newest_ws = newest("workspace") or 0
-newest_ar = newest("artifact") or 0
-import time
-out["secondsSinceLastWrite"] = int(time.time() - max(newest_ws, newest_ar)) if max(newest_ws, newest_ar) else None
+        return int((os.environ.get(name) or "0").strip() or 0)
+    except ValueError:
+        return 0
+
+out = {
+    "harnessReachable": as_int("SESSIONS") > 0,
+    "harnessSessions": as_int("SESSIONS"),
+    "runSessionVisible": as_int("SESSION_SEEN") > 0,
+    "workspaceFiles": ws_f, "workspaceBytes": ws_b,
+    "artifactFiles": ar_f, "artifactBytes": ar_b,
+    "tmpPresent": (run / ".tmp").exists(),
+    "secondsSinceLastWrite": int(time.time() - newest) if newest else None,
+}
+for name in ("agent.log", "stderr.log"):
+    p = run / name
+    out[name.replace(".", "_")] = p.stat().st_size if p.exists() else 0
 print(json.dumps(out))
 PY
 )"
-  hb "$DETAIL"
 
-  # Stop once the harness server is gone (the coordinator process has exited).
-  curl -sf -m 3 "$BASE/api/health" >/dev/null 2>&1 || exit 0
+  printf '{"time":"%s","type":"heartbeat","trigger":"periodic_liveness_check","detail":%s}\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$DETAIL" >> "$INTERVENTIONS"
 done

@@ -56,7 +56,9 @@ Verified empirically before this protocol was accepted (see `README.md`):
   `kilo run --auto` plus a pre-approved permission surface, with the interactive
   `question` tool **denied** so no run can block on an absent human.
 - Background execution with observable status — **supported** via the harness
-  HTTP server (`/api/session`, `/api/session/active`).
+  session store (`kilo session list`, `kilo export`). Note that `kilo run` does
+  *not* open an HTTP server; only `kilo serve` does, so the observer reads the
+  session store rather than an endpoint.
 
 Had lead-model selection been unavailable while the coordinator stayed fixed,
 the correct outcome would have been to report `UNSUPPORTED_LEAD_MODEL_SELECTION`
@@ -137,6 +139,20 @@ Exactly the skill's own vocabulary. There is no parallel taxonomy.
 `status.txt` contains **exactly** the value of `run.json.status` — it is written
 by reading that field, never computed independently.
 
+### Excluded runs
+
+A run that was disturbed by the operator or the environment — not by the model —
+is **excluded rather than repaired or deleted**. Mark it by writing an
+`OPERATOR-INVALIDATION.md` into its run directory stating what happened, when,
+why it is discarded rather than normalized, and an explicit note that the fault
+is not the model's.
+
+`status.txt` still mirrors `run.json.status`, so the status vocabulary stays
+single-valued; the presence of the marker file is what excludes the run. Any
+analysis must skip runs carrying that marker, and must never count them as model
+failures. Deleting such a run is not permitted: removing evidence of an operator
+mistake is worse than recording it.
+
 ---
 
 ## 4. Timeout policy
@@ -177,10 +193,12 @@ coordinator model cannot act. This is a recorded harness limitation, not
 something worked around with a substitute steering channel.
 
 Monitoring therefore runs as an **external observer**
-(`scripts/monitor-liveness.sh`), which polls the harness's own HTTP server every
-180 seconds — mid-band — and appends a `heartbeat` record carrying session
-count, token totals, cost, workspace and artifact file counts, `.tmp/` presence,
-and seconds since the last write.
+(`scripts/monitor-liveness.sh`), which samples every 180 seconds — mid-band —
+and appends a `heartbeat` record carrying harness session state, whether this
+run's session is visible, workspace and artifact file counts and byte totals,
+`.tmp/` presence, log sizes, and seconds since the last write. Seconds-since-last-write
+is the real progress signal: a lead that has stopped producing bytes shows up as
+a rising number.
 
 The observer is **content-free by construction**: it has no channel to the
 coordinator or the lead and can only read. It therefore cannot leak guidance

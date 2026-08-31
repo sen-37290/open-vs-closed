@@ -9,6 +9,16 @@
 set -euo pipefail
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
 
+# ---------------------------------------------------------------------------
+# EDIT-SAFETY: the entire body lives inside main(), invoked as `main "$@"` on
+# the last line. Bash reads a script incrementally by byte offset, so editing a
+# plain script while a long run is executing it makes the running shell resume
+# at a shifted offset and re-execute arbitrary blocks. Bash parses a complete
+# function definition before executing it, so wrapping the body makes an
+# in-flight run immune to edits of this file.
+# ---------------------------------------------------------------------------
+main() {
+
 [ $# -ge 1 ] || die "usage: run-pair.sh PROMPT_FILE"
 PROMPT_FILE_IN="$1"
 load_config
@@ -92,3 +102,6 @@ echo "-------------------------------------------------------------------"
 echo "pair record: $PAIR_DIR/pair.json"
 echo "no retries were performed; failed arms are preserved as failures"
 echo "==================================================================="
+}
+
+main "$@"
