@@ -5,50 +5,50 @@ have started invalidates cross-run comparability; version it instead.
 
 ---
 
-## 1. Role architecture
+## 1. What is being compared
 
-The `oneshot-websites` skill is an orchestration protocol with three roles, not
-a CLI. The experiment exploits that structure: it varies exactly one role.
+A run is: **one human prompt handed to one model**, which then works
+autonomously until it produces an artifact or fails.
 
-| Role | Who | Model | Status |
-|---|---|---|---|
-| **Coordinator** | `kilo run` primary session | `COORDINATOR_MODEL` | **pinned constant** |
-| **Lead** | `oneshot-lead` subagent | `GLM_MODEL` *or* `FABLE_MODEL` | **treatment variable** |
-| **Critic** | `oneshot-critic` subagent | `CRITIC_MODEL` | **pinned constant** |
+**One model per run.** The initial session and every subagent that model chooses
+to spawn — at any depth, in any role — run on the same model. GLM-5.3 runs the
+entire system in one arm; Fable 5 runs the entire system in the other.
 
-**The treatment variable is the lead model, and nothing else.**
+| | |
+|---|---|
+| **Treatment variable** | the model, for the whole run |
+| **Held constant** | harness, harness version, skill commit, permissions, prompt bytes, timeout, starting environment |
 
-The coordinator reserves nothing new, authors nothing, and builds nothing: it
-verifies the reserved run, dispatches one fresh lead, and verifies finalization.
-The critic is read-only and inspects the real rendered artifact.
+The harness does **not** impose a coordinator, a lead, or a critic, and does not
+assign a model to any role. The `oneshot-websites` skill describes a delegation
+protocol, and `oneshot-lead` / `oneshot-critic` subagent types are *available*,
+but whether the model delegates, how much, and to whom is the model's decision —
+and that decision is part of what the experiment measures. Neither subagent type
+declares a model, so both inherit the run's single model.
 
-Both constants are recorded in every run's `metadata.json` under
-`constants.coordinatorModel` and `constants.criticModel`, and the models that
-actually served each turn are recorded under
-`telemetry.modelsObservedInSession` — so a silent model substitution is
-detectable after the fact rather than merely assumed away.
+This is enforced mechanically, not by convention:
 
-### Why the critic is a third model
-
-`CRITIC_MODEL` defaults to a family that is neither GLM nor Fable. If the critic
-were one of the arms, that arm's artifacts would be graded by a sibling of the
-model that built them, and any self-preference would land entirely on one side
-of the comparison. A third family keeps the grading asymmetry off the treatment.
-
-The binding requirement is that the critic is **identical across both arms**. If
-you prefer one of the arms as critic, change `CRITIC_MODEL` once, before any
-run, and record the change here. Never change it between arms.
+- `kilo.jsonc` contains no `model` field anywhere — not top-level, not
+  `small_model`, not on any agent. `verify-environment.sh` FAILS if one appears.
+- `run-one.sh` sets exactly one model per run, via `--model` and
+  `KILO_CONFIG_CONTENT`, including `small_model` so even incidental harness
+  traffic cannot pull in a second model.
+- `metadata.json` records `singleModelIntegrity`, derived from per-message
+  `modelID` telemetry: the set of models that actually served the run, and
+  whether any unexpected model appeared. A contaminated run is detectable after
+  the fact rather than assumed clean.
 
 ### Harness capability boundary
 
 Verified empirically before this protocol was accepted (see `README.md`):
 
 - Fresh no-history subagent dispatch — **supported**. Verified with a canary
-  token held in the coordinator session: the subagent reported `CANARY=NONE`.
-- Per-subagent model selection with the coordinator fixed — **supported**.
-  Verified by running a coordinator on one model and reading back a different
-  model id from the dispatched subagent.
-- Recursive delegation (lead → critic) — **supported**, but only after raising
+  token held in the parent session: the subagent reported `CANARY=NONE`.
+- Subagents **inherit** the session model when no model is pinned — verified
+  from per-message `modelID` telemetry, which showed a single model across a
+  session that dispatched a subagent. This is what makes one-model-per-run
+  enforceable rather than merely intended.
+- Recursive delegation (subagent spawning subagents) — **supported**, but only after raising
   `subagent_depth`. Kilo's default of `1` silently prevents a subagent from
   launching a subagent, which would have disabled the lead's quality gauntlet
   entirely while appearing to work.
@@ -60,9 +60,8 @@ Verified empirically before this protocol was accepted (see `README.md`):
   *not* open an HTTP server; only `kilo serve` does, so the observer reads the
   session store rather than an endpoint.
 
-Had lead-model selection been unavailable while the coordinator stayed fixed,
-the correct outcome would have been to report `UNSUPPORTED_LEAD_MODEL_SELECTION`
-and build nothing.
+Had no-history subagent dispatch been unavailable, the correct outcome would
+have been to report `UNSUPPORTED_NO_FRESH_SUBAGENT` and build nothing.
 
 ---
 
@@ -80,16 +79,16 @@ team size, or recursion depth, and this harness adds none.
 "One-shot" is a statement about the **delegation boundary**, not about effort:
 one prompt, one owning lead, no human follow-up.
 
-The human must not provide follow-up instructions during a run. The coordinator
-is explicitly forbidden from sending the lead guidance, hints, corrections,
-examples, or quality opinions of any kind.
+The human must not provide follow-up instructions during a run. Nothing outside
+the run may send the model guidance, hints, corrections, examples, or quality
+opinions of any kind once it has started.
 
 ### The prompt is sealed before dispatch — and never refined per arm
 
-The skill's default coordinator behaviour is to refine a rough brief into a
-fully developed actual prompt. **That behaviour is disabled here.** If each arm's
-coordinator refined the prompt independently, the two arms would receive
-different bytes and the comparison would be meaningless.
+The skill's default behaviour is to refine a rough brief into a fully developed
+actual prompt. **That behaviour is disabled here.** If each arm refined the
+prompt independently, the two arms would receive different bytes and the
+comparison would be meaningless.
 
 Instead:
 
@@ -100,7 +99,7 @@ Instead:
 3. `prepare_run.py` copies those exact bytes to `artifact/PROMPT.md`.
 4. The digest of the sealed copy is verified against the source **before**
    anything is dispatched. On mismatch the run is marked failed and nothing runs.
-5. The coordinator brief forbids refining, rewriting, reformatting or re-sealing
+5. The run brief forbids refining, rewriting, reformatting or re-sealing
    those bytes, and forbids consulting the prompt catalogue.
 6. After the run, the sealed digest is verified again and recorded in
    `metadata.json` as `prompt.sealIntact`.
@@ -170,8 +169,8 @@ operator-imposed environment constraint of the kind the skill explicitly leaves
 authoritative. Two properties keep it honest:
 
 - It is enforced **outside** the agent, by `run-one.sh`. It is never disclosed
-  to the coordinator or the lead, so it cannot function as a budget that shapes
-  the lead's behaviour or causes it to truncate its work.
+  to the model, so it cannot function as a budget that shapes its behaviour or
+  causes it to truncate its work.
 - It is **identical in both arms**, so it cannot advantage either.
 
 macOS ships no `timeout(1)`, so `scripts/lib/common.sh` implements the watchdog
@@ -187,10 +186,10 @@ log shape is produced for both arms.
 
 ### Liveness monitoring
 
-The skill requires bounded coordinator liveness checks every 2–5 minutes. In
-this harness the `task` tool is **synchronous**: while the lead runs, the
-coordinator model cannot act. This is a recorded harness limitation, not
-something worked around with a substitute steering channel.
+The skill requires bounded liveness checks every 2–5 minutes. In this harness
+the `task` tool is **synchronous**: while a dispatched subagent runs, its parent
+cannot act. This is a recorded harness limitation, not something worked around
+with a substitute steering channel.
 
 Monitoring therefore runs as an **external observer**
 (`scripts/monitor-liveness.sh`), which samples every 180 seconds — mid-band —
@@ -200,8 +199,8 @@ run's session is visible, workspace and artifact file counts and byte totals,
 is the real progress signal: a lead that has stopped producing bytes shows up as
 a rising number.
 
-The observer is **content-free by construction**: it has no channel to the
-coordinator or the lead and can only read. It therefore cannot leak guidance
+The observer is **content-free by construction**: it has no channel into the run at
+all and can only read. It therefore cannot leak guidance
 into either arm, which is the property the content-free-nudge rule exists to
 protect.
 
@@ -224,7 +223,7 @@ merely doing badly.
 After the lead reaches a terminal state the **artifact bytes are frozen**.
 
 The only permitted post-terminal edits are mechanical record-shape
-normalizations of the coordinator's own bookkeeping files — `run.json` and
+normalizations of the run's bookkeeping files — `run.json` and
 `worker-report.json` — performed by `scripts/normalize-records.py`: status
 casing, list-to-string joins for validator-required fields, `{name, key}` object
 shapes, null-to-empty-container fills, and filling a *missing* terminal status
@@ -241,9 +240,9 @@ surfaces in `metadata.json`.
 ## 6. Comparison rule
 
 For each prompt: GLM-5.3 gets **one** autonomous run; Fable 5 gets **one**
-autonomous run. Both receive the exact same prompt bytes, the same coordinator,
-the same critic, the same harness and harness version, the same pinned skill
-commit, the same permissions, and the same starting environment.
+autonomous run. Both receive the exact same prompt bytes, the same harness and
+harness version, the same pinned skill commit, the same permissions, the same
+timeout and the same starting environment. The only difference is the model.
 
 The two arms run in completely separate run directories and share only the
 immutable skill copy and the catalogue index. `run-pair.sh` records the pair's
@@ -261,13 +260,13 @@ Per run, inside the skill's own run directory:
 | File | Owner | Contents |
 |---|---|---|
 | `run.json` | skill | identity, status, prompt digest, receipt pointer |
-| `worker-report.json` | lead | quality gauntlet, verification, observations |
+| `worker-report.json` | run | quality gauntlet, verification, observations |
 | `artifact/PROMPT.md` | skill | the sealed prompt, verbatim |
-| `artifact/` | lead | the portable static handoff |
-| `workspace/` | lead | unrestricted source and build work |
-| `.tmp/` | lead | run-local scratch; retained on every non-`OK` run |
-| `agent.log` | harness | coordinator stdout (raw JSON event stream) |
-| `stderr.log` | harness | coordinator stderr |
+| `artifact/` | run | the portable static handoff |
+| `workspace/` | run | unrestricted source and build work |
+| `.tmp/` | run | run-local scratch; retained on every non-`OK` run |
+| `agent.log` | harness | run stdout (raw JSON event stream) |
+| `stderr.log` | harness | run stderr |
 | `interventions.jsonl` | harness | every heartbeat, dispatch, timeout, resume |
 | `record-normalizations.jsonl` | harness | every mechanical record edit |
 | `metadata.json` | harness | derived from the above; never a second copy |

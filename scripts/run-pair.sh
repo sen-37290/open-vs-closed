@@ -43,8 +43,7 @@ cat > "$PAIR_DIR/pair.json" <<JSON
   "promptSha256": "$PAIR_SHA",
   "startedAt": "$(now_iso)",
   "arms": ["glm-5.3", "fable-5"],
-  "coordinatorModel": "$COORDINATOR_MODEL",
-  "criticModel": "$CRITIC_MODEL",
+  "design": "one model per run: each arm's model runs the entire system, including any subagents it chooses to spawn",
   "timeoutSeconds": $RUN_TIMEOUT_SECONDS,
   "retryPolicy": "none"
 }

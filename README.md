@@ -9,19 +9,36 @@ One prompt in. One autonomous agent run. One artifact, or one preserved failure.
 
 ## The one idea
 
-`oneshot-websites` is an orchestration protocol with three roles — coordinator,
-lead, critic — not a CLI you invoke once. This harness varies **exactly one of
-them**:
+**One prompt, one model, one run.**
+
+A run is a single human prompt handed to a model, which then works autonomously
+until it produces an artifact or fails. Whatever it does inside — reason, run
+commands, spawn subagents, assign them roles, have them spawn more — is its own
+decision, and that decision is part of what is being measured.
 
 ```
-coordinator  (pinned constant)  ──dispatches──▶  LEAD  ◀── the treatment variable
-                                                  │         GLM-5.3  or  Fable 5
-                                                  └──dispatches──▶  critic (pinned constant)
+one sealed prompt ──▶  MODEL  ──▶ artifact/  or a preserved failure
+                         │
+                         └─ any subagents it chooses to spawn, at any depth,
+                            all running on the SAME model
 ```
 
-Everything else — harness, harness version, skill commit, permissions, prompt
-bytes, starting environment, coordinator model, critic model — is held identical
-across both arms and recorded in every run's metadata.
+GLM-5.3 runs the entire system in one arm. Fable 5 runs the entire system in the
+other. **The model is the only difference between arms.** Harness, harness
+version, skill commit, permissions, prompt bytes, timeout and starting
+environment are identical.
+
+The harness does not impose a coordinator, a lead, or a critic, and never
+assigns a model to a role. The `oneshot-websites` skill describes a delegation
+protocol and `oneshot-lead` / `oneshot-critic` subagent types are *available* —
+but neither declares a model, so both inherit the run's single model, and
+whether they are used at all is up to the model.
+
+This is enforced mechanically: `kilo.jsonc` contains no `model` field anywhere,
+`verify-environment.sh` FAILS if one appears, and every run's `metadata.json`
+records `singleModelIntegrity` derived from per-message `modelID` telemetry — so
+a second model sneaking into an arm is detectable after the fact rather than
+assumed away.
 
 Read [`experiment-config/protocol.md`](experiment-config/protocol.md) before
 running anything. It is the experimental contract.
@@ -60,7 +77,7 @@ open-vs-closed/
 ├── experiment-config/
 │   ├── protocol.md                 the experimental contract
 │   ├── models.example.env          placeholders only, never real keys
-│   ├── coordinator-brief.template.md
+│   ├── run-brief.template.md
 │   └── SKILL_COMMIT.txt            pinned upstream commit SHA
 ├── prompts/pilot.md                harness-verification prompt only
 ├── scripts/
@@ -97,13 +114,14 @@ records the upstream commit; `verify-environment.sh` runs the author's own
 
 ## How the arms are separated
 
-`kilo.jsonc` is identical for every run. `run-one.sh` overrides **only** the
-lead's model, per run, through the `KILO_CONFIG_CONTENT` environment variable —
-never by editing a file. Nothing else about the harness differs between arms.
+`kilo.jsonc` is identical for every run and pins no model at all. `run-one.sh`
+sets exactly one model per run — via `--model` and `KILO_CONFIG_CONTENT`,
+including `small_model` so even incidental harness traffic (title generation)
+cannot pull in a second model. Every subagent inherits it.
 
-`metadata.json` records both the requested model and, from harness telemetry,
-the models that actually served each turn, so a silent substitution is
-detectable rather than assumed away.
+`metadata.json` then records which models *actually* served the run, from
+harness telemetry, so a silent substitution is detectable rather than assumed
+away.
 
 ## Verified harness capabilities
 
@@ -111,27 +129,28 @@ Each was probed on this machine before the harness was built, not assumed:
 
 | Capability | Result | How it was verified |
 |---|---|---|
-| No-history subagent dispatch | supported | canary token in the coordinator session; subagent reported `CANARY=NONE` |
-| Per-subagent model selection, coordinator fixed | supported | coordinator on one model read back a different model id from its subagent |
-| Recursive delegation (lead → critic) | supported | grandchild subagent wrote a file; **requires** raising `subagent_depth` from its default of `1` |
+| No-history subagent dispatch | supported | canary token in the parent session; subagent reported `CANARY=NONE` |
+| Subagents inherit the session model when unpinned | supported | per-message `modelID` telemetry showed one model across a session that dispatched a subagent |
+| Recursive delegation (subagents spawning subagents) | supported | grandchild subagent wrote a file; **requires** raising `subagent_depth` from its default of `1` |
 | Autonomous, no approval prompts | supported | `--auto` + pre-approved permissions; `question` denied |
 | Background with observable status | supported | harness session store (`kilo session list`); note `kilo run` opens no HTTP server, only `kilo serve` does |
 | Both arms on one provider | supported | `z-ai/glm-5.3` and `anthropic/claude-fable-5` both visible via OpenRouter |
 
-The `subagent_depth` default is the dangerous one: at `1`, the lead cannot spawn
-a critic, so the quality gauntlet silently does not happen while the run still
-reports success.
+The `subagent_depth` default is the dangerous one: at `1`, a subagent cannot
+spawn a subagent, so any quality gauntlet silently does not happen while the run
+still reports success.
 
 ## Rules this harness enforces
 
+- One model per run, enforced in config and verified from telemetry.
 - No automatic retry, ever. Failures are preserved with partial artifacts, logs
   and a retained `.tmp/`.
 - No best-of selection.
-- No human follow-up during a run; the coordinator is forbidden from sending the
-  lead guidance.
+- No human follow-up during a run; nothing outside the run may send it guidance
+  once it has started.
 - No manual edits to generated artifacts. After a terminal state artifact bytes
-  are frozen; only the coordinator's own bookkeeping records may be
-  shape-normalized, and every such edit is logged.
+  are frozen; only the run's own bookkeeping records may be shape-normalized,
+  and every such edit is logged.
 - Identical prompt bytes per pair, digest-verified before dispatch and again
   after the run.
 - Secrets never enter a committed file.

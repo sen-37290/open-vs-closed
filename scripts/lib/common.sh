@@ -44,8 +44,6 @@ load_config() {
   : "${FABLE_PROVIDER:=openrouter}"
   : "${GLM_MODEL:=z-ai/glm-5.3}"
   : "${FABLE_MODEL:=anthropic/claude-fable-5}"
-  : "${COORDINATOR_MODEL:=openrouter/openai/gpt-5.1}"
-  : "${CRITIC_MODEL:=openrouter/openai/gpt-5.1}"
   : "${RUN_TIMEOUT_SECONDS:=14400}"
   : "${MAX_PARALLEL:=2}"
   : "${HARNESS_NAME:=kilo-cli}"

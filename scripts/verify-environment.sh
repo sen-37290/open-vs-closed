@@ -99,12 +99,24 @@ echo "$AGENTS" | grep -q '^oneshot-lead (subagent)'   && pass "no-history subage
 echo "$AGENTS" | grep -q '^oneshot-critic (subagent)' && pass "critic subagent registered" \
                                                       || fail "oneshot-critic subagent not registered"
 
-grep -q '"model"' "$EXP_ROOT/kilo.jsonc" 2>/dev/null \
-  && pass "lead-model selection: per-agent model pin present in kilo.jsonc (overridden per run via KILO_CONFIG_CONTENT)" \
-  || fail "kilo.jsonc has no per-agent model pin"
+# The experiment runs ONE model per run. Any per-agent model pin in kilo.jsonc
+# would introduce a second model into an arm, so its ABSENCE is the check.
+if "${ONESHOT_WEBSITES_PYTHON:-python3}" - "$EXP_ROOT/kilo.jsonc" <<'PYCHK'
+import json, re, sys, pathlib
+cfg = json.loads(re.sub(r"^\s*//.*$", "", pathlib.Path(sys.argv[1]).read_text(), flags=re.M))
+pinned = [n for n, a in (cfg.get("agent") or {}).items() if isinstance(a, dict) and a.get("model")]
+if cfg.get("model"):        pinned.append("<top-level model>")
+if cfg.get("small_model"):  pinned.append("<small_model>")
+sys.exit(1 if pinned else 0)
+PYCHK
+then
+  pass "single-model design intact: no agent in kilo.jsonc pins a model, so every subagent inherits the run's one model"
+else
+  fail "kilo.jsonc pins a model somewhere; that would put a SECOND model inside one arm and invalidate the comparison"
+fi
 
 DEPTH="$(grep -o '"subagent_depth"[^,]*' "$EXP_ROOT/kilo.jsonc" | grep -o '[0-9]\+' || echo 0)"
-[ "${DEPTH:-0}" -ge 1000 ] && pass "recursive delegation enabled (subagent_depth=$DEPTH; kilo's default of 1 would block the lead's critic)" \
+[ "${DEPTH:-0}" -ge 1000 ] && pass "recursive delegation enabled (subagent_depth=$DEPTH; kilo's default of 1 would block any subagent from spawning a subagent)" \
                            || fail "subagent_depth is $DEPTH; the lead could not run its quality gauntlet"
 
 grep -q '"question": "deny"' "$EXP_ROOT/kilo.jsonc" \
@@ -115,7 +127,7 @@ grep -q '"bash": "allow"' "$EXP_ROOT/kilo.jsonc" \
   || fail "tool permissions are not pre-approved; runs would prompt for approval"
 
 kilo serve --help >/dev/null 2>&1 \
-  && pass "background execution with observable status (kilo serve + /api/session/active, used by monitor-liveness.sh)" \
+  && pass "background execution with observable status (session store + filesystem progress, used by monitor-liveness.sh)" \
   || fail "kilo serve unavailable; liveness monitoring cannot observe run status"
 
 echo; echo "-- config isolation ----------------------------------------------"
@@ -145,17 +157,13 @@ check_model() {
   fi
 }
 if [ -n "${OPENROUTER_API_KEY:-}" ]; then
-  check_model "GLM arm"     "$(resolve_model glm-5.3)"
-  check_model "Fable arm"   "$(resolve_model fable-5)"
-  check_model "coordinator" "$COORDINATOR_MODEL"
-  check_model "critic"      "$CRITIC_MODEL"
+  check_model "GLM arm"   "$(resolve_model glm-5.3)"
+  check_model "Fable arm" "$(resolve_model fable-5)"
 fi
 
-if [ "$COORDINATOR_MODEL" = "$(resolve_model glm-5.3)" ] || [ "$COORDINATOR_MODEL" = "$(resolve_model fable-5)" ]; then
-  warn "COORDINATOR_MODEL is one of the two arms; it is still constant across arms, but a neutral third model is cleaner"
-fi
-if [ "$CRITIC_MODEL" = "$(resolve_model glm-5.3)" ] || [ "$CRITIC_MODEL" = "$(resolve_model fable-5)" ]; then
-  warn "CRITIC_MODEL is one of the two arms: that arm's artifacts would be graded by a sibling of the model that built them"
+# These are leftovers from an earlier design and are now ignored entirely.
+if [ -n "${COORDINATOR_MODEL:-}" ] || [ -n "${CRITIC_MODEL:-}" ]; then
+  warn "models.env still sets COORDINATOR_MODEL and/or CRITIC_MODEL. They are IGNORED now (one model per run). You can delete those two lines."
 fi
 
 echo; echo "-- workspace -----------------------------------------------------"

@@ -40,10 +40,14 @@ esac
 [ -d "$SKILL_DIR" ]   || die "pinned skill not found at $SKILL_DIR"
 [ -n "${OPENROUTER_API_KEY:-}" ] || die "OPENROUTER_API_KEY is not set (put it in experiment-config/models.env, which is gitignored)"
 
-LEAD_MODEL="$(resolve_model "$MODEL_ALIAS")"
-assert_model_visible "$LEAD_MODEL"
-assert_model_visible "$COORDINATOR_MODEL"
-assert_model_visible "$CRITIC_MODEL"
+# ONE model for the whole run: the session, and every subagent it chooses to
+# spawn at any depth, all run on this. Nothing else is pinned.
+RUN_MODEL="$(resolve_model "$MODEL_ALIAS")"
+assert_model_visible "$RUN_MODEL"
+
+if [ -n "${COORDINATOR_MODEL:-}" ] || [ -n "${CRITIC_MODEL:-}" ]; then
+  warn "COORDINATOR_MODEL / CRITIC_MODEL are set but IGNORED: this experiment runs one model per run. You can delete those lines from models.env."
+fi
 
 EXPERIMENT_LABEL="${RUN_LABEL:-$EXPERIMENT_NAME-$MODEL_ALIAS-$(basename "$PROMPT_FILE" .md)}"
 
@@ -55,7 +59,7 @@ log "prompt sealed: sha256=$PROMPT_SHA  file=$PROMPT_FILE"
 mkdir -p "$RUNS_ROOT" "$METADATA_ROOT"
 PREPARE_JSON="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/prepare_run.py" \
   --output-root "$RUNS_ROOT" \
-  --model "$LEAD_MODEL" \
+  --model "$RUN_MODEL" \
   --harness "$HARNESS_NAME" \
   --experiment "$EXPERIMENT_LABEL" \
   --prompt-file "$PROMPT_FILE")" || die "prepare_run.py failed; no run was reserved"
@@ -116,10 +120,8 @@ finalize_metadata() {
     --run-dir "$RUN_DIR" \
     --run-id "$RUN_ID" \
     --model-alias "$MODEL_ALIAS" \
-    --provider "${LEAD_MODEL%%/*}" \
-    --exact-model-id "$LEAD_MODEL" \
-    --coordinator-model "$COORDINATOR_MODEL" \
-    --critic-model "$CRITIC_MODEL" \
+    --provider "${RUN_MODEL%%/*}" \
+    --exact-model-id "$RUN_MODEL" \
     --prompt-file "$PROMPT_FILE" \
     --prompt-hash "$PROMPT_SHA" \
     --start-time "$START_ISO" \
@@ -175,18 +177,18 @@ GIT_COMMIT="$(git -C "$EXP_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
 export SKILL_COMMIT SKILL_VERSION HARNESS_VERSION GIT_COMMIT
 
 # --------------------------------------------------------- 5. build the brief
-BRIEF="$RUN_DIR/.tmp/coordinator-brief.md"
+BRIEF="$RUN_DIR/.tmp/run-brief.md"
 mkdir -p "$RUN_DIR/.tmp"
 "$ONESHOT_WEBSITES_PYTHON" - \
-  "$EXP_ROOT/experiment-config/coordinator-brief.template.md" "$BRIEF" \
-  "$RUN_DIR" "$RUN_ID" "$LEAD_MODEL" "$CRITIC_MODEL" "$HARNESS_NAME" \
+  "$EXP_ROOT/experiment-config/run-brief.template.md" "$BRIEF" \
+  "$RUN_DIR" "$RUN_ID" "$RUN_MODEL" "$HARNESS_NAME" \
   "$EXPERIMENT_LABEL" "$PROMPT_SHA" "$SKILL_DIR" "$ONESHOT_WEBSITES_PYTHON" "$RUNS_ROOT" <<'PY'
 import pathlib, sys
-tpl, out, run_dir, run_id, lead, critic, harness, exp, sha, skill, py, runs_root = sys.argv[1:13]
+tpl, out, run_dir, run_id, model, harness, exp, sha, skill, py, runs_root = sys.argv[1:12]
 text = pathlib.Path(tpl).read_text(encoding="utf-8")
 for k, v in {
-    "@@RUN_DIR@@": run_dir, "@@RUN_ID@@": run_id, "@@LEAD_MODEL@@": lead,
-    "@@CRITIC_MODEL@@": critic, "@@HARNESS@@": harness, "@@EXPERIMENT@@": exp,
+    "@@RUN_DIR@@": run_dir, "@@RUN_ID@@": run_id, "@@RUN_MODEL@@": model,
+    "@@HARNESS@@": harness, "@@EXPERIMENT@@": exp,
     "@@PROMPT_SHA256@@": sha, "@@SKILL_DIR@@": skill, "@@PY@@": py,
     "@@RUNS_ROOT@@": runs_root,
 }.items():
@@ -198,18 +200,18 @@ PY
 # ------------------------------------------------- 6. launch the coordinator
 # Per-run override of the LEAD model only. The coordinator, the critic, the
 # permissions and every other harness setting come from the pinned kilo.jsonc.
+# Set the single model for the run. `small_model` is pinned to the same model
+# so even incidental harness traffic (title/summary generation) cannot pull in
+# a second model. No per-agent model is set, so every subagent inherits this.
 KILO_CONFIG_CONTENT="$("$ONESHOT_WEBSITES_PYTHON" -c '
 import json,sys
-print(json.dumps({"agent":{
-  "oneshot-lead":{"model":sys.argv[1]},
-  "oneshot-critic":{"model":sys.argv[2]},
-}}))' "$LEAD_MODEL" "$CRITIC_MODEL")"
+print(json.dumps({"model": sys.argv[1], "small_model": sys.argv[1]}))' "$RUN_MODEL")"
 export KILO_CONFIG_CONTENT
 
 export TMPDIR="$RUN_DIR/.tmp" TMP="$RUN_DIR/.tmp" TEMP="$RUN_DIR/.tmp"
 
-log "launching coordinator: coordinator=$COORDINATOR_MODEL lead=$LEAD_MODEL critic=$CRITIC_MODEL timeout=${RUN_TIMEOUT_SECONDS}s"
-record_intervention "dispatch" "coordinator_launch" "lead=$LEAD_MODEL"
+log "launching run: model=$RUN_MODEL (single model for every turn at every depth) timeout=${RUN_TIMEOUT_SECONDS}s"
+record_intervention "dispatch" "session_launch" "model=$RUN_MODEL"
 
 # External bounded liveness monitor (content-free: it only observes).
 "$EXP_ROOT/scripts/monitor-liveness.sh" "$RUN_DIR" "$INTERVENTIONS" "$RUN_ID" "$$" \
@@ -224,7 +226,7 @@ run_with_timeout "$RUN_TIMEOUT_SECONDS" \
   $KEEPAWAKE kilo run \
     --auto \
     --agent code \
-    --model "$COORDINATOR_MODEL" \
+    --model "$RUN_MODEL" \
     --format json \
     --title "$RUN_ID" \
     "$(cat "$BRIEF")" \
@@ -263,7 +265,7 @@ finalize_metadata "$EXIT_CODE"
 echo
 echo "run_id:   $RUN_ID"
 echo "run_dir:  $RUN_DIR"
-echo "arm:      $MODEL_ALIAS ($LEAD_MODEL)"
+echo "arm:      $MODEL_ALIAS ($RUN_MODEL)  [single model for the whole run]"
 echo "status:   $(cat "$STATUS_FILE")"
 echo "metadata: $META_FILE"
 exit 0

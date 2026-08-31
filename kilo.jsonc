@@ -4,34 +4,34 @@
   // ---------------------------------------------------------------------
   // open-vs-closed A/B harness — PINNED HARNESS CONFIGURATION
   //
-  // This file is the *constant* half of the experiment. It is identical for
-  // both arms. The ONLY thing that varies between arms is the model of the
-  // `oneshot-lead` subagent, which run-one.sh overrides per run via
-  // KILO_CONFIG_CONTENT (never by editing this file).
+  // ONE MODEL PER RUN. A run is: one human prompt handed to one model, which
+  // then does whatever it decides to do — including spawning subagents and
+  // assigning them roles. Every turn of that run, at every depth, uses the
+  // SAME model. The experiment compares two whole systems, GLM-5.3 and
+  // Fable 5, not two roles inside one system.
   //
-  // Do not hand-edit during a benchmark campaign. Any change invalidates
-  // cross-run comparability; record a new harness config hash if you must.
+  // Therefore NO agent below declares a `model`. In Kilo an agent without an
+  // explicit model inherits the session's model, verified empirically via
+  // per-message modelID telemetry. run-one.sh sets that single model per run
+  // through KILO_CONFIG_CONTENT and `--model`, and metadata.json afterwards
+  // asserts that exactly one model served the entire run.
+  //
+  // Do not add a `model` field to any agent here. Doing so would silently
+  // introduce a second model into one arm and invalidate the comparison.
+  //
+  // This file is identical for both arms. Do not hand-edit during a campaign.
   // ---------------------------------------------------------------------
 
-  // Coordinator default. run-one.sh passes -m "$COORDINATOR_MODEL" explicitly,
-  // so this value is a documented fallback, not the live selection.
-  "model": "openrouter/openai/gpt-5.1",
-
-  // Title/summary generation. Pinned so incidental helper traffic is identical
-  // across arms and never silently borrows an arm's model.
-  "small_model": "openrouter/openai/gpt-5-mini",
-
-  // The skill requires unbounded recursive delegation: coordinator -> lead ->
-  // critic -> further descendants. Kilo's default is 1, which would silently
-  // prevent the lead from running its quality gauntlet at all. The skill forbids
-  // adding a recursion-depth limit to compensate for a harness difference, and
-  // kilo has no "unlimited" sentinel, so this is set far beyond any plausible
-  // topology rather than to a chosen ceiling.
+  // The skill's protocol has the model delegate to fresh subagents, which may
+  // delegate further. Kilo's default is 1, which would silently prevent any
+  // quality gauntlet from happening while the run still reported success.
+  // The skill forbids imposing a recursion-depth limit and kilo has no
+  // "unlimited" sentinel, so this sits far beyond any plausible topology.
   "subagent_depth": 1000000,
 
-  // Autonomous execution. Combined with `kilo run --auto`, no tool call in the
-  // run may block on human approval. `question` is denied outright so an agent
-  // cannot stall a headless run waiting for an answer that will never come.
+  // Autonomous execution. With `kilo run --auto`, no tool call may block on
+  // human approval. `question` is denied outright so a run cannot stall
+  // waiting for an answer that will never come.
   "permission": {
     "bash": "allow",
     "edit": "allow",
@@ -50,57 +50,34 @@
   },
 
   "agent": {
-    // ---------------- LEAD: the treatment variable ----------------
-    // model is overridden per run by run-one.sh. The value here is a
-    // deliberately invalid placeholder so an unparameterised run fails loudly
-    // instead of silently benchmarking the wrong model.
+    // Subagent types the model MAY use if it chooses to follow the skill's
+    // delegation protocol. Their existence is an available capability, not an
+    // instruction: nothing here dictates how many are spawned, in what order,
+    // or whether they are used at all. That is the model's decision and is
+    // part of what the experiment measures.
+    //
+    // Neither declares a model. Both inherit the run's single model.
     "oneshot-lead": {
       "mode": "subagent",
-      "description": "Autonomous one-shot website lead. Owns exactly one experiment end to end, in its own run directory, with no inherited conversation history. Dispatched by the coordinator with the complete role and sealed prompt.",
-      "model": "openrouter/z-ai/glm-5.3",
-      "temperature": 1,
-      "prompt": "You are the autonomous one-shot lead for exactly one website experiment.\n\nYour complete role definition, run identity, assigned paths, operational envelopes, sealed prompt, and critic role are supplied verbatim in the dispatch message you receive. That dispatch is authoritative. Follow it exactly.\n\nYou start with no inherited conversation history and you must not ask for any. Work autonomously to a terminal state. Never ask the human a question; there is no human available during this run. If you reach a genuine blocker, record it honestly in worker-report.json and run.json rather than stalling or waiting.\n\nStay inside your assigned run directory. Never inspect, enumerate, search for, or compare any sibling run. Build, test, validate and package locally only: never upload, deploy, publish, or push anything anywhere.",
+      "description": "Owns one website experiment end to end in its own run directory, with no inherited conversation history.",
+      "prompt": "Your complete role definition, run identity, assigned paths, operational envelopes and prompt are supplied verbatim in the dispatch message you receive. That dispatch is authoritative.\n\nYou start with no inherited conversation history and must not ask for any. Work autonomously to a terminal state. Never ask the human a question; no human is available during this run. If you reach a genuine blocker, record it honestly rather than stalling.\n\nStay inside your assigned run directory. Never inspect or compare any sibling run. Build, test, validate and package locally only: never upload, deploy, publish, or push anything.",
       "permission": {
-        "bash": "allow",
-        "edit": "allow",
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
-        "task": "allow",
-        "todowrite": "allow",
-        "webfetch": "allow",
-        "websearch": "allow",
-        "lsp": "allow",
-        "external_directory": "allow",
-        "question": "deny",
-        "doom_loop": "allow"
+        "bash": "allow", "edit": "allow", "read": "allow", "glob": "allow",
+        "grep": "allow", "list": "allow", "task": "allow", "todowrite": "allow",
+        "webfetch": "allow", "websearch": "allow", "lsp": "allow",
+        "external_directory": "allow", "question": "deny", "doom_loop": "allow"
       }
     },
 
-    // ---------------- CRITIC: pinned constant ----------------
-    // Read-only reviewer. Identical model in both arms. Deliberately a third
-    // family, neither GLM nor Fable, so neither arm's artifact is graded by a
-    // sibling of the model that built it.
     "oneshot-critic": {
       "mode": "subagent",
-      "description": "Fresh read-only critic for one built artifact. Inspects the real rendered result, never a builder summary, and returns READY or NOT_READY with one coherent batch of material blockers.",
-      "model": "openrouter/openai/gpt-5.1",
-      "temperature": 1,
-      "prompt": "You are a fresh, independent, read-only critic for exactly one website experiment.\n\nYour complete role definition is supplied verbatim in the dispatch message you receive. That dispatch is authoritative.\n\nYou start with no inherited builder conversation and must not request the builder's rationale, progress narrative, self-assessment, or implementation history. Never accept a prose summary in place of opening, rendering, and exercising the actual artifact.\n\nYou are read-only: inspect, render, and exercise the artifact, but never edit, create, or delete any file in workspace/ or artifact/. Return a concise verdict, concrete artifact-grounded evidence, and one coherent batch of material blockers.",
+      "description": "Fresh read-only reviewer of a built artifact. Inspects the real rendered result rather than a builder summary.",
+      "prompt": "Your complete role definition is supplied verbatim in the dispatch message you receive. That dispatch is authoritative.\n\nYou start with no inherited builder conversation and must not request the builder's rationale, progress narrative, self-assessment, or implementation history. Never accept a prose summary in place of opening, rendering and exercising the actual artifact.\n\nYou are read-only: inspect, render and exercise the artifact, but never edit, create or delete any file in workspace/ or artifact/.",
       "permission": {
-        "bash": "allow",
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
-        "webfetch": "allow",
-        "websearch": "allow",
-        "todowrite": "allow",
-        "edit": "deny",
-        "task": "deny",
-        "question": "deny",
-        "doom_loop": "allow"
+        "bash": "allow", "read": "allow", "glob": "allow", "grep": "allow",
+        "list": "allow", "webfetch": "allow", "websearch": "allow",
+        "todowrite": "allow", "edit": "deny", "task": "deny",
+        "question": "deny", "doom_loop": "allow"
       }
     }
   }

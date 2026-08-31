@@ -74,8 +74,8 @@ def kilo_session_telemetry(session_id: str):
         "tokens": info.get("tokens"),
         "cost": info.get("cost"),
         "modelsObservedInSession": models_seen,
-        "note": "Token/cost figures cover the coordinator session only. Subagent "
-                "(lead, critic) sessions are separate sessions; see kilo stats.",
+        "note": "Token/cost figures cover the primary session. Subagents the "
+                "model chose to spawn may have their own sessions; see kilo stats.",
     }
 
 
@@ -83,7 +83,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     for flag in (
         "run-dir", "run-id", "model-alias", "provider", "exact-model-id",
-        "coordinator-model", "critic-model", "prompt-file", "prompt-hash",
+        "prompt-file", "prompt-hash",
         "start-time", "end-time", "wall-clock-seconds", "exit-code",
         "harness-name", "harness-version", "skill-commit", "skill-version",
         "git-commit", "timeout-seconds", "timeout-hit", "kilo-session-file",
@@ -113,17 +113,15 @@ def main() -> int:
         "runId": a.run_id,
         "runDirectory": str(run_dir),
 
-        # ---- treatment variable ----
+        # ---- the treatment variable: the whole system is this one model ----
         "arm": {
             "modelAlias": a.model_alias,
             "provider": a.provider,
             "exactModelId": a.exact_model_id,
-            "role": "lead",
+            "scope": "entire run: the session and every subagent it spawned, at every depth",
         },
         # ---- pinned constants, identical across both arms ----
         "constants": {
-            "coordinatorModel": a.coordinator_model,
-            "criticModel": a.critic_model,
             "harnessName": a.harness_name,
             "harnessVersion": a.harness_version,
             "oneshotSkillCommit": a.skill_commit,
@@ -173,6 +171,28 @@ def main() -> int:
         "derivedFrom": ["run.json", "worker-report.json", "interventions.jsonl",
                         "record-normalizations.jsonl", "kilo export"],
     }
+
+    # Single-model integrity check, derived from harness telemetry rather than
+    # assumed. If any turn ran on a model other than this arm's, the comparison
+    # is contaminated and must be treated as invalid.
+    observed = (meta["telemetry"] or {}).get("modelsObservedInSession") or {}
+    if observed:
+        unexpected = sorted(m for m in observed if m != a.exact_model_id)
+        meta["singleModelIntegrity"] = {
+            "expectedModel": a.exact_model_id,
+            "modelsObserved": sorted(observed),
+            "unexpectedModels": unexpected,
+            "holds": not unexpected,
+            "basis": "per-message modelID from harness telemetry",
+        }
+    else:
+        meta["singleModelIntegrity"] = {
+            "expectedModel": a.exact_model_id,
+            "modelsObserved": [],
+            "unexpectedModels": [],
+            "holds": None,
+            "basis": "harness telemetry unavailable for this run; not verified, not assumed",
+        }
 
     (run_dir / "metadata.json").write_text(
         json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
