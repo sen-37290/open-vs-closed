@@ -158,6 +158,10 @@ def main() -> int:
             "tmpRetained": (run_dir / ".tmp").exists(),
         },
 
+        # Did the model actually complete the protocol it was given? Reported,
+        # never repaired — a claimed OK that broke the contract stays visible.
+        "finalization": load_json(run_dir / ".finalization.json"),
+
         "interventions": read_jsonl(run_dir / "interventions.jsonl"),
         "recordNormalizations": read_jsonl(run_dir / "record-normalizations.jsonl"),
 

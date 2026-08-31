@@ -208,7 +208,18 @@ import json,sys
 print(json.dumps({"model": sys.argv[1], "small_model": sys.argv[1]}))' "$RUN_MODEL")"
 export KILO_CONFIG_CONTENT
 
-export TMPDIR="$RUN_DIR/.tmp" TMP="$RUN_DIR/.tmp" TEMP="$RUN_DIR/.tmp"
+# The harness process writes into TMPDIR continuously, including AFTER the
+# model's cleanup helper has removed .tmp/. Pointing TMPDIR at .tmp/ therefore
+# re-creates it moments later and makes the skill's "OK requires .tmp/ absent"
+# contract structurally unreachable: every successful run would fail catalogue
+# validation through no fault of the model.
+#
+# So the HARNESS gets its own run-local temp dir. The model's own scratch still
+# belongs in .tmp/, which the skill's dispatch envelope instructs it to use and
+# which stays under the model's control. Both live inside the run directory, so
+# both remain part of the preserved record.
+mkdir -p "$RUN_DIR/.harness-tmp"
+export TMPDIR="$RUN_DIR/.harness-tmp" TMP="$RUN_DIR/.harness-tmp" TEMP="$RUN_DIR/.harness-tmp"
 
 log "launching run: model=$RUN_MODEL (single model for every turn at every depth) timeout=${RUN_TIMEOUT_SECONDS}s"
 record_intervention "dispatch" "session_launch" "model=$RUN_MODEL"
@@ -247,6 +258,20 @@ grep -o 'ses_[A-Za-z0-9]\{20,\}' "$AGENT_LOG" 2>/dev/null | head -1 > "$RUN_DIR/
 
 # ------------------------------------------------------ 7. verify finalization
 record_intervention "finalization_check" "post_exit" ""
+
+# Verify the skill's finalization contract WITHOUT repairing it. A violation is
+# recorded honestly; the model's own status is never rewritten to hide it, so a
+# claimed OK that broke the contract stays visible as exactly that.
+FINALIZATION_REPORT="$RUN_DIR/.finalization.json"
+"$ONESHOT_WEBSITES_PYTHON" "$EXP_ROOT/scripts/check_finalization.py" \
+  --run-dir "$RUN_DIR" --expected-digest "$PROMPT_SHA" \
+  > "$FINALIZATION_REPORT" 2>>"$STDERR_LOG" || true
+
+if [ -s "$FINALIZATION_REPORT" ] && ! grep -q '"contractHolds": true' "$FINALIZATION_REPORT"; then
+  log "finalization contract VIOLATED (recorded, not repaired): $FINALIZATION_REPORT"
+  record_intervention "finalization_violation" "contract_check" "see .finalization.json"
+fi
+
 normalize_records
 
 # ----------------------------------------- 8. catalogue validate + rebuild
@@ -254,7 +279,8 @@ set +e
 "$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/validate_catalog.py" "$RUNS_ROOT" \
   > "$RUN_DIR/catalog-validate.txt" 2>&1
 CATALOG_RC=$?
-"$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/build_catalog_index.py" "$RUNS_ROOT" \
+"$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/build_catalog_index.py" \
+  --root "$RUNS_ROOT" --out "$RUNS_ROOT/index.html" \
   >> "$RUN_DIR/catalog-validate.txt" 2>&1
 set -e
 log "catalogue validate rc=$CATALOG_RC (details: $RUN_DIR/catalog-validate.txt)"

@@ -1,0 +1,26 @@
+{
+  "pairId": "pair-20260831-230842-pilot",
+  "promptFile": "/Users/friendli/Documents/open-vs-closed/prompts/pilot.md",
+  "promptSha256": "813c8402da7a0c2701450c58c480d336c9e3ab2cdf4a3c761cf87b7b5c164ee8",
+  "startedAt": "2026-08-31T23:08:42Z",
+  "arms": [
+    "glm-5.3",
+    "fable-5"
+  ],
+  "design": "one model per run: each arm's model runs the entire system, including any subagents it chooses to spawn",
+  "timeoutSeconds": 3600,
+  "retryPolicy": "none",
+  "finishedAt": "2026-08-31T23:24:51Z",
+  "results": {
+    "glm-5.3": {
+      "runId": "2026-08-31-16-08-45-open-vs-closed-glm-5-3-pilot",
+      "status": "OK",
+      "exitCode": 0
+    },
+    "fable-5": {
+      "runId": "2026-08-31-16-08-45-open-vs-closed-fable-5-pilot",
+      "status": "OK",
+      "exitCode": 0
+    }
+  }
+}
