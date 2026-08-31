@@ -53,6 +53,10 @@ or append to those bytes, and you must not consult the prompt catalogue or
 pass those exact bytes as the actual prompt. Any edit to that file invalidates
 the experiment and is detected by a post-run digest check.
 
+## Directional-control contract (operational; NOT part of the task prompt)
+
+@@DIRECTIONAL_CONTROL_GUIDANCE@@
+
 ## Finalization
 
 Bring the run to a terminal state and record it honestly in `run.json` and

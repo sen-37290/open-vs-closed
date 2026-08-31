@@ -66,6 +66,12 @@ PREPARE_JSON="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/prepare_run.py" \
 
 RUN_DIR="$("$ONESHOT_WEBSITES_PYTHON" -c 'import json,sys; print(json.loads(sys.argv[1])["runDirectory"])' "$PREPARE_JSON")"
 RUN_ID="$(basename "$RUN_DIR")"
+
+# The skill infers from the prompt whether this run needs the digest-bound
+# directional-control browser gate. When it does, the model must be given the
+# transient technical contract, and the gate must be run after an OK handoff --
+# catalogue validation rejects an applicable OK run without passing evidence.
+DIRECTIONAL_REQUIRED="$("$ONESHOT_WEBSITES_PYTHON" -c 'import json,sys; print("1" if json.loads(sys.argv[1]).get("directionalControlsRequired") else "0")' "$PREPARE_JSON")"
 log "run reserved: $RUN_DIR"
 
 STATUS_FILE="$RUN_DIR/status.txt"
@@ -179,18 +185,40 @@ export SKILL_COMMIT SKILL_VERSION HARNESS_VERSION GIT_COMMIT
 # --------------------------------------------------------- 5. build the brief
 BRIEF="$RUN_DIR/.tmp/run-brief.md"
 mkdir -p "$RUN_DIR/.tmp"
+
+DIRECTIONAL_GUIDANCE_FILE="$RUN_DIR/.tmp/.directional-guidance.md"
+if [ "$DIRECTIONAL_REQUIRED" = "1" ]; then
+  log "directional-control gate REQUIRED for this prompt"
+  {
+    echo "This run REQUIRES the directional-control contract. Implement its"
+    echo "production-state adapter in the built artifact and exercise it during"
+    echo "verification. Never copy any of this into artifact/PROMPT.md: that file"
+    echo "stays the human task brief only."
+    echo
+    echo "----- BEGIN .tmp/TECHNICAL_PROMPT.md -----"
+    cat "$RUN_DIR/.tmp/TECHNICAL_PROMPT.md" 2>/dev/null
+    echo "----- END .tmp/TECHNICAL_PROMPT.md -----"
+    echo
+    echo "----- BEGIN references/directional-controls.md -----"
+    cat "$SKILL_DIR/references/directional-controls.md" 2>/dev/null
+    echo "----- END references/directional-controls.md -----"
+  } > "$DIRECTIONAL_GUIDANCE_FILE"
+else
+  echo "NOT_APPLICABLE: no prepared directional-control browser gate." > "$DIRECTIONAL_GUIDANCE_FILE"
+fi
 "$ONESHOT_WEBSITES_PYTHON" - \
-  "$EXP_ROOT/experiment-config/run-brief.template.md" "$BRIEF" \
+  "$EXP_ROOT/experiment-config/run-brief.template.md" "$BRIEF" "$DIRECTIONAL_GUIDANCE_FILE" \
   "$RUN_DIR" "$RUN_ID" "$RUN_MODEL" "$HARNESS_NAME" \
   "$EXPERIMENT_LABEL" "$PROMPT_SHA" "$SKILL_DIR" "$ONESHOT_WEBSITES_PYTHON" "$RUNS_ROOT" <<'PY'
 import pathlib, sys
-tpl, out, run_dir, run_id, model, harness, exp, sha, skill, py, runs_root = sys.argv[1:12]
+tpl, out, guidance_file, run_dir, run_id, model, harness, exp, sha, skill, py, runs_root = sys.argv[1:13]
 text = pathlib.Path(tpl).read_text(encoding="utf-8")
 for k, v in {
     "@@RUN_DIR@@": run_dir, "@@RUN_ID@@": run_id, "@@RUN_MODEL@@": model,
     "@@HARNESS@@": harness, "@@EXPERIMENT@@": exp,
     "@@PROMPT_SHA256@@": sha, "@@SKILL_DIR@@": skill, "@@PY@@": py,
     "@@RUNS_ROOT@@": runs_root,
+    "@@DIRECTIONAL_CONTROL_GUIDANCE@@": pathlib.Path(guidance_file).read_text(encoding="utf-8"),
 }.items():
     text = text.replace(k, v)
 assert "@@" not in text, "unsubstituted placeholder remains in coordinator brief"
@@ -273,6 +301,29 @@ if [ -s "$FINALIZATION_REPORT" ] && ! grep -q '"contractHolds": true' "$FINALIZA
 fi
 
 normalize_records
+
+# ------------------------------- 7b. directional-control browser gate
+# Coordinator-owned, per the skill: run only after the model reaches OK, and
+# only when the prepared run requires it. It writes digest-bound evidence
+# outside the run. A failure is recorded, never retried and never repaired.
+if [ "$DIRECTIONAL_REQUIRED" = "1" ]; then
+  RUN_STATUS_NOW="$("$ONESHOT_WEBSITES_PYTHON" -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status"))' "$RUN_DIR/run.json" 2>/dev/null || echo "")"
+  if [ "$RUN_STATUS_NOW" = "OK" ]; then
+    log "running directional-control browser gate"
+    record_intervention "directional_gate" "post_ok_verification" "start"
+    set +e
+    "$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/verify_directional_controls.py" \
+      --run "$RUN_DIR" > "$RUN_DIR/directional-controls.txt" 2>&1
+    DIRECTIONAL_RC=$?
+    set -e
+    record_intervention "directional_gate" "post_ok_verification" "rc=$DIRECTIONAL_RC"
+    [ "$DIRECTIONAL_RC" -eq 0 ] && log "directional gate PASSED" \
+                                || log "directional gate FAILED (recorded, not retried): $RUN_DIR/directional-controls.txt"
+  else
+    log "directional gate skipped: run status is $RUN_STATUS_NOW, not OK"
+    record_intervention "directional_gate" "skipped_non_ok" "status=$RUN_STATUS_NOW"
+  fi
+fi
 
 # ----------------------------------------- 8. catalogue validate + rebuild
 set +e
