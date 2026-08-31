@@ -1,0 +1,5 @@
+[2026-08-31T23:45:44Z] prompt sealed: sha256=4b2c38d2bed69fad466bafe3bbf7a4c7b14bcc559a7991a4abe27300ffeff5da  file=/Users/friendli/Documents/open-vs-closed/prompts/interactive-design.md
+[2026-08-31T23:45:44Z] run reserved: /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-16-45-44-open-vs-closed-glm-5-3-interactive-design
+[2026-08-31T23:45:44Z] sealed digest verified
+[2026-08-31T23:45:45Z] directional-control gate REQUIRED for this prompt
+[2026-08-31T23:45:45Z] launching run: model=openrouter/z-ai/glm-5.3 (single model for every turn at every depth) timeout=14400s

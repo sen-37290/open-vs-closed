@@ -1,0 +1,10 @@
+{
+  "pairId": "pair-20260831-234542-interactive-design",
+  "promptFile": "/Users/friendli/Documents/open-vs-closed/prompts/interactive-design.md",
+  "promptSha256": "4b2c38d2bed69fad466bafe3bbf7a4c7b14bcc559a7991a4abe27300ffeff5da",
+  "startedAt": "2026-08-31T23:45:42Z",
+  "arms": ["glm-5.3", "fable-5"],
+  "design": "one model per run: each arm's model runs the entire system, including any subagents it chooses to spawn",
+  "timeoutSeconds": 14400,
+  "retryPolicy": "none"
+}
