@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "3.4",
+  "identity": {
+    "model": {"name": "{{MODEL_NAME}}", "key": "{{MODEL_KEY}}"},
+    "harness": {"name": "{{HARNESS_NAME}}", "key": "{{HARNESS_KEY}}"},
+    "experiment": {"name": "{{EXPERIMENT_NAME}}", "key": "{{EXPERIMENT_KEY}}"}
+  },
+  "runId": "{{RUN_ID}}",
+  "provenanceReceipt": ".oneshot-provenance/{{RUN_ID}}.json",
+  "classification": "autonomous-one-shot",
+  "priorRun": null,
+  "status": "PLANNED",
+  "prompt": {
+    "path": "artifact/PROMPT.md",
+    "sha256": "{{PROMPT_SHA256}}",
+    "preservation": "verbatim"
+  },
+  "temporary": {
+    "path": ".tmp/",
+    "routing": "best-effort-run-local",
+    "lifecycle": "retain-until-successful-finalization"
+  },
+  "workspace": {"path": "workspace/"},
+  "artifact": {
+    "path": "artifact/",
+    "entrypoint": "artifact/index.html",
+    "deployment": "static-folder"
+  },
+  "execution": {
+    "leadWorkerId": null,
+    "descendantWorkerIds": [],
+    "recursiveDelegation": "allowed",
+    "skillImposedLimits": "none",
+    "coordinatorMonitoring": {
+      "required": true,
+      "contractVersion": "1.0",
+      "mode": "bounded-periodic-liveness-checks",
+      "recovery": "same-run-single-owner"
+    }
+  },
+  "interaction": {
+    "directionalControls": {
+      "required": false,
+      "contractVersion": "1.0",
+      "basis": "prepared-prompt-analysis",
+      "signals": [],
+      "evidencePath": null,
+      "technicalPrompt": null
+    }
+  }
+}

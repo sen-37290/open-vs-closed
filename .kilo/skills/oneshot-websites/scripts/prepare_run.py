@@ -1,0 +1,673 @@
+#!/usr/bin/env python3
+"""Reserve a flat collision-free directory for one isolated oneshot-websites run."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import shutil
+import stat
+import sys
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional, Sequence
+
+from directional_controls import (
+    DIRECTIONAL_TECHNICAL_PROMPT_PATH,
+    DirectionalControlError,
+    directional_control_contract,
+    infer_directional_control_requirement,
+    reject_internal_directional_contract_in_prompt,
+    validate_directional_technical_prompt_contract,
+)
+from runtime_contract import (
+    BoundedReadError,
+    COORDINATOR_MONITORING_CONTRACT,
+    experiment_slug,
+    find_likely_mojibake,
+    identity_key,
+    parse_json_bounded,
+    read_regular_file_bounded,
+    resolve_existing_or_new,
+)
+
+
+CLASSIFICATIONS = ("autonomous-one-shot", "rerun", "curated-attempt")
+METADATA_MAX_BYTES = 1024 * 1024
+PROMPT_MAX_BYTES = 5 * 1024 * 1024
+TECHNICAL_PROMPT_MAX_BYTES = 1024 * 1024
+RUN_NAME_RE = re.compile(
+    r"^(?P<timestamp>\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})-"
+    r"(?P<slug>[a-z0-9]+(?:-[a-z0-9]+)*)$"
+)
+
+
+class RunPreparationError(ValueError):
+    """Raised when a run cannot be safely reserved."""
+
+
+@dataclass(frozen=True)
+class Identity:
+    """Raw name and collision-resistant filesystem key for one identity level."""
+
+    name: str
+    key: str
+
+
+@dataclass(frozen=True)
+class RunPaths:
+    """All paths reserved for one run, relative to the validated output root."""
+
+    root: Path
+    run: Path
+    temporary: Path
+    workspace: Path
+    artifact: Path
+
+
+def parse_arguments(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
+    """Parse the fixed run-identity contract and optional provenance fields."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-root", required=True, type=Path, help="Root directory that will contain all runs")
+    parser.add_argument("--model", required=True, help="Raw model name")
+    parser.add_argument("--harness", required=True, help="Raw harness name")
+    parser.add_argument("--experiment", required=True, help="Raw experiment name")
+    parser.add_argument("--prompt-file", required=True, type=Path, help="UTF-8 prompt file to preserve verbatim")
+    parser.add_argument(
+        "--classification",
+        choices=CLASSIFICATIONS,
+        default="autonomous-one-shot",
+        help="Whether this is the original autonomous run, a rerun, or a curated attempt",
+    )
+    parser.add_argument(
+        "--prior-run",
+        type=Path,
+        help="Existing prior run directory under --output-root, used for reruns and curated attempts",
+    )
+    parser.add_argument(
+        "--directional-controls",
+        choices=("auto", "required"),
+        default="auto",
+        help="Infer the browser control gate from the prompt, or explicitly require it",
+    )
+    return parser.parse_args(argv)
+
+
+def build_identity(name: str, label: str) -> Identity:
+    """Create a readable key whose digest remains tied to exact UTF-8 input bytes."""
+
+    if not name.strip():
+        raise RunPreparationError(f"{label} must not be empty")
+    try:
+        key = identity_key(name)
+    except UnicodeEncodeError as error:
+        raise RunPreparationError(f"{label} must be valid UTF-8 text") from error
+    return Identity(name=name, key=key)
+
+
+def read_prompt(path: Path) -> bytes:
+    """Read prompt bytes only after proving that their UTF-8 contract holds."""
+
+    try:
+        prompt = read_regular_file_bounded(path, PROMPT_MAX_BYTES)
+    except BoundedReadError as error:
+        detail = str(error)
+        if "regular non-symlink" in detail or "not a regular file" in detail:
+            raise RunPreparationError(f"prompt file must be a regular file: {path}") from error
+        if "exceeds" in detail:
+            raise RunPreparationError(f"prompt file exceeds the 5 MiB artifact limit: {path}") from error
+        raise RunPreparationError(f"prompt file is not readable: {path}: {error}") from error
+    try:
+        decoded = prompt.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise RunPreparationError(f"prompt file is not valid UTF-8: {path}") from error
+    if not decoded.strip():
+        raise RunPreparationError("prompt file must contain a non-blank actual prompt")
+    mojibake = find_likely_mojibake(decoded)
+    if mojibake is not None:
+        raise RunPreparationError(
+            "prompt file contains likely mojibake at character offset "
+            f"{mojibake.offset} ({mojibake.codepoints}): {path}; "
+            "correct the prepared prompt at its source, write it as UTF-8, and retry"
+        )
+    return prompt
+
+
+def read_directional_technical_prompt() -> bytes:
+    """Load and validate the package-owned transient directional contract."""
+
+    path = Path(__file__).resolve().parent.parent / "references" / "directional-controls.md"
+    try:
+        prompt = read_regular_file_bounded(path, TECHNICAL_PROMPT_MAX_BYTES)
+        decoded = prompt.decode("utf-8")
+    except (BoundedReadError, UnicodeDecodeError) as error:
+        raise RunPreparationError(
+            f"directional technical prompt is unreadable: {path}: {error}"
+        ) from error
+    try:
+        validate_directional_technical_prompt_contract(decoded)
+    except DirectionalControlError as error:
+        raise RunPreparationError(str(error)) from error
+    return prompt
+
+
+def resolved_root(path: Path) -> Path:
+    """Resolve the caller-selected root before accepting any derived path beneath it."""
+
+    try:
+        root = resolve_existing_or_new(path)
+    except (OSError, RuntimeError) as error:
+        raise RunPreparationError(f"unable to resolve output root: {path}: {error}") from error
+    if root.exists() and not root.is_dir():
+        raise RunPreparationError(f"output root is not a directory: {root}")
+    return root
+
+
+def exact_child(parent: Path, name: str) -> Optional[Path]:
+    """Return a direct child only when its stored casing is exact."""
+
+    try:
+        return next((entry for entry in parent.iterdir() if entry.name == name), None)
+    except OSError:
+        return None
+
+
+def read_json_object_bounded(path: Path, label: str) -> dict[str, Any]:
+    """Read a small regular JSON object without following special files."""
+
+    try:
+        raw = read_regular_file_bounded(path, METADATA_MAX_BYTES)
+        decoded = raw.decode("utf-8")
+        value = parse_json_bounded(decoded)
+    except (BoundedReadError, UnicodeDecodeError, json.JSONDecodeError, RecursionError, ValueError) as error:
+        raise RunPreparationError(f"{label} is unreadable: {path}: {error}") from error
+    if not isinstance(value, dict):
+        raise RunPreparationError(f"{label} must contain a JSON object: {path}")
+    return value
+
+
+def prepare_provenance_directory(root: Path) -> Path:
+    """Create the coordinator inventory without following a pre-positioned link."""
+
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+    except OSError as error:
+        raise RunPreparationError(f"unable to create output root: {error}") from error
+    directory = root / ".oneshot-provenance"
+    try:
+        directory.mkdir(exist_ok=True)
+    except OSError as error:
+        raise RunPreparationError(f"unable to create provenance directory: {error}") from error
+    directory = exact_child(root, ".oneshot-provenance")
+    if directory is None:
+        raise RunPreparationError("provenance directory name must use exact casing")
+    if directory.is_symlink():
+        raise RunPreparationError("provenance directory must not be a symbolic link")
+    if not directory.is_dir():
+        raise RunPreparationError("provenance path must be a directory")
+    try:
+        mode = directory.stat().st_mode
+    except OSError as error:
+        raise RunPreparationError(f"unable to inspect provenance directory: {error}") from error
+    if mode & 0o222 == 0:
+        raise RunPreparationError("provenance directory must have a writable file mode")
+    try:
+        directory.resolve(strict=True).relative_to(root.resolve(strict=True))
+    except (OSError, ValueError) as error:
+        raise RunPreparationError("provenance directory must stay inside the output root") from error
+    return directory
+
+
+def require_within_root(path: Path, root: Path, label: str) -> Path:
+    """Resolve a path and reject any value that could target data outside the run root."""
+
+    try:
+        resolved = resolve_existing_or_new(path)
+    except (OSError, RuntimeError) as error:
+        raise RunPreparationError(f"unable to resolve {label}: {path}: {error}") from error
+    try:
+        resolved.relative_to(root)
+    except ValueError as error:
+        raise RunPreparationError(f"{label} must stay within output root: {root}") from error
+    return resolved
+
+
+def prior_run_path(value: Optional[Path], root: Path) -> Optional[str]:
+    """Validate and store optional prior-run provenance as a portable relative path."""
+
+    if value is None:
+        return None
+    candidate = value.expanduser() if value.is_absolute() else root / value
+    try:
+        relative = candidate.relative_to(root)
+    except ValueError:
+        # A caller may spell an already-resolved macOS root through a system alias
+        # such as /var -> /private/var. Find that root prefix without resolving
+        # worker-controlled components below it, so interior symlinks remain visible.
+        relative = None
+        for prefix in candidate.parents:
+            try:
+                if prefix.resolve(strict=True) == root:
+                    relative = candidate.relative_to(prefix)
+                    break
+            except OSError:
+                continue
+        if relative is None:
+            try:
+                candidate.resolve(strict=True).relative_to(root)
+            except (OSError, ValueError) as error:
+                raise RunPreparationError(f"prior run must stay within output root: {root}") from error
+            raise RunPreparationError("prior run could not be mapped to exact output-root path components")
+    if len(relative.parts) not in {1, 4} or any(part in {"", ".", ".."} for part in relative.parts):
+        raise RunPreparationError(
+            "prior run must use one timestamp directory or exact legacy model/harness/experiment/run components"
+        )
+    prior = root
+    for part in relative.parts:
+        stored_part = exact_child(prior, part)
+        if stored_part is None:
+            raise RunPreparationError(f"prior run path must use exact casing: {candidate}")
+        if stored_part.is_symlink():
+            raise RunPreparationError(f"prior run path must not use symbolic links: {candidate}")
+        prior = stored_part
+    if not prior.is_dir():
+        raise RunPreparationError(f"prior run is not an existing directory: {prior}")
+    require_within_root(prior, root, "prior run")
+    run_manifest = exact_child(prior, "run.json")
+    if run_manifest is None or not run_manifest.is_file() or run_manifest.is_symlink():
+        raise RunPreparationError("prior run must be a timestamped or legacy run directory containing run.json")
+
+    # A run is dispatch-ready only after its coordinator-owned receipt and
+    # final empty commit marker exist outside the worker-writable directory.
+    # Refusing pre-commit residue prevents reruns from linking to an attempt
+    # that a crashed preparation process never made canonical.
+    provenance_directory = exact_child(root, ".oneshot-provenance")
+    if (
+        provenance_directory is None
+        or provenance_directory.is_symlink()
+        or not provenance_directory.is_dir()
+    ):
+        raise RunPreparationError("prior run is missing its coordinator provenance directory")
+
+    run_id = prior.name
+    prior_relative = prior.relative_to(root).as_posix()
+    receipt_path = exact_child(provenance_directory, f"{run_id}.json")
+    if receipt_path is None:
+        raise RunPreparationError("prior run is missing its coordinator provenance receipt")
+    receipt = read_json_object_bounded(receipt_path, "prior run coordinator provenance receipt")
+    if (
+        receipt.get("schemaVersion") not in {"1.0", "1.1", "2.0", "2.1", "2.2", "2.3", "2.4"}
+        or receipt.get("runId") != run_id
+        or receipt.get("runPath") != prior_relative
+    ):
+        raise RunPreparationError("prior run coordinator provenance receipt does not match the prior run")
+
+    commit_path = exact_child(provenance_directory, f"{run_id}.commit")
+    if commit_path is None:
+        raise RunPreparationError("prior run is missing its provenance commit marker")
+    try:
+        commit_metadata = commit_path.lstat()
+    except OSError as error:
+        raise RunPreparationError(f"prior run provenance commit marker is unreadable: {error}") from error
+    if not stat.S_ISREG(commit_metadata.st_mode):
+        raise RunPreparationError("prior run provenance commit marker must be a regular non-symlink file")
+    if commit_metadata.st_size != 0:
+        raise RunPreparationError("prior run provenance commit marker must be empty")
+
+    return prior_relative
+
+
+def validate_run_relationship(classification: str, prior_run: Optional[str]) -> None:
+    """Keep original attempts and later attempts distinguishable in provenance."""
+
+    if classification == "autonomous-one-shot" and prior_run is not None:
+        raise RunPreparationError("autonomous-one-shot runs must not declare a prior run")
+    if classification in {"rerun", "curated-attempt"} and prior_run is None:
+        raise RunPreparationError(f"{classification} runs must declare --prior-run")
+
+
+def make_run_id(experiment_name: str) -> str:
+    """Return a local timestamp and readable experiment slug for a run base."""
+
+    timestamp = datetime.now().astimezone().strftime("%Y-%m-%d-%H-%M-%S")
+    return f"{timestamp}-{experiment_slug(experiment_name)}"
+
+
+def reserve_paths(root: Path, run_id: str) -> RunPaths:
+    """Atomically reserve a slugged timestamp run, suffixing collisions."""
+
+    match = RUN_NAME_RE.fullmatch(run_id)
+    if match is None:
+        raise RunPreparationError(
+            "run ID must use YYYY-MM-DD-HH-MM-SS-experiment-slug format: "
+            f"{run_id!r}"
+        )
+    timestamp_text = match.group("timestamp")
+    try:
+        parsed_timestamp = datetime.strptime(timestamp_text, "%Y-%m-%d-%H-%M-%S")
+    except ValueError as error:
+        raise RunPreparationError(f"run ID contains an invalid local timestamp: {run_id!r}") from error
+    if parsed_timestamp.strftime("%Y-%m-%d-%H-%M-%S") != timestamp_text:
+        raise RunPreparationError(f"run ID contains an invalid local timestamp: {run_id!r}")
+
+    collision_number = 1
+    while True:
+        directory_name = run_id if collision_number == 1 else f"{run_id}--{collision_number:02d}"
+        run = root / directory_name
+        require_within_root(run, root, "derived run path")
+        try:
+            run.mkdir(exist_ok=False)
+            break
+        except FileExistsError:
+            collision_number += 1
+        except OSError as error:
+            raise RunPreparationError(f"unable to reserve run directory: {error}") from error
+
+    return RunPaths(
+        root=root,
+        run=run,
+        temporary=run / ".tmp",
+        workspace=run / "workspace",
+        artifact=run / "artifact",
+    )
+
+
+def rollback_reserved_run(
+    paths: RunPaths,
+    owned_provenance_paths: set[Path],
+) -> None:
+    """Remove an uncommitted run and its receipt without touching prior runs."""
+
+    for owned_path in owned_provenance_paths:
+        try:
+            if owned_path.exists() and not owned_path.is_symlink():
+                owned_path.unlink()
+        except OSError:
+            pass
+    try:
+        if paths.run.exists() and not paths.run.is_symlink():
+            shutil.rmtree(paths.run)
+    except OSError:
+        pass
+
+
+def write_json(
+    path: Path,
+    value: dict[str, Any],
+    owned_paths: Optional[set[Path]] = None,
+) -> None:
+    """Create metadata once, refusing to replace even an unexpected competing file."""
+
+    with path.open("x", encoding="utf-8") as handle:
+        if owned_paths is not None:
+            owned_paths.add(path)
+        handle.write(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+
+
+def write_commit_marker(path: Path, owned_paths: set[Path]) -> None:
+    """Atomically mark that all pre-dispatch run and receipt files exist."""
+
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0)
+    descriptor = os.open(path, flags, 0o644)
+    owned_paths.add(path)
+    try:
+        try:
+            os.fsync(descriptor)
+        except OSError:
+            pass
+    finally:
+        try:
+            os.close(descriptor)
+        except OSError:
+            pass
+
+
+def run_document(
+    model: Identity,
+    harness: Identity,
+    experiment: Identity,
+    run_id: str,
+    classification: str,
+    prompt_digest: str,
+    prior_run: Optional[str],
+    receipt_path: str,
+    directional_controls: dict[str, Any],
+) -> dict[str, Any]:
+    """Build the durable run metadata, following templates/run.json's contract."""
+
+    document: dict[str, Any] = {
+        "schemaVersion": "3.4",
+        "identity": {
+            "model": {"name": model.name, "key": model.key},
+            "harness": {"name": harness.name, "key": harness.key},
+            "experiment": {"name": experiment.name, "key": experiment.key},
+        },
+        "runId": run_id,
+        "classification": classification,
+        "status": "PLANNED",
+        "prompt": {"path": "artifact/PROMPT.md", "sha256": prompt_digest, "preservation": "verbatim"},
+        "temporary": {
+            "path": ".tmp/",
+            "routing": "best-effort-run-local",
+            "lifecycle": "retain-until-successful-finalization",
+        },
+        "workspace": {"path": "workspace/"},
+        "artifact": {"path": "artifact/", "entrypoint": "artifact/index.html", "deployment": "static-folder"},
+        "execution": {
+            "leadWorkerId": None,
+            "descendantWorkerIds": [],
+            "recursiveDelegation": "allowed",
+            "skillImposedLimits": "none",
+            "coordinatorMonitoring": dict(COORDINATOR_MONITORING_CONTRACT),
+        },
+        "interaction": {"directionalControls": directional_controls},
+        "priorRun": prior_run,
+        "provenanceReceipt": receipt_path,
+    }
+    return document
+
+
+def provenance_receipt(
+    paths: RunPaths,
+    model: Identity,
+    harness: Identity,
+    experiment: Identity,
+    run_id: str,
+    classification: str,
+    prompt_digest: str,
+    prompt_bytes: int,
+    prior_run: Optional[str],
+    directional_controls: dict[str, Any],
+) -> dict[str, Any]:
+    """Anchor pre-dispatch identity and prompt evidence outside the worker-owned run."""
+
+    return {
+        "schemaVersion": "2.4",
+        "runId": run_id,
+        "runPath": paths.run.relative_to(paths.root).as_posix(),
+        "runSchemaVersion": "3.4",
+        "identity": {
+            "model": {"name": model.name, "key": model.key},
+            "harness": {"name": harness.name, "key": harness.key},
+            "experiment": {"name": experiment.name, "key": experiment.key},
+        },
+        "classification": classification,
+        "priorRun": prior_run,
+        "prompt": {"sha256": prompt_digest, "bytes": prompt_bytes},
+        "temporary": {
+            "path": ".tmp/",
+            "routing": "best-effort-run-local",
+            "lifecycle": "retain-until-successful-finalization",
+        },
+        "qualityGauntlet": {
+            "required": True,
+            "contractVersion": "1.0",
+            "reportSchemaVersion": "2.1",
+        },
+        "coordinatorMonitoring": dict(COORDINATOR_MONITORING_CONTRACT),
+        "directionalControls": directional_controls,
+    }
+
+
+def initial_worker_report(run_id: str) -> dict[str, Any]:
+    """Reserve an honest, editable report without inventing worker telemetry."""
+
+    return {
+        "schemaVersion": "2.1",
+        "runId": run_id,
+        "status": "PLANNED",
+        "summary": None,
+        "blocker": None,
+        "leadWorkerId": None,
+        "descendantWorkerIds": [],
+        "temporary": {"path": ".tmp/", "routingApplied": None, "externalExceptions": []},
+        "workspace": "workspace/",
+        "artifact": {"entrypoint": "artifact/index.html", "staticDeploymentVerified": False},
+        "technologies": [],
+        "dependencies": [],
+        "build": {"command": None},
+        "qualityGauntlet": {
+            "applicability": None,
+            "notRequiredReason": None,
+            "bar": None,
+            "referenceProvenance": [],
+            "barValidation": {"result": None, "evidence": None},
+            "barRevisions": [],
+            "freshCriticAvailable": None,
+            "rounds": [],
+            "integrationPass": {"required": None, "result": None, "evidence": None},
+            "fallbackEvidence": None,
+            "stopReason": None,
+        },
+        "verification": [],
+        "observations": {
+            "startedAt": None,
+            "completedAt": None,
+            "usage": None,
+            "duration": None,
+            "cost": None,
+            "designTerritory": None,
+            "livenessEvents": [],
+        },
+    }
+
+
+def create_run(arguments: argparse.Namespace) -> Path:
+    """Validate all inputs, reserve the namespace, and initialize run records."""
+
+    root = resolved_root(arguments.output_root)
+    prompt = read_prompt(arguments.prompt_file)
+    model = build_identity(arguments.model, "model")
+    harness = build_identity(arguments.harness, "harness")
+    experiment = build_identity(arguments.experiment, "experiment")
+    directional_requirement = infer_directional_control_requirement(
+        experiment.name,
+        prompt.decode("utf-8"),
+        force_required=arguments.directional_controls == "required",
+    )
+    try:
+        reject_internal_directional_contract_in_prompt(prompt.decode("utf-8"))
+    except DirectionalControlError as error:
+        raise RunPreparationError(str(error)) from error
+    directional_technical_prompt = (
+        read_directional_technical_prompt() if directional_requirement.required else None
+    )
+    prior_run = prior_run_path(arguments.prior_run, root)
+    validate_run_relationship(arguments.classification, prior_run)
+    receipt_directory = prepare_provenance_directory(root)
+    paths = reserve_paths(root, make_run_id(experiment.name))
+    run_id = paths.run.name
+    prompt_digest = hashlib.sha256(prompt).hexdigest()
+    directional_controls = directional_control_contract(directional_requirement, run_id)
+    receipt_relative = Path(".oneshot-provenance") / f"{run_id}.json"
+    receipt_path = receipt_directory / f"{run_id}.json"
+    commit_path = receipt_directory / f"{run_id}.commit"
+    owned_provenance_paths: set[Path] = set()
+
+    try:
+        paths.temporary.mkdir()
+        if directional_technical_prompt is not None:
+            technical_prompt_path = paths.run / DIRECTIONAL_TECHNICAL_PROMPT_PATH
+            with technical_prompt_path.open("xb") as technical_prompt_destination:
+                technical_prompt_destination.write(directional_technical_prompt)
+        paths.workspace.mkdir()
+        paths.artifact.mkdir()
+        with (paths.artifact / "PROMPT.md").open("xb") as prompt_destination:
+            prompt_destination.write(prompt)
+        write_json(
+            paths.run / "run.json",
+            run_document(
+                model,
+                harness,
+                experiment,
+                run_id,
+                arguments.classification,
+                prompt_digest,
+                prior_run,
+                receipt_relative.as_posix(),
+                directional_controls,
+            ),
+        )
+        write_json(paths.run / "worker-report.json", initial_worker_report(run_id))
+        write_json(
+            receipt_path,
+            provenance_receipt(
+                paths,
+                model,
+                harness,
+                experiment,
+                run_id,
+                arguments.classification,
+                prompt_digest,
+                len(prompt),
+                prior_run,
+                directional_controls,
+            ),
+            owned_provenance_paths,
+        )
+        write_commit_marker(commit_path, owned_provenance_paths)
+    except OSError as error:
+        rollback_reserved_run(paths, owned_provenance_paths)
+        raise RunPreparationError(f"unable to initialize reserved run: {error}") from error
+    return paths.run
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Create a run and emit only its absolute path as JSON on standard output."""
+
+    arguments = parse_arguments(argv)
+    try:
+        run = create_run(arguments)
+    except RunPreparationError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 2
+    manifest = read_json_object_bounded(run / "run.json", "prepared run manifest")
+    directional_controls = (
+        manifest.get("interaction", {}).get("directionalControls", {})
+        if isinstance(manifest.get("interaction"), dict)
+        else {}
+    )
+    print(
+        json.dumps(
+            {
+                "runDirectory": str(run.resolve()),
+                "directionalControlsRequired": directional_controls.get("required") is True,
+                "technicalPromptPath": (
+                    str((run / DIRECTIONAL_TECHNICAL_PROMPT_PATH).resolve())
+                    if directional_controls.get("required") is True
+                    else None
+                ),
+                "coordinatorMonitoringRequired": True,
+            }
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

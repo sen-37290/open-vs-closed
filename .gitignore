@@ -1,0 +1,41 @@
+# --- secrets (never committed) --------------------------------------------
+experiment-config/models.env
+*.env
+!experiment-config/models.example.env
+.env
+.env.*
+*.key
+*.pem
+auth.json
+
+# --- OS / editor -----------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+
+# --- caches and dependencies that must not be versioned -------------------
+/__pycache__/
+/*.py[cod]
+/.pytest_cache/
+/.ruff_cache/
+/.venv/
+/node_modules/
+/scripts/__pycache__/
+
+# --- temporary worktrees ---------------------------------------------------
+.worktrees/
+*.tmp.d/
+
+# ---------------------------------------------------------------------------
+# DELIBERATELY NOT IGNORED
+#
+#   runs/        the experimental record: logs, sealed prompts, artifacts,
+#                metadata, provenance receipts, and the retained .tmp/ of
+#                failed runs. Ignoring it would destroy the experiment.
+#   metadata/    cross-run pair and batch records.
+#   .kilo/       the pinned skill and the pinned harness configuration.
+#
+# Node/Python caches produced INSIDE a run's workspace/ are part of that run's
+# record and are intentionally left alone by the patterns above, which are
+# anchored to the repository root.
+# ---------------------------------------------------------------------------

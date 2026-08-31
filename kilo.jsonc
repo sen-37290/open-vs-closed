@@ -1,0 +1,107 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+
+  // ---------------------------------------------------------------------
+  // open-vs-closed A/B harness — PINNED HARNESS CONFIGURATION
+  //
+  // This file is the *constant* half of the experiment. It is identical for
+  // both arms. The ONLY thing that varies between arms is the model of the
+  // `oneshot-lead` subagent, which run-one.sh overrides per run via
+  // KILO_CONFIG_CONTENT (never by editing this file).
+  //
+  // Do not hand-edit during a benchmark campaign. Any change invalidates
+  // cross-run comparability; record a new harness config hash if you must.
+  // ---------------------------------------------------------------------
+
+  // Coordinator default. run-one.sh passes -m "$COORDINATOR_MODEL" explicitly,
+  // so this value is a documented fallback, not the live selection.
+  "model": "openrouter/openai/gpt-5.1",
+
+  // Title/summary generation. Pinned so incidental helper traffic is identical
+  // across arms and never silently borrows an arm's model.
+  "small_model": "openrouter/openai/gpt-5-mini",
+
+  // The skill requires unbounded recursive delegation: coordinator -> lead ->
+  // critic -> further descendants. Kilo's default is 1, which would silently
+  // prevent the lead from running its quality gauntlet at all. The skill forbids
+  // adding a recursion-depth limit to compensate for a harness difference, and
+  // kilo has no "unlimited" sentinel, so this is set far beyond any plausible
+  // topology rather than to a chosen ceiling.
+  "subagent_depth": 1000000,
+
+  // Autonomous execution. Combined with `kilo run --auto`, no tool call in the
+  // run may block on human approval. `question` is denied outright so an agent
+  // cannot stall a headless run waiting for an answer that will never come.
+  "permission": {
+    "bash": "allow",
+    "edit": "allow",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "task": "allow",
+    "todowrite": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "lsp": "allow",
+    "external_directory": "allow",
+    "question": "deny",
+    "doom_loop": "allow"
+  },
+
+  "agent": {
+    // ---------------- LEAD: the treatment variable ----------------
+    // model is overridden per run by run-one.sh. The value here is a
+    // deliberately invalid placeholder so an unparameterised run fails loudly
+    // instead of silently benchmarking the wrong model.
+    "oneshot-lead": {
+      "mode": "subagent",
+      "description": "Autonomous one-shot website lead. Owns exactly one experiment end to end, in its own run directory, with no inherited conversation history. Dispatched by the coordinator with the complete role and sealed prompt.",
+      "model": "openrouter/z-ai/glm-5.3",
+      "temperature": 1,
+      "prompt": "You are the autonomous one-shot lead for exactly one website experiment.\n\nYour complete role definition, run identity, assigned paths, operational envelopes, sealed prompt, and critic role are supplied verbatim in the dispatch message you receive. That dispatch is authoritative. Follow it exactly.\n\nYou start with no inherited conversation history and you must not ask for any. Work autonomously to a terminal state. Never ask the human a question; there is no human available during this run. If you reach a genuine blocker, record it honestly in worker-report.json and run.json rather than stalling or waiting.\n\nStay inside your assigned run directory. Never inspect, enumerate, search for, or compare any sibling run. Build, test, validate and package locally only: never upload, deploy, publish, or push anything anywhere.",
+      "permission": {
+        "bash": "allow",
+        "edit": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "task": "allow",
+        "todowrite": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "lsp": "allow",
+        "external_directory": "allow",
+        "question": "deny",
+        "doom_loop": "allow"
+      }
+    },
+
+    // ---------------- CRITIC: pinned constant ----------------
+    // Read-only reviewer. Identical model in both arms. Deliberately a third
+    // family, neither GLM nor Fable, so neither arm's artifact is graded by a
+    // sibling of the model that built it.
+    "oneshot-critic": {
+      "mode": "subagent",
+      "description": "Fresh read-only critic for one built artifact. Inspects the real rendered result, never a builder summary, and returns READY or NOT_READY with one coherent batch of material blockers.",
+      "model": "openrouter/openai/gpt-5.1",
+      "temperature": 1,
+      "prompt": "You are a fresh, independent, read-only critic for exactly one website experiment.\n\nYour complete role definition is supplied verbatim in the dispatch message you receive. That dispatch is authoritative.\n\nYou start with no inherited builder conversation and must not request the builder's rationale, progress narrative, self-assessment, or implementation history. Never accept a prose summary in place of opening, rendering, and exercising the actual artifact.\n\nYou are read-only: inspect, render, and exercise the artifact, but never edit, create, or delete any file in workspace/ or artifact/. Return a concise verdict, concrete artifact-grounded evidence, and one coherent batch of material blockers.",
+      "permission": {
+        "bash": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "todowrite": "allow",
+        "edit": "deny",
+        "task": "deny",
+        "question": "deny",
+        "doom_loop": "allow"
+      }
+    }
+  }
+}

@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""Assemble a run's metadata.json.
+
+Metadata is DERIVED from the skill's own records (run.json, worker-report.json)
+plus harness telemetry. It never forks the truth into a second copy: status,
+classification and prompt provenance are read from run.json, and the sealed
+prompt is referenced by path + hash rather than duplicated.
+
+Measurements the harness does not expose are recorded as null. Nothing is
+fabricated or estimated.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import pathlib
+import subprocess
+import sys
+
+
+def load_json(path: pathlib.Path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def read_jsonl(path: pathlib.Path):
+    out = []
+    if not path.exists():
+        return out
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            out.append(json.loads(line))
+        except Exception:
+            out.append({"unparsed": line})
+    return out
+
+
+def kilo_session_telemetry(session_id: str):
+    """Pull real token/cost telemetry, and the model each role actually ran on.
+
+    The per-message modelID is what makes the A/B auditable: it proves the
+    coordinator stayed pinned and only the lead varied.
+    """
+    if not session_id:
+        return None
+    try:
+        raw = subprocess.run(
+            ["kilo", "export", session_id],
+            capture_output=True, text=True, timeout=120,
+        )
+        if raw.returncode != 0 or not raw.stdout.strip():
+            return None
+        data = json.loads(raw.stdout)
+    except Exception:
+        return None
+
+    info = data.get("info") or {}
+    models_seen = {}
+    for m in data.get("messages") or []:
+        mi = (m or {}).get("info") or {}
+        mid, pid = mi.get("modelID"), mi.get("providerID")
+        if mid:
+            key = f"{pid}/{mid}" if pid else mid
+            models_seen[key] = models_seen.get(key, 0) + 1
+    return {
+        "sessionId": info.get("id"),
+        "tokens": info.get("tokens"),
+        "cost": info.get("cost"),
+        "modelsObservedInSession": models_seen,
+        "note": "Token/cost figures cover the coordinator session only. Subagent "
+                "(lead, critic) sessions are separate sessions; see kilo stats.",
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    for flag in (
+        "run-dir", "run-id", "model-alias", "provider", "exact-model-id",
+        "coordinator-model", "critic-model", "prompt-file", "prompt-hash",
+        "start-time", "end-time", "wall-clock-seconds", "exit-code",
+        "harness-name", "harness-version", "skill-commit", "skill-version",
+        "git-commit", "timeout-seconds", "timeout-hit", "kilo-session-file",
+    ):
+        ap.add_argument(f"--{flag}", required=True)
+    a = ap.parse_args()
+
+    run_dir = pathlib.Path(a.run_dir)
+    run_json = load_json(run_dir / "run.json") or {}
+    worker = load_json(run_dir / "worker-report.json") or {}
+
+    session_id = ""
+    sf = pathlib.Path(a.kilo_session_file)
+    if sf.exists():
+        session_id = sf.read_text(encoding="utf-8").strip()
+
+    artifact_index = run_dir / "artifact" / "index.html"
+    sealed_prompt = run_dir / "artifact" / "PROMPT.md"
+
+    sealed_hash = None
+    if sealed_prompt.exists():
+        import hashlib
+        sealed_hash = hashlib.sha256(sealed_prompt.read_bytes()).hexdigest()
+
+    meta = {
+        "schema": "open-vs-closed/metadata/1.0",
+        "runId": a.run_id,
+        "runDirectory": str(run_dir),
+
+        # ---- treatment variable ----
+        "arm": {
+            "modelAlias": a.model_alias,
+            "provider": a.provider,
+            "exactModelId": a.exact_model_id,
+            "role": "lead",
+        },
+        # ---- pinned constants, identical across both arms ----
+        "constants": {
+            "coordinatorModel": a.coordinator_model,
+            "criticModel": a.critic_model,
+            "harnessName": a.harness_name,
+            "harnessVersion": a.harness_version,
+            "oneshotSkillCommit": a.skill_commit,
+            "oneshotSkillVersion": a.skill_version,
+            "experimentGitCommit": a.git_commit,
+        },
+        # ---- prompt provenance: referenced, never duplicated ----
+        "prompt": {
+            "sourceFile": a.prompt_file,
+            "sourceSha256": a.prompt_hash,
+            "sealedPath": str(sealed_prompt.relative_to(run_dir)) if sealed_prompt.exists() else None,
+            "sealedSha256": sealed_hash,
+            "sealIntact": (sealed_hash == a.prompt_hash) if sealed_hash else False,
+        },
+        # ---- timing ----
+        "timing": {
+            "startTime": a.start_time,
+            "endTime": a.end_time,
+            "wallClockSeconds": int(a.wall_clock_seconds),
+            "timeoutSeconds": int(a.timeout_seconds),
+            "timeoutHit": a.timeout_hit == "1",
+        },
+        "exitCode": int(a.exit_code) if str(a.exit_code).lstrip("-").isdigit() else None,
+
+        # ---- status: single source of truth is run.json ----
+        "status": run_json.get("status"),
+        "statusSource": "run.json.status",
+        "workerReportStatus": worker.get("status"),
+        "classification": run_json.get("classification"),
+
+        "artifact": {
+            "path": "artifact/",
+            "entrypointPresent": artifact_index.exists(),
+            "tmpRetained": (run_dir / ".tmp").exists(),
+        },
+
+        "interventions": read_jsonl(run_dir / "interventions.jsonl"),
+        "recordNormalizations": read_jsonl(run_dir / "record-normalizations.jsonl"),
+
+        "telemetry": kilo_session_telemetry(session_id) or {
+            "sessionId": session_id or None,
+            "tokens": None,
+            "cost": None,
+            "note": "harness telemetry unavailable for this run; not estimated",
+        },
+
+        "derivedFrom": ["run.json", "worker-report.json", "interventions.jsonl",
+                        "record-normalizations.jsonl", "kilo export"],
+    }
+
+    (run_dir / "metadata.json").write_text(
+        json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(json.dumps({"metadata": str(run_dir / "metadata.json"), "status": meta["status"]}))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
