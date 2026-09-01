@@ -47,24 +47,27 @@ load_config() {
   : "${KIMI_PROVIDER:=openrouter}"
   : "${KIMI_MODEL:=moonshotai/kimi-k3}"
   # OpenRouter routes an open-weights model to many upstreams at different
-  # quantizations, so two runs of the "same" model can differ materially.
-  # Pinning the upstream makes a run reproducible. Empty means "let OpenRouter
-  # choose", which is the current behaviour for GLM and Fable.
+  # speeds, prices and quantizations. Left alone, a run can land on one that
+  # stalls: three kimi runs died with "Upstream idle timeout exceeded".
   #
-  # kimi-k3 pins to fireworks/fast on measured latency, not preference:
-  #                    ~30k ctx   ~100k ctx
-  #   fireworks/fast      2.3s       4.8s   <- chosen
-  #   together            2.5s       3.7s
-  #   fireworks/us        3.1s       4.4s
-  #   fireworks (bare)    error      3.3s   <- flaky, avoid
-  #   moonshotai         13.6s      22.2s   <- ~5x slower, stalls
-  # Three runs pinned to moonshotai all died with OpenRouter's "Upstream idle
-  # timeout exceeded" after the model had already done real work. Pinning was
-  # correct; picking the first-party provider by reputation rather than by
-  # measurement was not.
-  : "${KIMI_UPSTREAM:=fireworks/fast}"
+  # <ALIAS>_UPSTREAM        preference order, first choice first
+  # <ALIAS>_UPSTREAM_IGNORE never route here, even as a fallback
+  # Fallbacks are ENABLED, so a stalling provider costs a retry rather than the
+  # whole run. The trade-off is that a run may not be served by its first
+  # choice; see the note in metadata.json.
+  #
+  # Measured latency for moonshotai/kimi-k3 (~30k / ~100k context):
+  #   together 2.5s/3.7s  $3.00/M   <- first choice, baseline price
+  #   fireworks 3.1s(err)/3.3s $3.00/M
+  #   fireworks/us 3.1s/4.4s  $3.30/M
+  #   fireworks/fast 2.3s/4.8s $4.50/M  (50% dearer, no gain at 100k)
+  #   moonshotai 13.6s/22.2s  $3.00/M  <- ~5x slower and stalls: ignored
+  : "${KIMI_UPSTREAM:=together,fireworks,deepinfra,fireworks/us}"
+  : "${KIMI_UPSTREAM_IGNORE:=moonshotai,makora}"
   : "${GLM_UPSTREAM:=}"
+  : "${GLM_UPSTREAM_IGNORE:=}"
   : "${FABLE_UPSTREAM:=}"
+  : "${FABLE_UPSTREAM_IGNORE:=}"
   : "${RUN_TIMEOUT_SECONDS:=14400}"
   : "${MAX_PARALLEL:=2}"
   : "${HARNESS_NAME:=kilo-cli}"
@@ -82,13 +85,23 @@ resolve_model() {
   esac
 }
 
-# Which OpenRouter upstream, if any, this alias pins.
+# OpenRouter upstream preference order for this alias (comma separated).
 resolve_upstream() {
   case "$1" in
     glm-5.3|glm|GLM)     printf '%s\n' "${GLM_UPSTREAM:-}" ;;
     fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM:-}" ;;
     kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM:-}" ;;
     *)                   printf '%s\n' "${UPSTREAM:-}" ;;
+  esac
+}
+
+# Upstreams this alias must never use, even as a fallback.
+resolve_upstream_ignore() {
+  case "$1" in
+    glm-5.3|glm|GLM)     printf '%s\n' "${GLM_UPSTREAM_IGNORE:-}" ;;
+    fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM_IGNORE:-}" ;;
+    kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM_IGNORE:-}" ;;
+    *)                   printf '%s\n' "${UPSTREAM_IGNORE:-}" ;;
   esac
 }
 

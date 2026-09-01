@@ -98,6 +98,7 @@ def main() -> int:
     ):
         ap.add_argument(f"--{flag}", required=True)
     ap.add_argument("--upstream", default="")
+    ap.add_argument("--upstream-ignore", default="")
     a = ap.parse_args()
 
     run_dir = pathlib.Path(a.run_dir)
@@ -127,10 +128,13 @@ def main() -> int:
             "modelAlias": a.model_alias,
             "provider": a.provider,
             "exactModelId": a.exact_model_id,
-            "upstreamPinned": a.upstream or None,
-            "upstreamNote": ("OpenRouter routing pinned to this upstream with fallbacks disabled"
+            "upstreamOrder": a.upstream or None,
+            "upstreamIgnored": a.upstream_ignore or None,
+            "upstreamNote": ("OpenRouter routing preference with fallbacks ENABLED: the run is served by the "
+                             "first available upstream in this order, so the provider and quantization that "
+                             "actually served it are not guaranteed and are not recorded by the harness"
                              if a.upstream else
-                             "upstream not pinned; OpenRouter may route to any provider, at any quantization it offers"),
+                             "upstream not pinned; OpenRouter may route to any provider at any quantization"),
             "scope": "entire run: the session and every subagent it spawned, at every depth",
         },
         # ---- pinned constants, identical across both arms ----

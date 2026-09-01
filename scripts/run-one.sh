@@ -170,6 +170,7 @@ finalize_metadata() {
     --timeout-seconds "$RUN_TIMEOUT_SECONDS" \
     --sandbox "$SANDBOX" \
     --upstream "${RUN_UPSTREAM:-}" \
+    --upstream-ignore "${RUN_UPSTREAM_IGNORE:-}" \
     --timeout-hit "$TIMEOUT_HIT" \
     --kilo-session-file "$RUN_DIR/.session-id" \
     >/dev/null 2>>"$STDERR_LOG" || warn "metadata assembly reported a problem (see stderr.log)"
@@ -266,17 +267,25 @@ PY
 # allow_fallbacks is false: silently falling back to a different upstream at a
 # different quantization would defeat the point of pinning.
 RUN_UPSTREAM="$(resolve_upstream "$MODEL_ALIAS")"
+RUN_UPSTREAM_IGNORE="$(resolve_upstream_ignore "$MODEL_ALIAS")"
 KILO_CONFIG_CONTENT="$("$ONESHOT_WEBSITES_PYTHON" -c '
 import json,sys
-model, upstream = sys.argv[1], sys.argv[2]
+model, order, ignore = sys.argv[1], sys.argv[2], sys.argv[3]
 cfg = {"model": model, "small_model": model}
-if upstream:
-    cfg["provider"] = {"openrouter": {"options": {"extraBody": {
-        "provider": {"only": [upstream], "allow_fallbacks": False}}}}}
-print(json.dumps(cfg))' "$RUN_MODEL" "$RUN_UPSTREAM")"
+routing = {}
+if order:  routing["order"] = [x.strip() for x in order.split(",") if x.strip()]
+if ignore: routing["ignore"] = [x.strip() for x in ignore.split(",") if x.strip()]
+if routing:
+    # Fallbacks ON: a stalling upstream costs a retry, not the whole run.
+    routing["allow_fallbacks"] = True
+    cfg["provider"] = {"openrouter": {"options": {"extraBody": {"provider": routing}}}}
+print(json.dumps(cfg))' "$RUN_MODEL" "$RUN_UPSTREAM" "$RUN_UPSTREAM_IGNORE")"
 export KILO_CONFIG_CONTENT
-[ -n "$RUN_UPSTREAM" ] && log "upstream pinned: $RUN_UPSTREAM (no fallbacks)" \
-                       || log "upstream: unpinned (OpenRouter default routing)"
+if [ -n "$RUN_UPSTREAM" ] || [ -n "$RUN_UPSTREAM_IGNORE" ]; then
+  log "upstream order: ${RUN_UPSTREAM:-<any>}  ignore: ${RUN_UPSTREAM_IGNORE:-<none>}  fallbacks: enabled"
+else
+  log "upstream: unpinned (OpenRouter default routing)"
+fi
 
 # The harness process writes into TMPDIR continuously, including AFTER the
 # model's cleanup helper has removed .tmp/. Pointing TMPDIR at .tmp/ therefore
