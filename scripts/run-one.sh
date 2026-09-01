@@ -86,9 +86,9 @@ if [ "$SANDBOX" = "auto" ]; then
   fi
 fi
 if [ "$SANDBOX" = "1" ]; then
-  MODEL_RUN_DIR="/work/run"
+  MODEL_RUN_DIR="/work/runs/$RUN_ID"
   MODEL_SKILL_DIR="/work/.kilo/skills/oneshot-websites"
-  MODEL_RUNS_ROOT="/work"            # nothing else is mounted there
+  MODEL_RUNS_ROOT="/work/runs"       # holds only this run and its own receipt
   MODEL_PY="/usr/bin/python3"
   log "sandbox: ENABLED (container-isolated run)"
 else
