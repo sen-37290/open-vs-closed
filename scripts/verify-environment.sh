@@ -21,7 +21,8 @@ else fail "kilo CLI not found on PATH (npm install -g @kilocode/cli)"; fi
 command -v git  >/dev/null 2>&1 && pass "git $(git --version | awk '{print $3}')" || fail "git not found"
 command -v node >/dev/null 2>&1 && pass "node $(node --version)"                  || warn "node not found (only needed if a lead chooses a node toolchain)"
 command -v npm  >/dev/null 2>&1 && pass "npm $(npm --version)"                    || warn "npm not found"
-command -v curl >/dev/null 2>&1 && pass "curl present (liveness monitor)"          || fail "curl not found; liveness monitoring will not work"
+command -v curl  >/dev/null 2>&1 && pass "curl present (liveness monitor)"                 || fail "curl not found; liveness monitoring will not work"
+command -v unzip >/dev/null 2>&1 && pass "unzip present (staging zipped prompt materials)" || warn "unzip not found; prompts that ship a .zip of materials will fail"
 
 # The skill's own finder calls shutil.which(), so anything on PATH works. This
 # check mirrors that, plus the macOS app-bundle paths which are not on PATH.

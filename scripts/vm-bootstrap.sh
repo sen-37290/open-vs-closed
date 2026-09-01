@@ -18,7 +18,7 @@ if [ "$MODE" != "--user" ]; then
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get install -y --no-install-recommends \
-    ca-certificates curl git rsync jq \
+    ca-certificates curl git rsync jq unzip \
     python3 python3-venv \
     chromium \
     build-essential \
