@@ -46,6 +46,13 @@ load_config() {
   : "${FABLE_MODEL:=anthropic/claude-fable-5}"
   : "${KIMI_PROVIDER:=openrouter}"
   : "${KIMI_MODEL:=moonshotai/kimi-k3}"
+  # OpenRouter routes an open-weights model to many upstreams at different
+  # quantizations, so two runs of the "same" model can differ materially.
+  # Pinning the upstream makes a run reproducible. Empty means "let OpenRouter
+  # choose", which is the current behaviour for GLM and Fable.
+  : "${KIMI_UPSTREAM:=moonshotai}"
+  : "${GLM_UPSTREAM:=}"
+  : "${FABLE_UPSTREAM:=}"
   : "${RUN_TIMEOUT_SECONDS:=14400}"
   : "${MAX_PARALLEL:=2}"
   : "${HARNESS_NAME:=kilo-cli}"
@@ -60,6 +67,16 @@ resolve_model() {
     kimi-k3|kimi|KIMI)   printf '%s/%s\n' "$KIMI_PROVIDER" "$KIMI_MODEL" ;;
     */*/*|*/*)           printf '%s\n' "$1" ;;
     *) die "unknown model alias '$1' (expected: glm-5.3, fable-5, kimi-k3, or an explicit provider/model id)" ;;
+  esac
+}
+
+# Which OpenRouter upstream, if any, this alias pins.
+resolve_upstream() {
+  case "$1" in
+    glm-5.3|glm|GLM)     printf '%s\n' "${GLM_UPSTREAM:-}" ;;
+    fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM:-}" ;;
+    kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM:-}" ;;
+    *)                   printf '%s\n' "${UPSTREAM:-}" ;;
   esac
 }
 

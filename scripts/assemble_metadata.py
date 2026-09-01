@@ -97,6 +97,7 @@ def main() -> int:
         "sandbox",
     ):
         ap.add_argument(f"--{flag}", required=True)
+    ap.add_argument("--upstream", default="")
     a = ap.parse_args()
 
     run_dir = pathlib.Path(a.run_dir)
@@ -126,6 +127,10 @@ def main() -> int:
             "modelAlias": a.model_alias,
             "provider": a.provider,
             "exactModelId": a.exact_model_id,
+            "upstreamPinned": a.upstream or None,
+            "upstreamNote": ("OpenRouter routing pinned to this upstream with fallbacks disabled"
+                             if a.upstream else
+                             "upstream not pinned; OpenRouter may route to any provider, at any quantization it offers"),
             "scope": "entire run: the session and every subagent it spawned, at every depth",
         },
         # ---- pinned constants, identical across both arms ----

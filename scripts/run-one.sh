@@ -169,6 +169,7 @@ finalize_metadata() {
     --git-commit "${GIT_COMMIT:-unknown}" \
     --timeout-seconds "$RUN_TIMEOUT_SECONDS" \
     --sandbox "$SANDBOX" \
+    --upstream "${RUN_UPSTREAM:-}" \
     --timeout-hit "$TIMEOUT_HIT" \
     --kilo-session-file "$RUN_DIR/.session-id" \
     >/dev/null 2>>"$STDERR_LOG" || warn "metadata assembly reported a problem (see stderr.log)"
@@ -260,10 +261,22 @@ PY
 # Set the single model for the run. `small_model` is pinned to the same model
 # so even incidental harness traffic (title/summary generation) cannot pull in
 # a second model. No per-agent model is set, so every subagent inherits this.
+# Optionally pin the OpenRouter upstream. Safe to set provider-wide here
+# because a run uses exactly one model, so this cannot affect another arm.
+# allow_fallbacks is false: silently falling back to a different upstream at a
+# different quantization would defeat the point of pinning.
+RUN_UPSTREAM="$(resolve_upstream "$MODEL_ALIAS")"
 KILO_CONFIG_CONTENT="$("$ONESHOT_WEBSITES_PYTHON" -c '
 import json,sys
-print(json.dumps({"model": sys.argv[1], "small_model": sys.argv[1]}))' "$RUN_MODEL")"
+model, upstream = sys.argv[1], sys.argv[2]
+cfg = {"model": model, "small_model": model}
+if upstream:
+    cfg["provider"] = {"openrouter": {"options": {"extraBody": {
+        "provider": {"only": [upstream], "allow_fallbacks": False}}}}}
+print(json.dumps(cfg))' "$RUN_MODEL" "$RUN_UPSTREAM")"
 export KILO_CONFIG_CONTENT
+[ -n "$RUN_UPSTREAM" ] && log "upstream pinned: $RUN_UPSTREAM (no fallbacks)" \
+                       || log "upstream: unpinned (OpenRouter default routing)"
 
 # The harness process writes into TMPDIR continuously, including AFTER the
 # model's cleanup helper has removed .tmp/. Pointing TMPDIR at .tmp/ therefore
