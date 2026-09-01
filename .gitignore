@@ -43,3 +43,35 @@ Thumbs.db
 # record and are intentionally left alone by the patterns above, which are
 # anchored to the repository root.
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Inside run directories: exclude reconstructible dependency trees and caches,
+# keep everything that is actual experimental evidence.
+#
+# EXCLUDED (not evidence):
+#   node_modules/      reconstructible from the lockfile the run already keeps
+#   .harness-tmp/      this harness's own scratch (kilo, compile caches)
+#   *-cache/ caches    npm/node/vite/parcel compile caches
+#
+# KEPT (evidence, deliberately):
+#   artifact/          the deliverable
+#   workspace/         model-authored source, and workspace/evidence/ captures
+#   .tmp/              the model's own scratch and verification captures,
+#                      which the skill requires be RETAINED for every failed run
+#   run.json, worker-report.json, metadata.json, status.txt,
+#   agent.log, stderr.log, interventions.jsonl, .finalization.json,
+#   directional-controls.txt, catalog-validate.txt, .oneshot-provenance/
+# ---------------------------------------------------------------------------
+runs/**/node_modules/
+runs/**/.harness-tmp/
+runs/**/node-compile-cache/
+runs/**/npm-cache/
+runs/**/.npm/
+runs/**/.cache/
+runs/**/.vite/
+runs/**/.parcel-cache/
+runs/**/.next/
+runs/**/.turbo/
+runs/**/__pycache__/
+runs/**/.venv/
+runs/**/venv/
