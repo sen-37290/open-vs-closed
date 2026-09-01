@@ -162,32 +162,37 @@ MATERIALS_COUNT=0
 MATERIALS_SHA=""
 if [ -n "$MATERIALS_SRC" ]; then
   mkdir -p "$RUN_DIR/materials"
-  # Two passes rather than one combined glob: `${VAR:+"$VAR"/*}` does not undergo
-  # pathname expansion, so the arm-specific directory was silently skipped and
-  # both arms received only the shared files.
-  MATERIAL_PATHS=""
-  for f in "$MATERIALS_SRC"/*; do [ -e "$f" ] && MATERIAL_PATHS="$MATERIAL_PATHS
-$f"; done
-  if [ -n "$MATERIALS_ARM_DIR" ]; then
-    for f in "$MATERIALS_ARM_DIR"/*; do [ -e "$f" ] && MATERIAL_PATHS="$MATERIAL_PATHS
-$f"; done
-  fi
-
-  printf '%s\n' "$MATERIAL_PATHS" | while IFS= read -r f; do
-    [ -n "$f" ] && [ -e "$f" ] || continue
-    case "$f" in
-      "$PROMPT_FILE") continue ;;                      # the sealed prompt itself
-      "$MATERIALS_SRC"/for-*) continue ;;              # another arm's materials
+  # Two separate loops with different rules. A single merged loop was wrong:
+  # the pattern that skips OTHER arms' directories in the shared pass also
+  # matched this arm's own files in the arm pass, so every one was skipped.
+  stage_file() {
+    case "$1" in
       *.zip)
         command -v unzip >/dev/null 2>&1 \
           || die "materials include a zip but unzip is not installed"
-        # -x __MACOSX/*: macOS resource forks are not experimental input
-        unzip -q -o -j "$f" -x '__MACOSX/*' '*/.DS_Store' -d "$RUN_DIR/materials" \
-          || die "could not extract materials archive: $f"
+        unzip -q -o -j "$1" -x '__MACOSX/*' -d "$RUN_DIR/materials" 2>/dev/null \
+          || die "could not extract materials archive: $1"
         ;;
-      *) cp -R "$f" "$RUN_DIR/materials/" ;;
+      *) cp -R "$1" "$RUN_DIR/materials/" ;;
     esac
+  }
+
+  # shared: everything beside the prompt, except any for-<alias> directory
+  for f in "$MATERIALS_SRC"/*; do
+    [ -e "$f" ] || continue
+    [ "$f" = "$PROMPT_FILE" ] && continue
+    case "$(basename "$f")" in for-*) continue ;; esac
+    stage_file "$f"
   done
+
+  # arm-specific: everything inside this arm's own directory
+  if [ -n "$MATERIALS_ARM_DIR" ]; then
+    for f in "$MATERIALS_ARM_DIR"/*; do
+      [ -e "$f" ] || continue
+      stage_file "$f"
+    done
+  fi
+
   # drop any resource-fork strays the archive smuggled through
   find "$RUN_DIR/materials" -name '._*' -delete 2>/dev/null || true
   MATERIALS_COUNT="$(find "$RUN_DIR/materials" -type f | wc -l | tr -d ' ')"
