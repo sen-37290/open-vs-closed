@@ -166,6 +166,8 @@ ensure_python() {
     return 0
   fi
 
+  # uv installs to ~/.local/bin, which a non-login ssh shell may not have on PATH
+  [ -x "$HOME/.local/bin/uv" ] && case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) PATH="$HOME/.local/bin:$PATH"; export PATH ;; esac
   if command -v uv >/dev/null 2>&1; then
     local uvpy
     uvpy="$(cd "$EXP_ROOT" && uv python find '>=3.11' 2>/dev/null | head -1)"

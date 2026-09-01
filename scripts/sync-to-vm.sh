@@ -28,14 +28,32 @@ REMOTE_DIR="~/open-vs-closed"
 
 command -v gcloud >/dev/null 2>&1 || { echo "gcloud CLI not found"; exit 127; }
 
-echo "=== 1/3 pipeline (git-tracked files) ==="
-gcloud compute ssh "$VM" --zone "$ZONE" --command "mkdir -p $REMOTE_DIR" -- -q
-git -C "$EXP_ROOT" ls-files -z | rsync -az --files-from=- --from0 \
-  -e "gcloud compute ssh $VM --zone $ZONE --" \
-  "$EXP_ROOT/" ":$REMOTE_DIR/" 2>/dev/null \
-  || { echo "  (rsync-over-gcloud unavailable; falling back to tar)"; \
-       git -C "$EXP_ROOT" archive --format=tar HEAD \
-       | gcloud compute ssh "$VM" --zone "$ZONE" --command "tar -x -C $REMOTE_DIR" -- -q; }
+REPO_URL="${REPO_URL:-$(git -C "$EXP_ROOT" remote get-url origin 2>/dev/null)}"
+
+echo "=== 1/3 pipeline ==="
+# Prefer a real git clone: it gives the VM provenance (commit SHA in metadata),
+# working gitignore checks, and a one-command update path. Fall back to a tar
+# of the tracked tree when the remote is unreachable from the VM.
+if [ -n "$REPO_URL" ] && gcloud compute ssh "$VM" --zone "$ZONE" -q --command "
+     set -e
+     if [ -d $REMOTE_DIR/.git ]; then
+       cd $REMOTE_DIR && git fetch --quiet origin && git reset --hard --quiet origin/main && echo '  updated existing clone'
+     else
+       mkdir -p $REMOTE_DIR
+       git clone --quiet '$REPO_URL' /tmp/ovc-clone
+       mv /tmp/ovc-clone/.git $REMOTE_DIR/.git
+       rm -rf /tmp/ovc-clone
+       cd $REMOTE_DIR && git checkout --quiet -- . && echo '  cloned'
+     fi
+     cd $REMOTE_DIR && echo \"  commit: \$(git rev-parse --short HEAD)\"
+   " 2>/dev/null; then
+  :
+else
+  echo "  (git remote unreachable from the VM; shipping a tar of the tracked tree)"
+  gcloud compute ssh "$VM" --zone "$ZONE" -q --command "mkdir -p $REMOTE_DIR"
+  git -C "$EXP_ROOT" archive --format=tar HEAD | gzip \
+    | gcloud compute ssh "$VM" --zone "$ZONE" -q --command "tar -xz -C $REMOTE_DIR"
+fi
 
 echo "=== 2/3 secret (models.env, never committed) ==="
 gcloud compute scp "$EXP_ROOT/experiment-config/models.env" \

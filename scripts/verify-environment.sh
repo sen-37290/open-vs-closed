@@ -38,8 +38,13 @@ done
 [ -n "$BROWSER" ] && pass "Chromium-family browser for the directional-controls gate: $(basename "$BROWSER")" \
                   || warn "no Chromium-family browser found; prompts with directional controls cannot pass the browser gate"
 
-if command -v caffeinate >/dev/null 2>&1; then pass "keep-awake available: caffeinate"
-else fail "no keep-awake mechanism; a host sleep mid-run corrupts wall-clock and liveness data"; fi
+if command -v caffeinate >/dev/null 2>&1; then
+  pass "keep-awake available: caffeinate"
+elif [ "$(uname -s)" = "Linux" ]; then
+  pass "keep-awake not needed on Linux (a server does not sleep mid-run)"
+else
+  fail "no keep-awake mechanism; a host sleep mid-run corrupts wall-clock and liveness data"
+fi
 
 echo; echo "-- uv + python for skill helpers (>= 3.11) -----------------------"
 if command -v uv >/dev/null 2>&1; then
@@ -136,6 +141,17 @@ kilo serve --help >/dev/null 2>&1 \
   && pass "background execution with observable status (session store + filesystem progress, used by monitor-liveness.sh)" \
   || fail "kilo serve unavailable; liveness monitoring cannot observe run status"
 
+echo; echo "-- run sandbox ---------------------------------------------------"
+if command -v docker >/dev/null 2>&1; then
+  if docker image inspect "${SANDBOX_IMAGE:-ovc-sandbox:7.5.6}" >/dev/null 2>&1; then
+    pass "sandbox image present (${SANDBOX_IMAGE:-ovc-sandbox:7.5.6}); runs are container-isolated"
+  else
+    warn "docker present but the sandbox image is missing; runs would fall back to UNSANDBOXED. Build it: ./scripts/build-sandbox.sh"
+  fi
+else
+  warn "docker not installed; runs would be unsandboxed and able to read sibling runs and experiment docs"
+fi
+
 echo; echo "-- config isolation ----------------------------------------------"
 GLOBAL_CFG="$HOME/.config/kilo/kilo.jsonc"
 if [ -f "$GLOBAL_CFG" ] && [ "$(tr -d '[:space:]' < "$GLOBAL_CFG" | sed 's/{"\$schema":"[^"]*"}//')" != "" ]; then
@@ -154,17 +170,36 @@ else
   fail "OPENROUTER_API_KEY is empty — fill it in experiment-config/models.env (that file exists and is gitignored)"
 fi
 
+# Fetch the model list once. The first `kilo models` call may populate a cache
+# and return a short list, which previously caused a spurious "not visible"
+# failure for whichever model happened to be checked first.
+MODEL_LIST_CACHE=""
+load_model_list() {
+  local provider="$1" n=0 tries=0
+  while [ "$tries" -lt 3 ]; do
+    MODEL_LIST_CACHE="$(kilo models "$provider" 2>/dev/null | grep -v '^INFO')"
+    n="$(printf '%s\n' "$MODEL_LIST_CACHE" | grep -c .)"
+    [ "$n" -gt 10 ] && return 0
+    tries=$((tries + 1)); sleep 3
+  done
+  return 1
+}
 check_model() {
-  local label="$1" full="$2" provider="${2%%/*}"
-  if kilo models "$provider" 2>/dev/null | grep -v '^INFO' | grep -Fxq "$full"; then
+  local label="$1" full="$2"
+  if printf '%s\n' "$MODEL_LIST_CACHE" | grep -Fxq "$full"; then
     pass "$label visible to harness: $full"
   else
     fail "$label NOT visible to harness: $full"
   fi
 }
 if [ -n "${OPENROUTER_API_KEY:-}" ]; then
-  check_model "GLM arm"   "$(resolve_model glm-5.3)"
-  check_model "Fable arm" "$(resolve_model fable-5)"
+  if load_model_list "${GLM_PROVIDER:-openrouter}"; then
+    pass "harness model list retrieved ($(printf '%s\n' "$MODEL_LIST_CACHE" | grep -c .) models)"
+    check_model "GLM arm"   "$(resolve_model glm-5.3)"
+    check_model "Fable arm" "$(resolve_model fable-5)"
+  else
+    fail "could not retrieve the provider model list after 3 attempts"
+  fi
 fi
 
 # These are leftovers from an earlier design and are now ignored entirely.
@@ -187,7 +222,9 @@ git -C "$EXP_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   && pass "experiment directory is a git repository ($(git -C "$EXP_ROOT" rev-parse --short HEAD 2>/dev/null || echo 'no commits yet'))" \
   || warn "not a git repository; provenance will not be recorded"
 
-if git -C "$EXP_ROOT" check-ignore -q experiment-config/models.env 2>/dev/null; then
+if ! git -C "$EXP_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  warn "not a git deployment; skipping gitignore checks (ensure models.env is never copied into a repo)"
+elif git -C "$EXP_ROOT" check-ignore -q experiment-config/models.env 2>/dev/null; then
   pass "experiment-config/models.env is gitignored (secrets stay out of commits)"
 else
   fail "experiment-config/models.env is NOT gitignored"
