@@ -162,8 +162,19 @@ MATERIALS_COUNT=0
 MATERIALS_SHA=""
 if [ -n "$MATERIALS_SRC" ]; then
   mkdir -p "$RUN_DIR/materials"
-  for f in "$MATERIALS_SRC"/* ${MATERIALS_ARM_DIR:+"$MATERIALS_ARM_DIR"/*}; do
-    [ -e "$f" ] || continue
+  # Two passes rather than one combined glob: `${VAR:+"$VAR"/*}` does not undergo
+  # pathname expansion, so the arm-specific directory was silently skipped and
+  # both arms received only the shared files.
+  MATERIAL_PATHS=""
+  for f in "$MATERIALS_SRC"/*; do [ -e "$f" ] && MATERIAL_PATHS="$MATERIAL_PATHS
+$f"; done
+  if [ -n "$MATERIALS_ARM_DIR" ]; then
+    for f in "$MATERIALS_ARM_DIR"/*; do [ -e "$f" ] && MATERIAL_PATHS="$MATERIAL_PATHS
+$f"; done
+  fi
+
+  printf '%s\n' "$MATERIAL_PATHS" | while IFS= read -r f; do
+    [ -n "$f" ] && [ -e "$f" ] || continue
     case "$f" in
       "$PROMPT_FILE") continue ;;                      # the sealed prompt itself
       "$MATERIALS_SRC"/for-*) continue ;;              # another arm's materials
