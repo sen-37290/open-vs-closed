@@ -287,11 +287,11 @@ if [ "$MATERIALS_COUNT" -gt 0 ]; then
     echo "Copy any asset you use into your built artifact; never link to a path"
     echo "outside \`artifact/\`, and never fetch an external replacement."
     echo
-    "$ONESHOT_WEBSITES_PYTHON" -c '
-import json,sys
-d=json.load(open(sys.argv[1]))
-for e in d["files"]:
-    print(f"- materials/{e[\"path\"]}  ({e[\"bytes\"]:,} bytes)")' "$RUN_DIR/materials-manifest.json"
+    "$ONESHOT_WEBSITES_PYTHON" - "$RUN_DIR/materials-manifest.json" <<'PYLIST'
+import json, sys
+for e in json.load(open(sys.argv[1]))["files"]:
+    print("- materials/%s  (%s bytes)" % (e["path"], format(e["bytes"], ",")))
+PYLIST
   } > "$MATERIALS_FILE"
 else
   echo "NOT_APPLICABLE: this run supplies no materials beyond the prompt." > "$MATERIALS_FILE"
