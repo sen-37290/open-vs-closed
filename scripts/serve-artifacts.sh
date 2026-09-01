@@ -34,8 +34,11 @@ for d in "$EXP_ROOT"/runs/*/; do
   title="$(sed -n 's/.*<title>\([^<]*\)<\/title>.*/\1/p' "$d/artifact/index.html" 2>/dev/null | head -1)"
 
   # already serving on this port? leave it be.
+  # Fully detach: setsid plus closed stdin, or an ssh session that starts these
+  # servers never returns because it waits on the inherited descriptors.
   if ! curl -sf -m 1 "http://$BIND:$port/index.html" >/dev/null 2>&1; then
-    ( cd "$d/artifact" && nohup "$PY" -m http.server "$port" --bind "$BIND" >/dev/null 2>&1 & ) 
+    ( cd "$d/artifact" && setsid "$PY" -m http.server "$port" --bind "$BIND" \
+        >/dev/null 2>&1 < /dev/null & ) >/dev/null 2>&1
   fi
   printf '%-6s %-11s %-46s %s\n' "$port" "$status" "${short:0:46}" "${title:0:44}"
   port=$((port + 1))

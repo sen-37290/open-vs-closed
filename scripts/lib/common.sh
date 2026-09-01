@@ -44,6 +44,8 @@ load_config() {
   : "${FABLE_PROVIDER:=openrouter}"
   : "${GLM_MODEL:=z-ai/glm-5.3}"
   : "${FABLE_MODEL:=anthropic/claude-fable-5}"
+  : "${KIMI_PROVIDER:=openrouter}"
+  : "${KIMI_MODEL:=moonshotai/kimi-k3}"
   : "${RUN_TIMEOUT_SECONDS:=14400}"
   : "${MAX_PARALLEL:=2}"
   : "${HARNESS_NAME:=kilo-cli}"
@@ -55,8 +57,9 @@ resolve_model() {
   case "$1" in
     glm-5.3|glm|GLM)     printf '%s/%s\n' "$GLM_PROVIDER" "$GLM_MODEL" ;;
     fable-5|fable|FABLE) printf '%s/%s\n' "$FABLE_PROVIDER" "$FABLE_MODEL" ;;
+    kimi-k3|kimi|KIMI)   printf '%s/%s\n' "$KIMI_PROVIDER" "$KIMI_MODEL" ;;
     */*/*|*/*)           printf '%s\n' "$1" ;;
-    *) die "unknown model alias '$1' (expected: glm-5.3, fable-5, or an explicit provider/model id)" ;;
+    *) die "unknown model alias '$1' (expected: glm-5.3, fable-5, kimi-k3, or an explicit provider/model id)" ;;
   esac
 }
 
