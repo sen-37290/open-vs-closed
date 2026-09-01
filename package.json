@@ -1,0 +1,21 @@
+{
+  "name": "open-vs-closed",
+  "version": "1.0.0",
+  "description": "A reproducible A/B harness for comparing **GLM-5.3** and **Fable 5** on one-prompt autonomous website generation, using the [`jpcaparas/skills`](https://github.com/jpcaparas/skills) `oneshot-websites` protocol.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sen-37290/open-vs-closed.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sen-37290/open-vs-closed/issues"
+  },
+  "homepage": "https://github.com/sen-37290/open-vs-closed#readme"
+}

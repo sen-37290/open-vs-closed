@@ -89,7 +89,7 @@ open-vs-closed/
 │   ├── normalize-records.py        mechanical record-shape fixes, logged
 │   ├── assemble_metadata.py        derives metadata.json from the real records
 │   └── lib/common.sh               shared helpers, portable timeout
-├── runs/                           the experimental record — NOT gitignored
+├── runs/                           the experimental record — LOCAL ONLY, gitignored
 └── metadata/                       cross-run pair and batch records
 ```
 

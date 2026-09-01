@@ -187,9 +187,14 @@ else
   fail "experiment-config/models.env is NOT gitignored"
 fi
 if git -C "$EXP_ROOT" check-ignore -q runs 2>/dev/null; then
-  fail "runs/ is gitignored, but it is the experimental record and must be committed"
+  pass "runs/ is local-only and gitignored (the record is preserved on disk, not in git)"
 else
-  pass "runs/ is tracked (logs, prompts, artifacts and failed-run .tmp/ are preserved)"
+  warn "runs/ is NOT gitignored; generated sites and screenshots will bloat the repository"
+fi
+if [ -d "$EXP_ROOT/runs" ] && [ -w "$EXP_ROOT/runs" ]; then
+  pass "runs/ exists and is writable ($(find "$EXP_ROOT/runs" -maxdepth 1 -type d 2>/dev/null | tail +2 | wc -l | tr -d ' ') runs preserved locally)"
+else
+  fail "runs/ is missing or not writable"
 fi
 
 echo; echo "=================================================================="

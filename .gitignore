@@ -31,18 +31,24 @@ Thumbs.db
 *.tmp.d/
 
 # ---------------------------------------------------------------------------
-# DELIBERATELY NOT IGNORED
+# runs/ is LOCAL-ONLY and deliberately untracked.
 #
-#   runs/        the experimental record: logs, sealed prompts, artifacts,
-#                metadata, provenance receipts, and the retained .tmp/ of
-#                failed runs. Ignoring it would destroy the experiment.
-#   metadata/    cross-run pair and batch records.
-#   .kilo/       the pinned skill and the pinned harness configuration.
+# It holds the experimental record: sealed prompts, built artifacts, workspace
+# source, gauntlet evidence, logs, metadata, provenance receipts and the .tmp/
+# retained for failed runs. That record still matters and is still produced and
+# preserved on disk exactly as before -- it is simply not repository content.
+# Git is a poor store for hundreds of megabytes of generated sites and
+# screenshots, and this repository is the HARNESS, not the results.
 #
-# Node/Python caches produced INSIDE a run's workspace/ are part of that run's
-# record and are intentionally left alone by the patterns above, which are
-# anchored to the repository root.
+# Back results up deliberately (copy, archive, or object storage) rather than
+# relying on git to hold them.
+#
+# STILL TRACKED:
+#   metadata/    small cross-run pair and batch records
+#   .kilo/       the pinned skill and the pinned harness configuration
+#   prompts/     the sealed benchmark prompts
 # ---------------------------------------------------------------------------
+/runs/
 
 # ---------------------------------------------------------------------------
 # Inside run directories: exclude reconstructible dependency trees and caches,

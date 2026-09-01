@@ -283,7 +283,26 @@ summary per `run-all.sh` invocation.
 
 ---
 
-## 8. Secrets
+## 8. Where the record lives
+
+`runs/` is **local-only and gitignored**. Every run still produces and preserves
+the full record on disk exactly as specified — sealed prompt, artifact,
+workspace source, gauntlet evidence, logs, metadata, provenance receipts, and
+the `.tmp/` retained for every failed run. None of that changes.
+
+What changed is that the record is not repository content. This repository is
+the harness; the results are data. A single run reached 23 MB, mostly gauntlet
+screenshots, and git is a poor store for that.
+
+Because the record is not backed up by pushing, **back it up deliberately** — an
+archive or a copy off the machine — before deleting or re-running anything you
+care about. A lost `runs/` directory is a lost experiment.
+
+`metadata/` (small cross-run pair and batch records) and `prompts/` (the sealed
+prompts, with their digests) remain tracked, so what was asked and which runs
+were paired stays in version control even though the outputs do not.
+
+## 9. Secrets
 
 Real credentials live only in `experiment-config/models.env`, which is
 gitignored. `models.example.env` contains placeholders only. No script echoes a
