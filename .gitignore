@@ -81,3 +81,6 @@ runs/**/.turbo/
 runs/**/__pycache__/
 runs/**/.venv/
 runs/**/venv/
+
+# derived from the kilo session store; large, regenerate with scripts/export-trajectory.sh
+/trajectories/

@@ -1,0 +1,14 @@
+[2026-09-01T03:03:37Z] prompt sealed: sha256=3580e5b2c8f002533567eeb1d7ec8f1beb5492d198a7853f706cbf188eddf345  file=/Users/friendli/Documents/open-vs-closed/prompts/sf-map.md
+[2026-09-01T03:03:37Z] run reserved: /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-20-03-37-open-vs-closed-glm-5-3-sf-map
+[2026-09-01T03:03:37Z] sealed digest verified
+[2026-09-01T03:03:38Z] launching run: model=openrouter/z-ai/glm-5.3 (single model for every turn at every depth) timeout=14400s
+[2026-09-01T03:06:14Z] coordinator exited: rc=0
+[2026-09-01T03:06:14Z] finalization contract VIOLATED (recorded, not repaired): /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-20-03-37-open-vs-closed-glm-5-3-sf-map/.finalization.json
+[2026-09-01T03:06:14Z] catalogue validate rc=1 (details: /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-20-03-37-open-vs-closed-glm-5-3-sf-map/catalog-validate.txt)
+[2026-09-01T03:06:17Z] status: ERROR  wall_clock=157s  run=/Users/friendli/Documents/open-vs-closed/runs/2026-08-31-20-03-37-open-vs-closed-glm-5-3-sf-map
+
+run_id:   2026-08-31-20-03-37-open-vs-closed-glm-5-3-sf-map
+run_dir:  /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-20-03-37-open-vs-closed-glm-5-3-sf-map
+arm:      glm-5.3 (openrouter/z-ai/glm-5.3)  [single model for the whole run]
+status:   ERROR
+metadata: /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-20-03-37-open-vs-closed-glm-5-3-sf-map/metadata.json

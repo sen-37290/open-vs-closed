@@ -3,8 +3,24 @@
   "promptFile": "/Users/friendli/Documents/open-vs-closed/prompts/interactive-design.md",
   "promptSha256": "4b2c38d2bed69fad466bafe3bbf7a4c7b14bcc559a7991a4abe27300ffeff5da",
   "startedAt": "2026-08-31T23:45:42Z",
-  "arms": ["glm-5.3", "fable-5"],
+  "arms": [
+    "glm-5.3",
+    "fable-5"
+  ],
   "design": "one model per run: each arm's model runs the entire system, including any subagents it chooses to spawn",
   "timeoutSeconds": 14400,
-  "retryPolicy": "none"
+  "retryPolicy": "none",
+  "finishedAt": "2026-09-01T02:10:59Z",
+  "results": {
+    "glm-5.3": {
+      "runId": "2026-08-31-16-45-44-open-vs-closed-glm-5-3-interactive-design",
+      "status": "OK",
+      "exitCode": 0
+    },
+    "fable-5": {
+      "runId": "2026-08-31-16-45-44-open-vs-closed-fable-5-interactive-design",
+      "status": "OK",
+      "exitCode": 0
+    }
+  }
 }

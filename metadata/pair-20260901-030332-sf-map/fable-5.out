@@ -1,0 +1,4 @@
+[2026-09-01T03:03:37Z] prompt sealed: sha256=3580e5b2c8f002533567eeb1d7ec8f1beb5492d198a7853f706cbf188eddf345  file=/Users/friendli/Documents/open-vs-closed/prompts/sf-map.md
+[2026-09-01T03:03:37Z] run reserved: /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-20-03-37-open-vs-closed-fable-5-sf-map
+[2026-09-01T03:03:37Z] sealed digest verified
+[2026-09-01T03:03:38Z] launching run: model=openrouter/anthropic/claude-fable-5 (single model for every turn at every depth) timeout=14400s

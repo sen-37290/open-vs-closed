@@ -17,6 +17,22 @@ available in this run and none is needed.
 The paragraphs below are constraints from the operator. They are authoritative
 and override any conflicting default in the skill.
 
+## Environment fact: background subagents do not work here
+
+This run executes as a single non-interactive session. When your turn ends, the
+process exits and anything still running is terminated with it.
+
+The `task` tool accepts a `background: true` parameter. **Do not use it.** A
+backgrounded task returns immediately and instructs you to end your response;
+in this environment that kills the subagent before it can do any work and the
+run fails with nothing built. There is no persistent session to receive a
+completion callback.
+
+Dispatch subagents normally, without `background`, so the call waits for the
+result. This is a limitation of how this environment invokes the harness, not a
+statement about how you should organise your work — how much you delegate, and
+to whom, remains entirely your decision.
+
 ## The run is already reserved — do not reserve another
 
 `scripts/prepare_run.py` has ALREADY been executed by the operator's harness.

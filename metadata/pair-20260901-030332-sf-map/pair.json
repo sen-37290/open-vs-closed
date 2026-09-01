@@ -1,0 +1,10 @@
+{
+  "pairId": "pair-20260901-030332-sf-map",
+  "promptFile": "/Users/friendli/Documents/open-vs-closed/prompts/sf-map.md",
+  "promptSha256": "3580e5b2c8f002533567eeb1d7ec8f1beb5492d198a7853f706cbf188eddf345",
+  "startedAt": "2026-09-01T03:03:32Z",
+  "arms": ["glm-5.3", "fable-5"],
+  "design": "one model per run: each arm's model runs the entire system, including any subagents it chooses to spawn",
+  "timeoutSeconds": 14400,
+  "retryPolicy": "none"
+}

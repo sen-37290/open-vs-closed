@@ -38,6 +38,24 @@ This is enforced mechanically, not by convention:
   whether any unexpected model appeared. A contaminated run is detectable after
   the fact rather than assumed clean.
 
+### Known harness limitation: background subagents
+
+`kilo run` is single-shot and non-interactive. Kilo's `task` tool accepts
+`background: true`, which returns immediately and instructs the model to end its
+response; the process then exits and kills the backgrounded subagent. The run
+fails with nothing built.
+
+This is a property of the environment, not of any model. It is disclosed to both
+arms identically in the run brief, in the same category as "no human is
+available during this run". Without that disclosure the experiment would partly
+be measuring which model happens to avoid an environment-specific trap, rather
+than how well it builds a website.
+
+Observed before the fix: every GLM run that passed `background: true` failed
+(2/2), every run that did not, succeeded (2/2); Fable never used the parameter
+in ten dispatches. Runs that failed this way are environment failures and are
+marked with `OPERATOR-INVALIDATION.md` rather than counted as model failures.
+
 ### Harness capability boundary
 
 Verified empirically before this protocol was accepted (see `README.md`):

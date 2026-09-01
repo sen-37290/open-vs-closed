@@ -3,3 +3,14 @@
 [2026-08-31T23:45:44Z] sealed digest verified
 [2026-08-31T23:45:45Z] directional-control gate REQUIRED for this prompt
 [2026-08-31T23:45:45Z] launching run: model=openrouter/z-ai/glm-5.3 (single model for every turn at every depth) timeout=14400s
+[2026-09-01T02:10:53Z] coordinator exited: rc=0
+[2026-09-01T02:10:53Z] running directional-control browser gate
+[2026-09-01T02:10:56Z] directional gate PASSED
+[2026-09-01T02:10:56Z] catalogue validate rc=1 (details: /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-16-45-44-open-vs-closed-glm-5-3-interactive-design/catalog-validate.txt)
+[2026-09-01T02:10:59Z] status: OK  wall_clock=8713s  run=/Users/friendli/Documents/open-vs-closed/runs/2026-08-31-16-45-44-open-vs-closed-glm-5-3-interactive-design
+
+run_id:   2026-08-31-16-45-44-open-vs-closed-glm-5-3-interactive-design
+run_dir:  /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-16-45-44-open-vs-closed-glm-5-3-interactive-design
+arm:      glm-5.3 (openrouter/z-ai/glm-5.3)  [single model for the whole run]
+status:   OK
+metadata: /Users/friendli/Documents/open-vs-closed/runs/2026-08-31-16-45-44-open-vs-closed-glm-5-3-interactive-design/metadata.json
