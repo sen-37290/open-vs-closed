@@ -50,7 +50,19 @@ load_config() {
   # quantizations, so two runs of the "same" model can differ materially.
   # Pinning the upstream makes a run reproducible. Empty means "let OpenRouter
   # choose", which is the current behaviour for GLM and Fable.
-  : "${KIMI_UPSTREAM:=moonshotai}"
+  #
+  # kimi-k3 pins to fireworks/fast on measured latency, not preference:
+  #                    ~30k ctx   ~100k ctx
+  #   fireworks/fast      2.3s       4.8s   <- chosen
+  #   together            2.5s       3.7s
+  #   fireworks/us        3.1s       4.4s
+  #   fireworks (bare)    error      3.3s   <- flaky, avoid
+  #   moonshotai         13.6s      22.2s   <- ~5x slower, stalls
+  # Three runs pinned to moonshotai all died with OpenRouter's "Upstream idle
+  # timeout exceeded" after the model had already done real work. Pinning was
+  # correct; picking the first-party provider by reputation rather than by
+  # measurement was not.
+  : "${KIMI_UPSTREAM:=fireworks/fast}"
   : "${GLM_UPSTREAM:=}"
   : "${FABLE_UPSTREAM:=}"
   : "${RUN_TIMEOUT_SECONDS:=14400}"
