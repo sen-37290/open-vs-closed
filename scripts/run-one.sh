@@ -30,7 +30,9 @@ load_config
 ensure_python || die "no Python >= 3.11 found for the oneshot-websites helpers; set ONESHOT_WEBSITES_PYTHON"
 
 command -v kilo >/dev/null 2>&1 || die "kilo CLI not found on PATH"
-command -v caffeinate >/dev/null 2>&1 || warn "caffeinate not found; a host sleep mid-run will corrupt wall-clock measurement"
+if ! command -v caffeinate >/dev/null 2>&1 && [ "$(uname -s)" != "Linux" ]; then
+  warn "caffeinate not found; a host sleep mid-run will corrupt wall-clock measurement"
+fi
 
 case "$PROMPT_FILE_IN" in
   /*) PROMPT_FILE="$PROMPT_FILE_IN" ;;
