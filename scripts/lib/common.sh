@@ -61,11 +61,26 @@ resolve_model() {
 }
 
 # Confirm the harness can actually see the model. Never guesses.
+#
+# Retries deliberately: the first `kilo models` call may populate a cache and
+# return a short list, and concurrent launches can race each other. A single
+# attempt once reported a perfectly available model as missing and aborted an
+# arm, which would silently have turned a paired comparison into a single-arm
+# run. Only a list that looks complete counts as evidence of absence.
 assert_model_visible() {
-  local full="$1" provider
+  local full="$1" provider list n tries=0
   provider="${full%%/*}"
-  kilo models "$provider" 2>/dev/null | grep -v '^INFO' | grep -Fxq "$full" \
-    || die "model '$full' is not visible to the kilo harness (checked: kilo models $provider). Refusing to run a comparison against a model the harness cannot address."
+  while [ "$tries" -lt 4 ]; do
+    list="$(kilo models "$provider" 2>/dev/null | grep -v '^INFO')"
+    n="$(printf '%s\n' "$list" | grep -c . | tr -d ' \n')"
+    if [ "${n:-0}" -gt 10 ]; then
+      printf '%s\n' "$list" | grep -Fxq "$full" && return 0
+      die "model '$full' is not visible to the kilo harness (provider list had $n models). Refusing to run a comparison against a model the harness cannot address."
+    fi
+    tries=$((tries + 1))
+    sleep 5
+  done
+  die "could not retrieve the '$provider' model list after 4 attempts; refusing to dispatch without confirming the model is addressable"
 }
 
 # --- prompt sealing ---------------------------------------------------------
