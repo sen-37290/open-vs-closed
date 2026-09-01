@@ -108,7 +108,13 @@ file_sha256() {
 TIMEOUT_HIT=0
 run_with_timeout() {
   local secs="$1"; shift
-  local flag; flag="$(mktemp -t ovc-timeout)"; rm -f "$flag"
+  # GNU mktemp requires XXXXXX in the template; BSD does not. Without this the
+  # call failed on Linux, the flag file was never created, and a run killed by
+  # the wall-clock watchdog was NOT recorded as a timeout.
+  local flag
+  flag="$(mktemp -t ovc-timeout.XXXXXX 2>/dev/null || mktemp "${TMPDIR:-/tmp}/ovc-timeout.XXXXXX")"
+  [ -n "$flag" ] || die "cannot create a timeout flag file; refusing to run without timeout detection"
+  rm -f "$flag"
 
   set -m
   "$@" &

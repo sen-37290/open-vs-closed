@@ -49,15 +49,18 @@ detect_total_mem_gb() {
 detect_cpus() { command -v nproc >/dev/null 2>&1 && nproc || sysctl -n hw.ncpu 2>/dev/null || echo 2; }
 
 if [ -z "${SANDBOX_MEMORY:-}" ] || [ -z "${SANDBOX_CPUS:-}" ]; then
-  _inflight="$(docker ps --filter 'name=ovc-' --format '{{.Names}}' 2>/dev/null | grep -c . || echo 0)"
+  # NB: `grep -c` prints 0 AND exits 1 when there is no match, so `|| echo 0`
+  # would emit "0\n0" and break the arithmetic below. Count with wc instead.
+  _inflight="$(docker ps --filter 'name=ovc-' --format '{{.Names}}' 2>/dev/null | wc -l | tr -d ' \n')"
+  [ -z "$_inflight" ] && _inflight=0
   _slots=$(( _inflight + 1 ))
   _totmem="$(detect_total_mem_gb)"; _totcpu="$(detect_cpus)"
   # leave ~20% of RAM for the host and the harness itself
   _mem=$(( (_totmem * 80 / 100) / _slots )); [ "$_mem" -lt 2 ] && _mem=2
   _cpu=$(( _totcpu / _slots )); [ "$_cpu" -lt 1 ] && _cpu=1
 fi
-MEM="${SANDBOX_MEMORY:-${_mem}g}"
-CPUS="${SANDBOX_CPUS:-$_cpu}"
+MEM="${SANDBOX_MEMORY:-${_mem:-4}g}"
+CPUS="${SANDBOX_CPUS:-${_cpu:-2}}"
 PIDS="${SANDBOX_PIDS:-2048}"
 echo "sandbox: mem=$MEM cpus=$CPUS (host ${_totmem:-?}GB/${_totcpu:-?}cpu, ${_inflight:-0} run(s) already in flight)" >&2
 
