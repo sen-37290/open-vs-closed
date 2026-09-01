@@ -33,36 +33,31 @@ docker image inspect "$IMAGE" >/dev/null 2>&1 || {
 # Resource caps keep one run from starving its sibling on a shared VM. These
 # are host-capacity limits, not model budgets: they are identical for both arms
 # and are never disclosed to the model.
-# Defaults adapt to the host and to how many runs are already in flight, so
-# launching a third concurrent run cannot silently overcommit memory and get a
-# container OOM-killed mid-experiment (which would look like a model failure).
-# Explicit SANDBOX_MEMORY / SANDBOX_CPUS always win.
+# Resource caps must be IDENTICAL for every run, or the arms of a pair are not
+# comparable. Sizing them from the number of runs already in flight was wrong:
+# whichever arm launched first got a larger share, so GLM received twice the CPU
+# of Fable on the same prompt.
+#
+# Caps are therefore deterministic: host capacity divided by the maximum
+# concurrency the operator plans for, reserving ~20% of RAM for the host and the
+# harness. Every run gets the same numbers regardless of launch order, and the
+# total can never overcommit.
 detect_total_mem_gb() {
-  if [ -r /proc/meminfo ]; then
-    awk '/^MemTotal:/ {printf "%d", $2/1048576}' /proc/meminfo
-  elif command -v sysctl >/dev/null 2>&1; then
-    sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1073741824}'
-  else
-    echo 8
-  fi
+  if [ -r /proc/meminfo ]; then awk '/^MemTotal:/ {printf "%d", $2/1048576}' /proc/meminfo
+  elif command -v sysctl >/dev/null 2>&1; then sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1073741824}'
+  else echo 8; fi
 }
 detect_cpus() { command -v nproc >/dev/null 2>&1 && nproc || sysctl -n hw.ncpu 2>/dev/null || echo 2; }
 
-if [ -z "${SANDBOX_MEMORY:-}" ] || [ -z "${SANDBOX_CPUS:-}" ]; then
-  # NB: `grep -c` prints 0 AND exits 1 when there is no match, so `|| echo 0`
-  # would emit "0\n0" and break the arithmetic below. Count with wc instead.
-  _inflight="$(docker ps --filter 'name=ovc-' --format '{{.Names}}' 2>/dev/null | wc -l | tr -d ' \n')"
-  [ -z "$_inflight" ] && _inflight=0
-  _slots=$(( _inflight + 1 ))
-  _totmem="$(detect_total_mem_gb)"; _totcpu="$(detect_cpus)"
-  # leave ~20% of RAM for the host and the harness itself
-  _mem=$(( (_totmem * 80 / 100) / _slots )); [ "$_mem" -lt 2 ] && _mem=2
-  _cpu=$(( _totcpu / _slots )); [ "$_cpu" -lt 1 ] && _cpu=1
-fi
-MEM="${SANDBOX_MEMORY:-${_mem:-4}g}"
-CPUS="${SANDBOX_CPUS:-${_cpu:-2}}"
+SANDBOX_MAX_CONCURRENT="${SANDBOX_MAX_CONCURRENT:-3}"
+_totmem="$(detect_total_mem_gb)"; _totcpu="$(detect_cpus)"
+_mem=$(( (_totmem * 80 / 100) / SANDBOX_MAX_CONCURRENT )); [ "$_mem" -lt 2 ] && _mem=2
+_cpu=$(( _totcpu / SANDBOX_MAX_CONCURRENT )); [ "$_cpu" -lt 1 ] && _cpu=1
+
+MEM="${SANDBOX_MEMORY:-${_mem}g}"
+CPUS="${SANDBOX_CPUS:-$_cpu}"
 PIDS="${SANDBOX_PIDS:-2048}"
-echo "sandbox: mem=$MEM cpus=$CPUS (host ${_totmem:-?}GB/${_totcpu:-?}cpu, ${_inflight:-0} run(s) already in flight)" >&2
+echo "sandbox: mem=$MEM cpus=$CPUS (host ${_totmem}GB/${_totcpu}cpu / max ${SANDBOX_MAX_CONCURRENT} concurrent; identical for every run)" >&2
 
 # Run as the HOST user. The run directory is a bind mount owned by the host
 # user, so the container's own uid could not write to it -- every run would fail
