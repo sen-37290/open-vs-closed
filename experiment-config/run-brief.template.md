@@ -54,6 +54,10 @@ a verified continuation of an already-reserved run, exactly as the skill's
 first: read `@@RUN_DIR@@/run.json` and confirm the digest above matches
 `run.json.prompt.sha256`.
 
+## Supplied materials (not part of the task prompt)
+
+@@MATERIALS@@
+
 ## The prompt is SEALED — do not refine it
 
 This is the most important constraint.

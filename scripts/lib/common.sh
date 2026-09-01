@@ -44,6 +44,10 @@ load_config() {
   : "${FABLE_PROVIDER:=openrouter}"
   : "${GLM_MODEL:=z-ai/glm-5.3}"
   : "${FABLE_MODEL:=anthropic/claude-fable-5}"
+  : "${FLASH_PROVIDER:=openrouter}"
+  : "${FLASH_MODEL:=z-ai/glm-5.3-flash}"
+  : "${FLASH_UPSTREAM:=}"
+  : "${FLASH_UPSTREAM_IGNORE:=}"
   : "${KIMI_PROVIDER:=openrouter}"
   : "${KIMI_MODEL:=moonshotai/kimi-k3}"
   # OpenRouter routes an open-weights model to many upstreams at different
@@ -80,8 +84,9 @@ resolve_model() {
     glm-5.3|glm|GLM)     printf '%s/%s\n' "$GLM_PROVIDER" "$GLM_MODEL" ;;
     fable-5|fable|FABLE) printf '%s/%s\n' "$FABLE_PROVIDER" "$FABLE_MODEL" ;;
     kimi-k3|kimi|KIMI)   printf '%s/%s\n' "$KIMI_PROVIDER" "$KIMI_MODEL" ;;
+    glm-5.3-flash|flash) printf '%s/%s\n' "$FLASH_PROVIDER" "$FLASH_MODEL" ;;
     */*/*|*/*)           printf '%s\n' "$1" ;;
-    *) die "unknown model alias '$1' (expected: glm-5.3, fable-5, kimi-k3, or an explicit provider/model id)" ;;
+    *) die "unknown model alias '$1' (expected: glm-5.3, glm-5.3-flash, fable-5, kimi-k3, or an explicit provider/model id)" ;;
   esac
 }
 
@@ -91,6 +96,7 @@ resolve_upstream() {
     glm-5.3|glm|GLM)     printf '%s\n' "${GLM_UPSTREAM:-}" ;;
     fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM:-}" ;;
     kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM:-}" ;;
+    glm-5.3-flash|flash) printf '%s\n' "${FLASH_UPSTREAM:-}" ;;
     *)                   printf '%s\n' "${UPSTREAM:-}" ;;
   esac
 }
@@ -101,6 +107,7 @@ resolve_upstream_ignore() {
     glm-5.3|glm|GLM)     printf '%s\n' "${GLM_UPSTREAM_IGNORE:-}" ;;
     fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM_IGNORE:-}" ;;
     kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM_IGNORE:-}" ;;
+    glm-5.3-flash|flash) printf '%s\n' "${FLASH_UPSTREAM_IGNORE:-}" ;;
     *)                   printf '%s\n' "${UPSTREAM_IGNORE:-}" ;;
   esac
 }

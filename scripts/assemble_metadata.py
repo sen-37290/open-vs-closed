@@ -99,6 +99,8 @@ def main() -> int:
         ap.add_argument(f"--{flag}", required=True)
     ap.add_argument("--upstream", default="")
     ap.add_argument("--upstream-ignore", default="")
+    ap.add_argument("--materials-sha", default="")
+    ap.add_argument("--materials-count", default="0")
     a = ap.parse_args()
 
     run_dir = pathlib.Path(a.run_dir)
@@ -156,6 +158,10 @@ def main() -> int:
             "sealedPath": str(sealed_prompt.relative_to(run_dir)) if sealed_prompt.exists() else None,
             "sealedSha256": sealed_hash,
             "sealIntact": (sealed_hash == a.prompt_hash) if sealed_hash else False,
+            "materialsCount": int(a.materials_count or 0),
+            "materialsCombinedSha256": a.materials_sha or None,
+            "materialsNote": ("binary inputs staged into materials/; the combined digest must match "
+                              "across arms for the comparison to be valid"),
         },
         # ---- timing ----
         "timing": {

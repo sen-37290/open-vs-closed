@@ -57,6 +57,22 @@ EXPERIMENT_LABEL="${RUN_LABEL:-$EXPERIMENT_NAME-$MODEL_ALIAS-$(basename "$PROMPT
 PROMPT_SHA="$(prompt_digest "$PROMPT_FILE")" || die "prompt failed the strict UTF-8 seal check"
 log "prompt sealed: sha256=$PROMPT_SHA  file=$PROMPT_FILE"
 
+# ------------------------------------------------ 2b. locate prompt materials
+# Convention: a prompt may live in its own directory alongside binary inputs
+# (screenshots, logos, data files). Every sibling of the prompt file, plus the
+# contents of any sibling .zip, becomes that run's materials.
+#
+# Materials are NOT part of the sealed prompt: PROMPT.md stays exactly the text
+# the operator wrote. They are staged into the run directory and described to
+# the model through the operational brief, so the sealed bytes remain identical
+# across arms while every arm still receives byte-identical inputs -- which the
+# materials manifest proves.
+PROMPT_DIR="$(cd "$(dirname "$PROMPT_FILE")" && pwd)"
+MATERIALS_SRC=""
+if [ "$PROMPT_DIR" != "$EXP_ROOT/prompts" ]; then
+  MATERIALS_SRC="$PROMPT_DIR"
+fi
+
 # ------------------------------------------------------------- 3. reserve run
 mkdir -p "$RUNS_ROOT" "$METADATA_ROOT"
 PREPARE_JSON="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/prepare_run.py" \
@@ -125,6 +141,47 @@ if [ "$SEALED_SHA" != "$PROMPT_SHA" ]; then
 fi
 log "sealed digest verified"
 
+# ---------------------------------------------------- 4b. stage the materials
+MATERIALS_COUNT=0
+MATERIALS_SHA=""
+if [ -n "$MATERIALS_SRC" ]; then
+  mkdir -p "$RUN_DIR/materials"
+  for f in "$MATERIALS_SRC"/*; do
+    [ -e "$f" ] || continue
+    case "$f" in
+      "$PROMPT_FILE") continue ;;                      # the sealed prompt itself
+      *.zip)
+        command -v unzip >/dev/null 2>&1 \
+          || die "materials include a zip but unzip is not installed"
+        # -x __MACOSX/*: macOS resource forks are not experimental input
+        unzip -q -o -j "$f" -x '__MACOSX/*' '*/.DS_Store' -d "$RUN_DIR/materials" \
+          || die "could not extract materials archive: $f"
+        ;;
+      *) cp -R "$f" "$RUN_DIR/materials/" ;;
+    esac
+  done
+  # drop any resource-fork strays the archive smuggled through
+  find "$RUN_DIR/materials" -name '._*' -delete 2>/dev/null || true
+  MATERIALS_COUNT="$(find "$RUN_DIR/materials" -type f | wc -l | tr -d ' ')"
+
+  # Manifest: proves every arm received byte-identical inputs.
+  "$ONESHOT_WEBSITES_PYTHON" - "$RUN_DIR" > "$RUN_DIR/materials-manifest.json" <<'PY'
+import hashlib, json, pathlib, sys
+run = pathlib.Path(sys.argv[1]); mat = run / "materials"
+entries = []
+for f in sorted(mat.rglob("*")):
+    if f.is_file():
+        b = f.read_bytes()
+        entries.append({"path": str(f.relative_to(mat)), "bytes": len(b),
+                        "sha256": hashlib.sha256(b).hexdigest()})
+combined = hashlib.sha256(
+    "".join(f"{e['path']}:{e['sha256']}" for e in entries).encode()).hexdigest()
+print(json.dumps({"count": len(entries), "combinedSha256": combined, "files": entries}, indent=2))
+PY
+  MATERIALS_SHA="$("$ONESHOT_WEBSITES_PYTHON" -c 'import json,sys;print(json.load(open(sys.argv[1]))["combinedSha256"])' "$RUN_DIR/materials-manifest.json")"
+  log "materials staged: $MATERIALS_COUNT file(s)  combined sha256=$MATERIALS_SHA"
+fi
+
 # -------------------------------------------------------- failure-safe trap
 START_ISO="$(now_iso)"; START_EPOCH="$(epoch)"
 EXIT_CODE=""; TIMEOUT_HIT=0; MONITOR_PID=""
@@ -171,6 +228,8 @@ finalize_metadata() {
     --sandbox "$SANDBOX" \
     --upstream "${RUN_UPSTREAM:-}" \
     --upstream-ignore "${RUN_UPSTREAM_IGNORE:-}" \
+    --materials-sha "${MATERIALS_SHA:-}" \
+    --materials-count "${MATERIALS_COUNT:-0}" \
     --timeout-hit "$TIMEOUT_HIT" \
     --kilo-session-file "$RUN_DIR/.session-id" \
     >/dev/null 2>>"$STDERR_LOG" || warn "metadata assembly reported a problem (see stderr.log)"
@@ -217,6 +276,27 @@ export SKILL_COMMIT SKILL_VERSION HARNESS_VERSION GIT_COMMIT
 BRIEF="$RUN_DIR/.tmp/run-brief.md"
 mkdir -p "$RUN_DIR/.tmp"
 
+MATERIALS_FILE="$RUN_DIR/.tmp/.materials.md"
+if [ "$MATERIALS_COUNT" -gt 0 ]; then
+  {
+    echo "This run supplies $MATERIALS_COUNT input file(s) alongside the prompt."
+    echo "They are in \`materials/\` inside your run directory, listed below."
+    echo
+    echo "Read image files with your \`read\` tool: it returns real image content,"
+    echo "so you can actually look at screenshots rather than guess from filenames."
+    echo "Copy any asset you use into your built artifact; never link to a path"
+    echo "outside \`artifact/\`, and never fetch an external replacement."
+    echo
+    "$ONESHOT_WEBSITES_PYTHON" -c '
+import json,sys
+d=json.load(open(sys.argv[1]))
+for e in d["files"]:
+    print(f"- materials/{e[\"path\"]}  ({e[\"bytes\"]:,} bytes)")' "$RUN_DIR/materials-manifest.json"
+  } > "$MATERIALS_FILE"
+else
+  echo "NOT_APPLICABLE: this run supplies no materials beyond the prompt." > "$MATERIALS_FILE"
+fi
+
 DIRECTIONAL_GUIDANCE_FILE="$RUN_DIR/.tmp/.directional-guidance.md"
 if [ "$DIRECTIONAL_REQUIRED" = "1" ]; then
   log "directional-control gate REQUIRED for this prompt"
@@ -238,11 +318,11 @@ else
   echo "NOT_APPLICABLE: no prepared directional-control browser gate." > "$DIRECTIONAL_GUIDANCE_FILE"
 fi
 "$ONESHOT_WEBSITES_PYTHON" - \
-  "$EXP_ROOT/experiment-config/run-brief.template.md" "$BRIEF" "$DIRECTIONAL_GUIDANCE_FILE" \
+  "$EXP_ROOT/experiment-config/run-brief.template.md" "$BRIEF" "$DIRECTIONAL_GUIDANCE_FILE" "$MATERIALS_FILE" \
   "$MODEL_RUN_DIR" "$RUN_ID" "$RUN_MODEL" "$HARNESS_NAME" \
   "$EXPERIMENT_LABEL" "$PROMPT_SHA" "$MODEL_SKILL_DIR" "$MODEL_PY" "$MODEL_RUNS_ROOT" <<'PY'
 import pathlib, sys
-tpl, out, guidance_file, run_dir, run_id, model, harness, exp, sha, skill, py, runs_root = sys.argv[1:13]
+tpl, out, guidance_file, materials_file, run_dir, run_id, model, harness, exp, sha, skill, py, runs_root = sys.argv[1:14]
 text = pathlib.Path(tpl).read_text(encoding="utf-8")
 for k, v in {
     "@@RUN_DIR@@": run_dir, "@@RUN_ID@@": run_id, "@@RUN_MODEL@@": model,
@@ -250,6 +330,7 @@ for k, v in {
     "@@PROMPT_SHA256@@": sha, "@@SKILL_DIR@@": skill, "@@PY@@": py,
     "@@RUNS_ROOT@@": runs_root,
     "@@DIRECTIONAL_CONTROL_GUIDANCE@@": pathlib.Path(guidance_file).read_text(encoding="utf-8"),
+    "@@MATERIALS@@": pathlib.Path(materials_file).read_text(encoding="utf-8"),
 }.items():
     text = text.replace(k, v)
 assert "@@" not in text, "unsubstituted placeholder remains in coordinator brief"
