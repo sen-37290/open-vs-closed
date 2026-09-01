@@ -87,6 +87,7 @@ def main() -> int:
         "start-time", "end-time", "wall-clock-seconds", "exit-code",
         "harness-name", "harness-version", "skill-commit", "skill-version",
         "git-commit", "timeout-seconds", "timeout-hit", "kilo-session-file",
+        "sandbox",
     ):
         ap.add_argument(f"--{flag}", required=True)
     a = ap.parse_args()
@@ -127,6 +128,10 @@ def main() -> int:
             "oneshotSkillCommit": a.skill_commit,
             "oneshotSkillVersion": a.skill_version,
             "experimentGitCommit": a.git_commit,
+            "sandboxed": a.sandbox == "1",
+            "isolation": ("container: only this run directory and the read-only skill are visible"
+                          if a.sandbox == "1" else
+                          "filesystem: sibling runs and experiment docs are readable (isolation instructed, not enforced)"),
         },
         # ---- prompt provenance: referenced, never duplicated ----
         "prompt": {

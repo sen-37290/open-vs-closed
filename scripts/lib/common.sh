@@ -89,7 +89,18 @@ print(hashlib.sha256(raw).hexdigest())
 PY
 }
 
-file_sha256() { shasum -a 256 "$1" | awk '{print $1}'; }
+# Portable SHA-256. Linux ships sha256sum (coreutils, always present); macOS
+# ships shasum (perl). This sits in the prompt-seal integrity path, so it must
+# never silently produce an empty digest -- it fails loudly instead.
+file_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    die "no sha256 tool found (need sha256sum or shasum); refusing to run without digest verification"
+  fi
+}
 
 # --- portable wall-clock timeout -------------------------------------------
 # macOS ships no timeout(1)/gtimeout(1). This runs "$@" in its own process

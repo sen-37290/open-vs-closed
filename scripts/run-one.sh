@@ -71,6 +71,32 @@ RUN_ID="$(basename "$RUN_DIR")"
 # directional-control browser gate. When it does, the model must be given the
 # transient technical contract, and the gate must be run after an OK handoff --
 # catalogue validation rejects an applicable OK run without passing evidence.
+# Sandbox mode. On by default when docker and the image are both available:
+# the model then sees ONLY its own run directory and the read-only skill, so it
+# cannot reach sibling runs, other prompts, or the files that name both models.
+SANDBOX="${SANDBOX:-auto}"
+if [ "$SANDBOX" = "auto" ]; then
+  if command -v docker >/dev/null 2>&1 \
+     && docker image inspect "${SANDBOX_IMAGE:-ovc-sandbox:7.5.6}" >/dev/null 2>&1; then
+    SANDBOX=1
+  else
+    SANDBOX=0
+  fi
+fi
+if [ "$SANDBOX" = "1" ]; then
+  MODEL_RUN_DIR="/work/run"
+  MODEL_SKILL_DIR="/work/.kilo/skills/oneshot-websites"
+  MODEL_RUNS_ROOT="/work"            # nothing else is mounted there
+  MODEL_PY="/usr/bin/python3"
+  log "sandbox: ENABLED (container-isolated run)"
+else
+  MODEL_RUN_DIR="$RUN_DIR"
+  MODEL_SKILL_DIR="$SKILL_DIR"
+  MODEL_RUNS_ROOT="$RUNS_ROOT"
+  MODEL_PY="$ONESHOT_WEBSITES_PYTHON"
+  warn "sandbox: DISABLED - the run can read sibling runs, other prompts and the experiment docs. Build the image with scripts/build-sandbox.sh."
+fi
+
 DIRECTIONAL_REQUIRED="$("$ONESHOT_WEBSITES_PYTHON" -c 'import json,sys; print("1" if json.loads(sys.argv[1]).get("directionalControlsRequired") else "0")' "$PREPARE_JSON")"
 log "run reserved: $RUN_DIR"
 
@@ -140,6 +166,7 @@ finalize_metadata() {
     --skill-version "${SKILL_VERSION:-unknown}" \
     --git-commit "${GIT_COMMIT:-unknown}" \
     --timeout-seconds "$RUN_TIMEOUT_SECONDS" \
+    --sandbox "$SANDBOX" \
     --timeout-hit "$TIMEOUT_HIT" \
     --kilo-session-file "$RUN_DIR/.session-id" \
     >/dev/null 2>>"$STDERR_LOG" || warn "metadata assembly reported a problem (see stderr.log)"
@@ -208,8 +235,8 @@ else
 fi
 "$ONESHOT_WEBSITES_PYTHON" - \
   "$EXP_ROOT/experiment-config/run-brief.template.md" "$BRIEF" "$DIRECTIONAL_GUIDANCE_FILE" \
-  "$RUN_DIR" "$RUN_ID" "$RUN_MODEL" "$HARNESS_NAME" \
-  "$EXPERIMENT_LABEL" "$PROMPT_SHA" "$SKILL_DIR" "$ONESHOT_WEBSITES_PYTHON" "$RUNS_ROOT" <<'PY'
+  "$MODEL_RUN_DIR" "$RUN_ID" "$RUN_MODEL" "$HARNESS_NAME" \
+  "$EXPERIMENT_LABEL" "$PROMPT_SHA" "$MODEL_SKILL_DIR" "$MODEL_PY" "$MODEL_RUNS_ROOT" <<'PY'
 import pathlib, sys
 tpl, out, guidance_file, run_dir, run_id, model, harness, exp, sha, skill, py, runs_root = sys.argv[1:13]
 text = pathlib.Path(tpl).read_text(encoding="utf-8")
@@ -261,8 +288,14 @@ KEEPAWAKE=""
 command -v caffeinate >/dev/null 2>&1 && KEEPAWAKE="caffeinate -i -m -s"
 
 set +e
+if [ "$SANDBOX" = "1" ]; then
+  LAUNCH="$EXP_ROOT/scripts/sandbox-exec.sh $RUN_DIR --"
+else
+  LAUNCH="$KEEPAWAKE"
+fi
+
 run_with_timeout "$RUN_TIMEOUT_SECONDS" \
-  $KEEPAWAKE kilo run \
+  $LAUNCH kilo run \
     --auto \
     --agent code \
     --model "$RUN_MODEL" \

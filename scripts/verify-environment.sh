@@ -23,8 +23,14 @@ command -v node >/dev/null 2>&1 && pass "node $(node --version)"                
 command -v npm  >/dev/null 2>&1 && pass "npm $(npm --version)"                    || warn "npm not found"
 command -v curl >/dev/null 2>&1 && pass "curl present (liveness monitor)"          || fail "curl not found; liveness monitoring will not work"
 
+# The skill's own finder calls shutil.which(), so anything on PATH works. This
+# check mirrors that, plus the macOS app-bundle paths which are not on PATH.
 BROWSER=""
 for b in "${ONESHOT_WEBSITES_BROWSER:-}" \
+         "$(command -v chromium 2>/dev/null)" \
+         "$(command -v chromium-browser 2>/dev/null)" \
+         "$(command -v google-chrome 2>/dev/null)" \
+         "$(command -v google-chrome-stable 2>/dev/null)" \
          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
          "/Applications/Chromium.app/Contents/MacOS/Chromium"; do
   [ -n "$b" ] && [ -x "$b" ] && { BROWSER="$b"; break; }

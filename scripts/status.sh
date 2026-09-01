@@ -40,10 +40,17 @@ snapshot() {
     [ -f "$d/OPERATOR-INVALIDATION.md" ] && status="$status*"
 
     # elapsed: run start -> now (or -> status.txt mtime once finished)
-    local start now stamp
-    stamp="$(printf '%s' "$name" | sed -n 's/^\([0-9]\{4\}\)-\([0-9][0-9]\)-\([0-9][0-9]\)-\([0-9][0-9]\)-\([0-9][0-9]\)-\([0-9][0-9]\).*/\1\2\3\4\5.\6/p')"
-    start="$(date -j -f %Y%m%d%H%M.%S "$stamp" +%s 2>/dev/null || echo 0)"
-    if [ -f "$d/status.txt" ]; then now="$(stat -f %m "$d/status.txt" 2>/dev/null || echo 0)"; else now="$(date +%s)"; fi
+    local start now human
+    # Portable: BSD date wants -j -f, GNU date wants -d. Try both.
+    human="$(printf '%s' "$name" | sed -n 's/^\([0-9]\{4\}\)-\([0-9][0-9]\)-\([0-9][0-9]\)-\([0-9][0-9]\)-\([0-9][0-9]\)-\([0-9][0-9]\).*/\1-\2-\3 \4:\5:\6/p')"
+    start="$(date -j -f '%Y-%m-%d %H:%M:%S' "$human" +%s 2>/dev/null \
+             || date -d "$human" +%s 2>/dev/null || echo 0)"
+    if [ -f "$d/status.txt" ]; then
+      # Portable: BSD stat -f %m, GNU stat -c %Y.
+      now="$(stat -f %m "$d/status.txt" 2>/dev/null || stat -c %Y "$d/status.txt" 2>/dev/null || echo 0)"
+    else
+      now="$(date +%s)"
+    fi
     if [ "$start" -gt 0 ] && [ "$now" -ge "$start" ]; then
       elapsed="$(( (now - start) / 60 ))m"
     else elapsed="-"; fi
