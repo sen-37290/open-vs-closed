@@ -73,6 +73,22 @@ if [ "$PROMPT_DIR" != "$EXP_ROOT/prompts" ]; then
   MATERIALS_SRC="$PROMPT_DIR"
 fi
 
+# Per-arm materials. A subdirectory named for-<alias> is supplied ONLY to that
+# arm; every other sibling is shared by all arms.
+#
+# This exists because a source document can be unreadable to one model and
+# native to another: Kilo refuses a PDF for a model that does not declare file
+# input ("Cannot read pdf"), so an arm would fail before starting rather than
+# attempt the task. Giving each arm the same source in a form it can consume
+# measures the actual task instead of the file format.
+#
+# The cost is real and is recorded: arms no longer receive byte-identical
+# materials, so materialsCombinedSha256 legitimately differs between them.
+MATERIALS_ARM_DIR=""
+if [ -n "$MATERIALS_SRC" ] && [ -d "$MATERIALS_SRC/for-$MODEL_ALIAS" ]; then
+  MATERIALS_ARM_DIR="$MATERIALS_SRC/for-$MODEL_ALIAS"
+fi
+
 # ------------------------------------------------------------- 3. reserve run
 mkdir -p "$RUNS_ROOT" "$METADATA_ROOT"
 PREPARE_JSON="$("$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/prepare_run.py" \
@@ -146,10 +162,11 @@ MATERIALS_COUNT=0
 MATERIALS_SHA=""
 if [ -n "$MATERIALS_SRC" ]; then
   mkdir -p "$RUN_DIR/materials"
-  for f in "$MATERIALS_SRC"/*; do
+  for f in "$MATERIALS_SRC"/* ${MATERIALS_ARM_DIR:+"$MATERIALS_ARM_DIR"/*}; do
     [ -e "$f" ] || continue
     case "$f" in
       "$PROMPT_FILE") continue ;;                      # the sealed prompt itself
+      "$MATERIALS_SRC"/for-*) continue ;;              # another arm's materials
       *.zip)
         command -v unzip >/dev/null 2>&1 \
           || die "materials include a zip but unzip is not installed"
@@ -163,6 +180,7 @@ if [ -n "$MATERIALS_SRC" ]; then
   # drop any resource-fork strays the archive smuggled through
   find "$RUN_DIR/materials" -name '._*' -delete 2>/dev/null || true
   MATERIALS_COUNT="$(find "$RUN_DIR/materials" -type f | wc -l | tr -d ' ')"
+  [ -n "$MATERIALS_ARM_DIR" ] && log "arm-specific materials from $(basename "$MATERIALS_ARM_DIR")/"
 
   # Manifest: proves every arm received byte-identical inputs.
   "$ONESHOT_WEBSITES_PYTHON" - "$RUN_DIR" > "$RUN_DIR/materials-manifest.json" <<'PY'
@@ -230,6 +248,7 @@ finalize_metadata() {
     --upstream-ignore "${RUN_UPSTREAM_IGNORE:-}" \
     --materials-sha "${MATERIALS_SHA:-}" \
     --materials-count "${MATERIALS_COUNT:-0}" \
+    --materials-arm-specific "$([ -n "$MATERIALS_ARM_DIR" ] && echo yes || echo no)" \
     --timeout-hit "$TIMEOUT_HIT" \
     --kilo-session-file "$RUN_DIR/.session-id" \
     >/dev/null 2>>"$STDERR_LOG" || warn "metadata assembly reported a problem (see stderr.log)"

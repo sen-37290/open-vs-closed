@@ -101,6 +101,7 @@ def main() -> int:
     ap.add_argument("--upstream-ignore", default="")
     ap.add_argument("--materials-sha", default="")
     ap.add_argument("--materials-count", default="0")
+    ap.add_argument("--materials-arm-specific", default="no")
     a = ap.parse_args()
 
     run_dir = pathlib.Path(a.run_dir)
@@ -160,7 +161,12 @@ def main() -> int:
             "sealIntact": (sealed_hash == a.prompt_hash) if sealed_hash else False,
             "materialsCount": int(a.materials_count or 0),
             "materialsCombinedSha256": a.materials_sha or None,
-            "materialsNote": ("binary inputs staged into materials/; the combined digest must match "
+            "materialsArmSpecific": a.materials_arm_specific == "yes",
+            "materialsNote": ("this arm received ARM-SPECIFIC materials, so the combined digest "
+                              "deliberately differs from other arms: the same source was supplied in a "
+                              "form this model can consume. Inputs are equivalent, not identical."
+                              if a.materials_arm_specific == "yes" else
+                              "binary inputs staged into materials/; the combined digest must match "
                               "across arms for the comparison to be valid"),
         },
         # ---- timing ----

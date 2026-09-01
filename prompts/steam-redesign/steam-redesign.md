@@ -54,9 +54,6 @@ PocketYoda:
 Judicator:
 "All to serve to doom scrolling tik-tok type of minded people"
 
-Mordenknen:
-"This new store is a steaming pile of ♥♥♥♥!"
-
 Sion:
 "Can we have an option somewhere to opt out of this new UI?"
 

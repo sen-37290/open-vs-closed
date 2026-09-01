@@ -1,647 +1,982 @@
-Create a highly polished interactive portfolio website that feels like a digital art exhibition rather than a conventional portfolio.
+Interaction Page Direction
 
-The website is built around a collection of experimental interactive artworks. The main navigation is not a grid, menu, or list. Instead, visitors browse a large circular carousel of tall, colorful poster-like cards. Each card represents one interactive experiment. Selecting a card transitions into a full-screen interactive artwork.
+Each colored cube cell should open into its own distinct interaction world.
 
-The experience should feel minimal, editorial, artistic, playful, and technically sophisticated. The website should demonstrate the relationship between visual design, creative coding, motion, and interaction.
+The eight pages should feel dramatically different from one another, but still belong to the same overall project.
 
-Do not create a conventional portfolio website with a hero section, navigation bar, project grid, About section, and footer. The interactive gallery itself is the portfolio.
+Keep a few shared rules across all pages:
 
-MAIN GALLERY
+Each page inherits the color of its cube cell as the main accent or environmental color.
+Avoid traditional website layouts whenever possible.
+Each page should focus on one primary interaction idea.
+Do not overload a page with many unrelated effects.
+The interaction should be understandable through movement and exploration rather than instructions.
+Keep typography minimal and editorial.
+Every page should include a subtle way to return to the 3D cube.
+Returning should visually collapse the page back into its original cube cell.
+1. RED — MAGNETIC TYPOGRAPHY
+Core idea
 
-Start with a mostly empty viewport with a white or very light neutral background.
+A spatial typography playground where words behave like physical magnetic objects.
 
-At the top center, place a very small understated portfolio wordmark or logo.
+Visual appearance
 
-The main visual element is a series of approximately 12–16 tall rectangular cards arranged along the circumference of a very large invisible circle.
+Use a mostly empty warm off-white or very dark background.
 
-Imagine a giant wheel whose center is positioned far below the bottom edge of the viewport. The cards sit upright around the upper edge of that wheel, creating a wide upward-facing arc across the lower half of the screen.
+Place one enormous typographic composition in the center of the screen.
 
-The visitor should only see part of this circular arrangement at once.
+The words should occupy a large percentage of the page, almost like a poster.
 
-The center card sits closest to the viewer and appears largest. Cards farther to the left and right gradually become slightly smaller and more angled because they are positioned farther around the circle.
+Example composition:
 
-The cards overlap slightly, like physical posters or book covers arranged around a circular display.
+PULL
+PUSH
+ATTRACT
 
-The carousel should create a strong feeling of depth even though the visual design remains flat and minimal.
+Use a bold variable typeface with very large letterforms.
 
-Each card should:
+The red color should appear inside the typography or as the primary interactive accent.
 
-- be tall and portrait-oriented
-- have a strong solid background color
-- contain a large title
-- contain a large index number such as 01, 02, 03, etc.
-- contain a small amount of tiny editorial metadata
-- use consistent typography and spacing
-- feel like a designed exhibition poster rather than a generic UI card
-- remain mostly flat, without rounded corners or glass effects
+Avoid decorative imagery.
 
-Use an elegant editorial serif typeface for the card titles and large index numbers, paired with a neutral sans-serif for small metadata.
+Typography itself is the visual artwork.
 
-The cards should feel like a coherent collection of art-book covers.
+Interaction
 
-Use generous negative space.
+As the cursor approaches a letter, that letter should be physically attracted toward the pointer.
 
-Avoid unnecessary interface elements.
+Nearby letters move slightly.
 
-CIRCULAR CAROUSEL INTERACTION
+Letters farther away remain stable.
 
-The circular card gallery must genuinely behave like a rotating wheel.
+The closer the cursor gets, the stronger the magnetic force becomes.
 
-Visitors can rotate through the collection by:
+Moving the cursor quickly creates temporary stretching or distortion.
 
-- dragging horizontally with the mouse
-- dragging with a trackpad
-- using the mouse wheel
-- swiping on touch devices
-- using the left and right arrow keys
+Moving slowly creates gentle attraction.
 
-The movement should have inertia and momentum.
+When the cursor leaves, the letters smoothly return to their original positions.
 
-If the visitor drags quickly and releases, the cards should continue moving briefly before slowing down.
+Clicking anywhere temporarily reverses the magnetic field:
 
-The carousel should gently snap toward a card after movement stops.
+letters suddenly repel from the cursor before settling back.
 
-As cards travel toward the center of the viewport, they should become slightly larger and more prominent.
+Extra behavior
 
-As they move away from the center, they should gradually decrease in scale.
-
-Cards should also subtly rotate according to their position on the circular path.
-
-Do not move cards along a simple horizontal line. Their position must visibly follow a curved circular or elliptical path.
-
-The interaction should feel physical, tactile, and extremely smooth.
-
-When a card reaches the center, its title should be completely readable and it should become the active card.
-
-Hovering over the active card can produce a subtle lift, scale, or depth response.
-
-Do not use large arrows or conventional carousel controls unless needed for accessibility.
-
-CARD COLOR SYSTEM
-
-Each card has its own strong color.
-
-The color is not decorative. It represents the identity and atmosphere of the interactive artwork behind that card.
-
-Use a carefully art-directed palette such as:
-
-01 — red
-02 — magenta
-03 — cyan
-04 — electric blue
-05 — lime green
-06 — warm green
-07 — yellow
-08 — orange
-09 — violet
-10 — deep indigo
-11 — black
-12 — white / silver
-
-Additional cards may introduce related colors.
-
-Avoid pastel SaaS palettes.
-
-The colors should feel bold, graphic, and almost like printing inks or exhibition posters.
-
-OPENING AN ARTWORK
-
-When a visitor clicks the active card, do not open a modal and do not navigate to a traditional project page.
-
-Instead, transition from the card gallery directly into a full-screen interactive artwork.
-
-The selected card should participate in the transition.
+Individual words can have slightly different magnetic strength.
 
 For example:
 
-- the card can enlarge until its color fills the viewport
-- its typography can disappear while the color becomes the background
-- the card can dissolve into particles
-- the card can stretch into the geometry of the artwork
-- its color can fade into the environment of the experiment
+PULL = strong attraction
+PUSH = repulsion
+ATTRACT = slow elastic movement
 
-Each experiment may use a slightly different transition.
+This makes the typography itself explain the interaction.
 
-The transition should make it feel as though the visitor is entering the card.
+Mood
 
-Once an experiment is open, almost all conventional website UI should disappear.
+Graphic.
 
-Allow the artwork to occupy the entire viewport.
+Bold.
 
-Include only a small minimal close control near the edge of the screen.
+Physical.
 
-Closing the experiment should return the visitor to the exact same position in the circular carousel rather than resetting the gallery.
+Minimal.
 
-INTERACTIVE ARTWORK 01 — RED — POP OBJECT
+Poster-like.
 
-Create a playful interactive 3D artwork inspired by Pop Art and iconic everyday consumer packaging.
+2. ORANGE — INFINITE SPATIAL CANVAS
+Core idea
 
-Display a stylized tomato soup can in the center of a large neutral space.
+A seemingly endless two-dimensional world that users explore by dragging through space.
 
-The object should be a genuine interactive 3D cylinder, not a flat image.
+Visual appearance
 
-Give it a graphic red-and-white soup label inspired by mid-century grocery packaging and Pop Art, but create an original design rather than directly reproducing commercial packaging.
+Start with a large open canvas.
 
-The visitor can click and drag the can to rotate it.
+Do not show a conventional webpage frame.
 
-Pointer movement should also create a subtle tilt.
+Scatter abstract objects, photographs, shapes, short words, coordinates, tiny symbols, and graphic fragments across the environment.
 
-Dragging quickly and releasing should produce a small amount of rotational momentum.
+Some elements should appear close together.
 
-On mobile, the same interaction should work through touch.
+Others should exist far away, encouraging exploration.
 
-Add subtle perspective, lighting, shadow, and material response.
+Use orange as the dominant accent.
 
-The artwork should remain visually minimal: one iconic object, beautifully presented, with satisfying movement.
+The environment should feel like a combination of:
 
-INTERACTIVE ARTWORK 02 — MAGENTA — BOKEH
+an artist's desk
+a visual archive
+a map
+and an infinite moodboard.
 
-Create a full-screen environment made from large blurred circles of colored light.
+Interaction
 
-Use saturated magenta, pink, red, cyan, green, yellow, orange, violet, and white.
+Users click and drag anywhere on the background to move through the space.
 
-The circles should exist at different apparent depths and sizes.
+The canvas should feel larger than the screen in every direction.
 
-They drift slowly through the screen.
+Elements should have different depths.
 
-Overlapping lights should visually become brighter, creating the impression of glowing photographic bokeh.
+Foreground objects move slightly faster than background objects, creating subtle parallax.
 
-The pointer should behave like a soft invisible force.
+Some objects react when approached.
 
-Moving the cursor through the composition gently pushes or distorts nearby lights.
+For example:
 
-Clicking creates a temporary burst or cluster of new glowing lights.
+images rotate slightly
+circles expand
+lines connect nearby elements
+text becomes visible
+tiny objects reveal larger compositions.
 
-The result should feel dreamy, abstract, photographic, and alive.
+Discovery
 
-INTERACTIVE ARTWORK 03 — CYAN — LIQUID WAVE
+Hide small surprises around the canvas.
 
-Create an abstract fluid waveform inspired by voice interfaces, water, and sound.
+Users might discover:
 
-Use one continuous luminous ribbon or several closely layered waves across the viewport.
+a giant word far away
+a cluster of photographs
+a tiny animated object
+a hidden pattern
+a large geometric composition
 
-The waveform must respond continuously to the pointer.
+There should be no obvious "correct" direction.
 
-Horizontal cursor movement changes the direction and flow of the wave.
+Exploration is the experience.
 
-Vertical cursor position changes its amplitude.
+Mood
 
-Cursor velocity changes turbulence.
+Expansive.
 
-Slow movement produces soft flowing waves.
+Curious.
 
-Fast movement creates dramatic distortion.
+Playful.
 
-When the cursor stops, the wave gradually settles instead of stopping immediately.
+Exploratory.
 
-Clicking sends a pulse through the entire waveform.
+3. YELLOW — TYPOGRAPHY PORTAL
+Core idea
 
-The visual effect should feel organic and silky, not like a standard audio equalizer.
+The user physically travels through enormous typography.
 
-INTERACTIVE ARTWORK 04 — YELLOW — BOUNCING ICON
+Visual appearance
 
-Create a playful artwork inspired by the classic bouncing DVD screensaver.
+Begin with one gigantic word filling almost the entire screen.
 
-Place a simple graphic symbol or logo inside an otherwise minimal full-screen environment.
+For example:
 
-The symbol continuously moves diagonally through the viewport and accurately bounces from every screen edge.
+ENTER
 
-Every time it hits an edge, change its color.
+or
 
-When it hits or nearly hits a corner, trigger a special visual event such as:
+INSIDE
 
-- a flash
-- particle burst
-- temporary background inversion
-- scale pulse
-- celebratory distortion
+or
 
-The visitor can grab and throw the icon in a new direction.
+TYPE
 
-Clicking it can increase its speed.
+The typography should be extremely large and architectural.
 
-Its physics should remain continuous and predictable enough that visitors naturally begin watching for a corner hit.
+Use yellow as the primary environment color.
 
-INTERACTIVE ARTWORK 05 — SKY BLUE — RAINING FIGURES
+The interiors of the letters should contain another visual world.
 
-Create a surreal interactive scene containing many simplified human silhouettes holding umbrellas.
+At first, users only see glimpses through the letterforms.
 
-The silhouettes continuously fall from the top of the viewport like rain.
+Interaction
 
-Create original figures rather than copying a specific painting.
+Scrolling moves the camera toward the typography.
 
-Use different sizes and falling speeds to create depth.
+Instead of the text moving past the user, the user should feel like they are moving toward it.
 
-Pointer movement represents wind.
+Gradually approach one letter.
 
-Moving the mouse toward the left pushes the falling figures toward the left.
+Move closer.
 
-Moving toward the right pushes them toward the right.
+Move inside its counter or opening.
 
-Fast pointer movement creates a stronger gust.
+Eventually the letter fills the entire viewport.
 
-The figures should smoothly lean or drift according to the wind rather than instantly changing direction.
+Continue moving through it.
 
-On touch devices, finger movement controls the wind.
+Inside the letter, reveal a completely different composition:
 
-The scene should feel surreal, calm, slightly humorous, and elegant.
+moving gradients
+smaller typography
+abstract landscapes
+video-like motion
+floating graphic elements.
 
-INTERACTIVE ARTWORK 06 — DEEP INDIGO — STARRY NIGHT DOTS
+Continue scrolling through several typographic layers.
 
-Create an interactive dot-based interpretation of Vincent van Gogh's The Starry Night.
+Structure
 
-Do not simply show the painting as a static image.
+The page could progress like:
 
-Reconstruct the composition from hundreds or thousands of colored circular dots.
+WORD
 
-From a distance, the overall composition should be recognizable.
+→ LETTER
 
-As the visitor zooms in, the image should gradually transform into an abstract field of individual dots.
+→ INSIDE LETTER
 
-Allow smooth zooming and panning.
+→ ABSTRACT WORLD
 
-The resolution of the dot field should change with zoom level.
+→ SECOND WORD
 
-When zoomed out:
+→ EXIT
 
-- many small dots reconstruct the complete image
+The entire page should feel like one continuous camera journey.
 
-When zoomed in:
+Mood
 
-- fewer, larger dots dominate the view
-- individual colors become more visible
-- the image becomes increasingly abstract
+Architectural.
 
-Give the sky subtle motion inspired by Van Gogh's swirling brush strokes.
+Surreal.
 
-Dots around stars can gently orbit, shimmer, or flow.
+Cinematic.
 
-The landscape should move less than the sky.
+Immersive.
 
-The central experience is the transition between recognizable artwork and abstract color data.
+4. GREEN — DISTORTED GRID
+Core idea
 
-INTERACTIVE ARTWORK 07 — GREEN — GROW A TREE
+A perfectly ordered design system that becomes distorted through interaction.
 
-Begin with a nearly empty landscape.
+Visual appearance
 
-A thin ground line may sit along the bottom of the viewport.
+Start with an extremely strict graphic grid.
 
-Whenever the visitor clicks anywhere on the ground, grow a procedural tree from that position.
-
-Do not instantly display a finished tree.
-
-Animate its growth:
-
-trunk
-→ primary branches
-→ smaller branches
-→ twigs
-→ leaves or glowing tips
-
-Every tree should be slightly different.
-
-Use controlled randomness for:
-
-- height
-- branching angle
-- branch count
-- density
-- growth speed
-- silhouette
-
-Over time the visitor creates their own forest.
-
-Include a day and night state.
-
-During the day:
-
-- background is very light
-- trees are dark silhouettes
-
-During the night:
-
-- background becomes dark
-- trees can grow with luminous colored branches or glowing leaves
-
-Transition smoothly between day and night.
-
-The experience should feel generative and meditative.
-
-INTERACTIVE ARTWORK 08 — ORANGE — COLOR GRAVITY
-
-Fill the screen with large translucent color masses floating in space.
-
-They should feel somewhere between liquid, soft light, and magnetic blobs.
-
-The cursor behaves like an invisible gravitational force.
-
-Moving slowly near a shape attracts it.
-
-Moving rapidly stretches nearby shapes.
-
-Holding the pointer causes surrounding forms to collapse toward the cursor.
-
-Releasing causes them to expand outward again.
-
-Different colored shapes should visually mix when they overlap.
-
-Clicking empty space creates a new color mass.
-
-The visitor should be able to continuously reshape the composition.
-
-It should feel like painting without a brush.
-
-INTERACTIVE ARTWORK 09 — VIOLET — TYPOGRAPHIC WEATHER
-
-Create a typography experiment where language behaves like rain on glass.
-
-Begin with a short word, sentence, or phrase formed from many small droplets, particles, or tiny typographic fragments.
-
-The pointer behaves like a windshield wiper.
-
-Moving across the screen temporarily clears particles away and reveals the text more clearly.
-
-After the pointer leaves, particles slowly return.
-
-Fast movements clear large regions.
-
-Slow movements reveal fine details.
-
-Some droplets should merge and travel downward according to gravity.
-
-The artwork should constantly move between legibility and abstraction.
-
-INTERACTIVE ARTWORK 10 — BLUE — WATER SURFACE
-
-Create a minimal graphical water surface using layered waves rather than photorealistic water.
-
-Pointer movement should create disturbances.
-
-Moving the cursor across the screen produces a wake.
-
-Clicking creates a ripple.
-
-Holding creates a continuous disturbance.
-
-Multiple waves should overlap and interfere with each other.
-
-Where waves overlap, colors or brightness can subtly change.
-
-The physics should remain soft and elegant.
-
-The visual result should sit somewhere between water, a topographic map, and generative drawing.
-
-INTERACTIVE ARTWORK 11 — BLACK — INFINITE SPACE
-
-Create a full-screen 360-degree space environment.
-
-The visitor should feel located inside the star field rather than looking at a flat photograph.
-
-Use multiple layers of stars at different depths.
-
-Include faint dust, distant light, and subtle nebula-like structures.
-
-Dragging rotates the view in three dimensions.
-
-Pointer movement produces subtle parallax.
-
-Scrolling moves slightly forward and backward through space.
-
-Avoid turning this into a game.
-
-The piece should feel quiet, vast, minimal, and atmospheric.
-
-INTERACTIVE ARTWORK 12 — WHITE — ORBITAL TYPOGRAPHY
-
-Create a three-dimensional typographic spiral.
-
-Break a short portfolio manifesto or introduction into individual words or short phrases.
-
-Arrange these fragments along a large 3D spiral extending into space.
-
-Dragging rotates the structure.
-
-Scrolling moves forward and backward through the spiral.
-
-Words near the viewer should become large, sharp, and readable.
-
-Distant words should become small and faint.
-
-When the pointer approaches an individual word, allow it to move slightly away from its position before returning.
-
-Typography should behave like architecture rather than static text.
-
-ADDITIONAL EXPERIMENTS
-
-If more cards are needed, add original interactive experiments that follow the same philosophy.
-
-Possible ideas include:
-
-TRIANGULATED IMAGE
-
-Turn an image into an interactive triangular mosaic.
-
-Moving the cursor changes the density and scale of nearby triangles.
-
-Clicking temporarily explodes the triangulation before it reforms.
-
-BEZIER DRAWING
-
-Fill the viewport with continuously generated curved lines.
-
-The pointer attracts, repels, or bends the curves.
-
-Fast cursor movement creates increasingly chaotic drawings.
-
-PIXEL DISTORTION
-
-Create an image constructed from vertical or horizontal pixel strips.
-
-Dragging across the image stretches, sorts, or offsets nearby pixels.
-
-The image gradually repairs itself after interaction.
-
-GRAVITY TYPE
-
-Fill the viewport with floating letters controlled by lightweight physics.
-
-The cursor behaves like a magnet.
-
-Clicking temporarily reverses gravity.
-
-Letters collide and settle naturally.
-
-CONSTELLATION FIELD
-
-Create hundreds of floating points.
-
-Nearby points automatically connect with thin lines.
-
-Moving the pointer deforms the network.
-
-Clicking generates a temporary constellation that slowly disappears.
-
-TRANSITIONS BETWEEN CARDS AND ARTWORKS
-
-Transitions should be carefully designed and conceptually related to the selected artwork.
-
-Do not use the exact same fade transition for every section.
-
-Examples:
-
-The red card expands until the red background fills the screen, then reveals the 3D object.
-
-The magenta card loses focus and transforms into large blurred bokeh lights.
-
-The blue card stretches horizontally and becomes the first waveform.
-
-The sky-blue card breaks apart into falling umbrella figures.
-
-The indigo card fragments into circular dots that reconstruct the Starry Night artwork.
-
-The green card collapses into the ground line from which the first tree begins growing.
-
-The black card expands into darkness and reveals stars.
-
-The white card sends its typography outward until the words form a spiral.
-
-Closing an artwork can reverse or reinterpret the same transformation.
-
-Keep transitions smooth and satisfying but relatively fast.
-
-Do not make the user wait through long cinematic sequences every time they open a project.
-
-VISUAL DESIGN LANGUAGE
-
-The website should combine:
-
-- editorial graphic design
-- Swiss-influenced typography
-- experimental digital art
-- creative coding
-- museum exhibition design
-- strong solid color
-- generous negative space
-- subtle dimensionality
-- precise motion design
-
-The gallery should remain restrained so that individual artworks can become expressive.
-
-Avoid:
-
-- SaaS-style UI
-- glassmorphism
-- excessive gradients
-- rounded rectangular interface cards
-- generic portfolio templates
-- huge marketing headlines
-- CTA buttons
-- testimonial sections
-- project grids
-- stock photography
-- excessive copy
-- decorative 3D objects unrelated to interaction
-
-This should not resemble a startup landing page.
-
-It should feel like an artist, interaction designer, or creative developer's personal digital exhibition.
-
-MICROINTERACTIONS
-
-Pay attention to small details.
-
-Include:
-
-- subtle cursor changes for drag, rotate, zoom, and click interactions
-- inertia and momentum
-- tuned easing curves
-- tiny movement when the cursor approaches cards
-- smooth hover and pressed states
-- soft visual feedback when an interaction occurs
-- touch-friendly equivalents of mouse interactions
-- keyboard navigation
-- responsive behavior
-- high-DPI Canvas/WebGL rendering
-- no accidental text selection during drag interactions
-- clean restoration of gallery state when closing an artwork
-
-The website should feel responsive to the visitor even when they are performing very small movements.
-
-RESPONSIVE DESIGN
-
-The experience must work on desktop, tablet, and mobile.
-
-Do not simply scale down the desktop composition.
-
-On mobile:
-
-- show fewer cards simultaneously
-- preserve the curved carousel
-- make swipe the primary navigation method
-- adapt mouse interactions to touch gestures
-- preserve smooth physics
-- keep artwork full-screen
-- simplify rendering complexity if necessary for performance
-
-All essential experiments should remain genuinely interactive on touch devices.
-
-TECHNICAL IMPLEMENTATION
-
-Build this as a real functioning interactive website, not a static visual mockup.
-
-Choose the correct browser technology for each experiment.
+Think Swiss modernism.
 
 Use:
 
-- WebGL or Three.js when real 3D is useful
-- Canvas for particle systems, waves, procedural drawing, and generative artworks
-- SVG for vector-based experiments when appropriate
-- CSS transforms for lightweight 3D and transitions
-- requestAnimationFrame for continuous animation
-- Pointer Events so mouse, stylus, and touch share a consistent interaction system
+thin grid lines
+small labels
+precise alignment
+modular rectangles
+clean sans-serif typography
+large negative space.
 
-Treat every artwork as a separate module.
+Green should be the accent color.
 
-Only run the animation loop for the currently active experiment.
+Everything should initially feel mathematically perfect.
 
-When an artwork is closed:
+Interaction
 
-- remove its event listeners
-- cancel unnecessary animation frames
-- clean up WebGL resources
-- preserve the carousel position
-- return smoothly to the gallery
+The cursor acts like a force field.
 
-Optimize for stable frame rates.
+As it moves across the page, nearby grid lines bend around it.
 
-Do not add a large dependency unless it meaningfully improves an experiment.
+Text blocks shift slightly.
 
-Respect prefers-reduced-motion.
+Images stretch.
 
-MOST IMPORTANT REQUIREMENT
+Columns temporarily narrow or widen.
 
-Do not spend all of the effort building the circular gallery and then make the individual projects superficial.
+The deformation should follow the cursor smoothly.
 
-The individual experiments are the actual portfolio.
+Once the cursor moves away, the system gradually returns to perfect alignment.
 
-Every colored card must open a genuinely different interactive experience.
+Click behavior
 
-Each artwork should have:
+Clicking creates a stronger distortion pulse.
 
-- its own interaction logic
-- its own visual language
-- its own motion behavior
-- its own relationship to the pointer or touch input
-- at least one small element of surprise or discovery
+The grid expands outward like a wave.
 
-Do not replace these experiments with static illustrations, videos, screenshots, fake placeholders, or simple hover animations.
+Nearby objects shift from their original positions and then snap back into place.
 
-The visitor should become curious about what every next card does.
+Scroll behavior
 
-The overall experience should feel like opening a collection of digital artworks: systematic and minimal from the outside, expressive and unpredictable once each card is entered.
+As users move down the page, the grid can gradually become more unstable.
 
-Design, code, interaction, motion, and artwork should feel inseparable.
+Top:
 
-Prioritize interaction quality over adding conventional website content.
+perfect order.
 
-Continue refining the details until the site feels like a complete experimental digital exhibition rather than a demo of isolated frontend effects.
+Middle:
+
+moderate deformation.
+
+Bottom:
+
+almost chaotic.
+
+Near the end, the system rebuilds itself.
+
+Mood
+
+Precise.
+
+Intellectual.
+
+Controlled chaos.
+
+Graphic-design focused.
+
+5. CYAN — IMAGE TRAILS
+Core idea
+
+Images become temporary traces of cursor movement.
+
+Visual appearance
+
+Begin with a mostly empty screen.
+
+Show only several large project titles or abstract category words.
+
+For example:
+
+MOTION
+
+OBJECT
+
+BODY
+
+SPACE
+
+LIGHT
+
+Keep typography restrained.
+
+Use cyan as the environmental accent.
+
+Do not show permanent image thumbnails.
+
+Interaction
+
+When the user moves the cursor over a word, its associated image appears underneath or beside the pointer.
+
+As the pointer continues moving, additional versions of the image are left behind.
+
+These images form a temporary visual trail.
+
+The faster the cursor moves, the larger the distance between images.
+
+The slower it moves, the denser the trail.
+
+Each image slowly fades after a short period.
+
+Variations
+
+Different titles can produce different trail behavior:
+
+one leaves photographs
+one leaves cropped fragments
+one leaves monochrome images
+one leaves rotated images
+one creates larger and larger images.
+
+Click behavior
+
+Clicking freezes the current trail.
+
+The scattered images become a temporary collage.
+
+Click again and they dissolve.
+
+Mood
+
+Photographic.
+
+Ephemeral.
+
+Expressive.
+
+Fashion/editorial.
+
+6. BLUE — INTERACTIVE SPOTLIGHT
+Core idea
+
+The page contains a hidden visual world that can only be discovered using light.
+
+Visual appearance
+
+The page should initially appear almost completely dark.
+
+Only a small amount of typography is visible.
+
+For example:
+
+FIND WHAT IS HIDDEN
+
+The cursor becomes a large soft spotlight.
+
+Use deep blue as the main environmental tone.
+
+Interaction
+
+Wherever the cursor moves, the spotlight reveals a hidden layer underneath.
+
+The hidden layer could contain:
+
+photography
+typography
+illustrations
+textures
+objects
+animated shapes.
+
+Outside the spotlight, the content remains almost invisible.
+
+The user explores the composition by moving the light around.
+
+Depth
+
+Create several layers.
+
+Small spotlight:
+
+reveals surface imagery.
+
+Holding the mouse:
+
+spotlight grows larger and reveals deeper content.
+
+Clicking:
+
+briefly illuminates the whole composition.
+
+Then darkness returns.
+
+Hidden compositions
+
+Different areas should contain unexpected visual moments.
+
+For example:
+
+a face
+large typography
+a moving object
+a hidden sentence
+a geometric sculpture.
+
+Mood
+
+Mysterious.
+
+Atmospheric.
+
+Quiet.
+
+Exploratory.
+
+7. PURPLE — PARTICLE FIELD
+Core idea
+
+A living environment made entirely from thousands of particles.
+
+Visual appearance
+
+The entire screen becomes a soft field of tiny particles.
+
+Avoid traditional cards, photographs, or sections.
+
+Particles should form subtle shapes and structures.
+
+Some areas may resemble:
+
+clouds
+waves
+constellations
+letters
+organic forms.
+
+Purple should dominate the environment without becoming overly neon.
+
+Interaction
+
+The cursor creates a force inside the particle system.
+
+Depending on cursor movement:
+
+particles move away
+particles orbit
+particles follow
+particles form trails.
+
+Slow movement creates gentle flow.
+
+Fast movement creates turbulence.
+
+Typography
+
+At certain moments, particles should assemble into large words.
+
+For example:
+
+TOUCH
+
+MOVE
+
+FORM
+
+The letters exist briefly.
+
+When the cursor touches them, the typography breaks back into particles.
+
+Click behavior
+
+Clicking creates a pulse.
+
+Particles rapidly expand outward from the click location and slowly return.
+
+Holding the mouse creates a temporary gravitational center pulling particles inward.
+
+Mood
+
+Organic.
+
+Digital.
+
+Atmospheric.
+
+Generative.
+
+8. PINK — GRAVITY TYPOGRAPHY
+Core idea
+
+Typography obeys gravity and behaves like physical objects.
+
+Visual appearance
+
+Start with a strong typographic poster composition.
+
+For example:
+
+LET
+IT
+FALL
+
+The letters should initially be perfectly arranged.
+
+Use a bold typeface.
+
+Pink acts as the dominant accent.
+
+The environment should initially feel clean and graphic.
+
+Interaction
+
+When the user clicks a word, its letters lose their fixed position.
+
+Gravity takes over.
+
+Letters fall toward the bottom of the screen.
+
+They collide.
+
+They rotate.
+
+They stack on top of each other.
+
+They bounce slightly before settling.
+
+Dragging
+
+Once letters have fallen, users can grab individual characters.
+
+They can:
+
+pick them up
+drag them
+throw them
+stack them
+drop them.
+
+Letters should have slightly different physical weights.
+
+Large letters feel heavier.
+
+Small letters move more easily.
+
+Additional behavior
+
+Tilting or dragging across the screen could temporarily shift the direction of gravity.
+
+For example:
+
+drag strongly toward the right → gravity pulls letters right.
+
+Release → gravity returns downward.
+
+Reset
+
+Include a very subtle RESET interaction.
+
+When activated, all letters rise from wherever they are and reconstruct the original typographic composition.
+
+The reconstruction should happen letter by letter.
+
+Mood
+
+Playful.
+
+Tactile.
+
+Graphic.
+
+Physical.
+
+Connection Between All 8 Pages
+
+Although every interaction page should feel unique, they should share a few visual details.
+
+Shared transition
+
+When entering a page:
+
+the selected cube cell expands toward the viewer.
+
+Its color fills the screen.
+
+The interaction world emerges from that color.
+
+When leaving:
+
+the experience collapses back toward the center.
+
+The environment transforms back into the colored cube cell.
+
+The cell reconnects with the other seven cubes.
+
+The user returns to the rotatable 2×2×2 cube.
+
+Shared navigation
+
+Do not use a large navigation bar.
+
+Instead, include one subtle control such as:
+
+← CUBE
+
+or
+
+a tiny wireframe cube icon.
+
+Place it consistently in one corner.
+
+Hovering the cube icon could show a miniature rotating preview of the original cube.
+
+Shared typography
+
+Use one consistent type family across the project.
+
+Individual pages can manipulate it differently, but the underlying typeface should connect the experiences.
+
+For example:
+
+Magnetic Typography stretches it.
+
+Typography Portal enlarges it.
+
+Distorted Grid aligns it.
+
+Gravity Typography turns it into physical objects.
+
+This creates consistency without making the pages look identical.
+
+Shared color logic
+
+Each interaction owns one color:
+
+RED
+Magnetic Typography
+
+ORANGE
+Infinite Spatial Canvas
+
+YELLOW
+Typography Portal
+
+GREEN
+Distorted Grid
+
+CYAN
+Image Trails
+
+BLUE
+Interactive Spotlight
+
+PURPLE
+Particle Field
+
+PINK
+Gravity Typography
+
+Use that page's color as a dominant accent, but do not make every page simply a full-screen block of saturated color.
+
+Allow neutral backgrounds, black, white, gray, transparency, and lighting to make the individual colors feel more intentional.
+
+Overall goal
+
+The experience should feel like exploring eight digital materials contained inside a single 3D object.
+
+The cube is calm, simple, and geometric.
+
+Each cell contains a completely different behavior.
+
+The contrast should be intentional:
+
+outside = order
+
+inside = experimentation
+
+The user rotates the cube, chooses a cell, enters its color, experiences one interaction, then returns to the cube to discover another.
+
+Revised Direction for the 8 Interaction Pages
+
+Each cube cell should open into a distinct visual experiment.
+
+Each page should have one clear visual idea.
+
+Some pages can be extremely minimal and focus on only one interaction. A few pages can combine two or three systems for contrast.
+
+The eight pages should feel like eight different studies in digital behavior.
+
+1. RED — MAGNETIC TYPOGRAPHY
+
+Typography only.
+
+The entire page is one large typographic composition.
+
+Letters respond to the cursor as if they have magnetic properties.
+
+Move the cursor close to a letter and it pulls toward you.
+
+Move between two letters and both stretch toward the cursor.
+
+Move quickly and the letterforms briefly distort before returning.
+
+Some words may attract while others repel.
+
+The page should feel like an interactive typographic poster.
+
+2. ORANGE — INFINITE SPATIAL CANVAS
+
+Space and navigation.
+
+The user enters a huge open environment that extends far beyond the screen.
+
+There is no traditional vertical scrolling.
+
+Instead, users drag the entire world around.
+
+The canvas contains simple abstract objects:
+
+circles
+squares
+planes
+small symbols
+lines
+textures
+
+Avoid large typography.
+
+Some objects appear extremely far apart.
+
+Some form little clusters.
+
+The joy of the page comes from discovering that the space is much larger than expected.
+
+Dragging should have subtle inertia.
+
+Objects at different depths move at slightly different speeds.
+
+3. YELLOW — TYPOGRAPHY PORTAL
+
+Scale and typography.
+
+This page can combine typography with spatial movement, but nothing else is necessary.
+
+Begin with one enormous word
+
+The word fills almost the entire screen.
+
+Scrolling moves the camera closer and closer.
+
+Eventually the viewer travels through the opening of a letter.
+
+Inside the letter is another enormous word.
+
+Then another.
+
+The entire experience becomes a journey through typography at radically different scales.
+
+It should feel architectural rather than like animated text.
+
+4. GREEN — DISTORTED GRID
+
+Geometry.
+
+The page consists almost entirely of a precise modular grid.
+
+Thin lines divide the screen into perfectly aligned cells.
+
+The cursor acts like a physical force.
+
+As the cursor moves across the grid:
+
+lines bend
+cells stretch
+intersections shift
+rectangles compress
+
+The deformation should spread gradually into nearby areas.
+
+When the cursor leaves, the grid reconstructs itself.
+
+Clicking creates a larger wave through the geometry.
+
+The visual experience should feel almost mathematical.
+
+5. CYAN — IMAGE TRAILS
+
+Photography and movement.
+
+This page should be almost entirely visual.
+
+Start with an empty neutral background.
+
+As the user moves the cursor, photographs appear along its path.
+
+Each movement creates a sequence of image frames.
+
+Fast movement:
+
+images spread further apart.
+
+Slow movement:
+
+images overlap densely.
+
+Circular movement:
+
+images form a ring.
+
+Sharp changes in direction:
+
+images rotate slightly.
+
+The trail slowly disappears after the cursor passes.
+
+Do not place large text across the page.
+
+At most, use a tiny title or page number.
+
+The experience should feel like drawing with photographs.
+
+6. BLUE — LIGHT
+
+Lighting only.
+
+No typography at all inside the main experience.
+
+The page begins almost completely dark.
+
+The cursor behaves like a movable light source.
+
+As it moves, light reveals a three-dimensional surface underneath.
+
+The hidden environment might contain:
+
+raised shapes
+deep cavities
+soft folds
+metallic surfaces
+translucent objects
+rough and smooth materials
+
+But the objects remain abstract.
+
+Different areas react differently to light.
+
+Some surfaces reflect strongly.
+
+Some absorb light.
+
+Some cast long shadows.
+
+Some become translucent.
+
+Clicking could briefly change the light from:
+
+soft → hard
+
+The entire page is an experiment in:
+
+light, shadow, material, depth.
+
+7. PURPLE — PARTICLE FIELD
+
+Particles and force.
+
+Thousands of small particles occupy an open dark environment.
+
+They move extremely slowly when untouched.
+
+The pointer generates different physical forces depending on movement.
+
+Move slowly:
+
+particles gently orbit the cursor.
+
+Move quickly:
+
+particles scatter.
+
+Stop:
+
+particles slowly drift back together.
+
+Click:
+
+create one expanding shockwave.
+
+Press and hold:
+
+create gravitational attraction.
+
+The system should feel almost biological.
+
+8. PINK — GRAVITY TYPOGRAPHY
+
+Typography + physics.
+
+This is intentionally one of the mixed experiments.
+
+Begin with a carefully composed typographic poster.
+
+At first, everything is completely static.
+
+Then the user clicks one word.
+
+Its letters suddenly become physical objects.
+
+They fall.
+
+They collide.
+
+They bounce.
+
+They pile up.
+
+Users can grab individual characters and throw them around.
+
+Different characters can have slightly different mass.
+
+A huge bold letter should feel heavier than a small thin one.
+
+The contrast is important:
+
+first, typography behaves like graphic design.
+
+Then typography behaves like matter.
+
+This page combines only:
+
+type + gravity + physical interaction.
+
+Nothing more is needed.
