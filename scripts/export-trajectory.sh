@@ -22,6 +22,15 @@ mkdir -p "$OUT"
 
 PY="${ONESHOT_WEBSITES_PYTHON:-python3}"
 
+# A sandboxed run keeps its Kilo session store inside the run directory, so the
+# subagent trajectories live there rather than in the operator's HOME.
+if [ -d "$RUN_DIR/.kilo-home" ]; then
+  export HOME="$RUN_DIR/.kilo-home"
+  export XDG_DATA_HOME="$RUN_DIR/.kilo-home/.local/share"
+  export XDG_CONFIG_HOME="$RUN_DIR/.kilo-home/.config"
+  echo "note: reading this run's own sandboxed session store"
+fi
+
 # top-level session: match by the title run-one.sh set (--title "$RUN_ID")
 TOP="$(kilo session list 2>/dev/null | grep -v '^INFO' | grep -F "$RUN_ID" | awk '{print $1}' | head -1)"
 

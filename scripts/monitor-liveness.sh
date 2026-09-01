@@ -23,6 +23,13 @@ set -uo pipefail
 RUN_DIR="$1"; INTERVENTIONS="$2"; RUN_ID="$3"; COORD_PID="${4:-}"
 INTERVAL="${MONITOR_INTERVAL_SECONDS:-180}"
 
+# A sandboxed run keeps its session store inside the run directory.
+if [ -d "$RUN_DIR/.kilo-home" ]; then
+  export HOME="$RUN_DIR/.kilo-home"
+  export XDG_DATA_HOME="$RUN_DIR/.kilo-home/.local/share"
+  export XDG_CONFIG_HOME="$RUN_DIR/.kilo-home/.config"
+fi
+
 while :; do
   sleep "$INTERVAL"
 

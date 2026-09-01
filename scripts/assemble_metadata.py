@@ -42,7 +42,7 @@ def read_jsonl(path: pathlib.Path):
     return out
 
 
-def kilo_session_telemetry(session_id: str):
+def kilo_session_telemetry(session_id: str, kilo_home: str | None = None):
     """Pull real token/cost telemetry, and the model each role actually ran on.
 
     The per-message modelID is what makes the A/B auditable: it proves the
@@ -51,9 +51,16 @@ def kilo_session_telemetry(session_id: str):
     if not session_id:
         return None
     try:
+        env = dict(os.environ)
+        if kilo_home and pathlib.Path(kilo_home).is_dir():
+            # A sandboxed run keeps its session store inside the run directory,
+            # so point the CLI at that HOME rather than the operator's.
+            env["HOME"] = kilo_home
+            env["XDG_DATA_HOME"] = str(pathlib.Path(kilo_home) / ".local/share")
+            env["XDG_CONFIG_HOME"] = str(pathlib.Path(kilo_home) / ".config")
         raw = subprocess.run(
             ["kilo", "export", session_id],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True, text=True, timeout=120, env=env,
         )
         if raw.returncode != 0 or not raw.stdout.strip():
             return None
@@ -170,7 +177,7 @@ def main() -> int:
         "interventions": read_jsonl(run_dir / "interventions.jsonl"),
         "recordNormalizations": read_jsonl(run_dir / "record-normalizations.jsonl"),
 
-        "telemetry": kilo_session_telemetry(session_id) or {
+        "telemetry": kilo_session_telemetry(session_id, str(run_dir / ".kilo-home")) or {
             "sessionId": session_id or None,
             "tokens": None,
             "cost": None,

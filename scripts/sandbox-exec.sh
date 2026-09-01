@@ -37,8 +37,25 @@ MEM="${SANDBOX_MEMORY:-12g}"
 CPUS="${SANDBOX_CPUS:-3}"
 PIDS="${SANDBOX_PIDS:-2048}"
 
+# Run as the HOST user. The run directory is a bind mount owned by the host
+# user, so the container's own uid could not write to it -- every run would fail
+# at the first file write.
+HOST_UID="$(id -u)"; HOST_GID="$(id -g)"
+
+# Per-run HOME, inside the run directory. Two reasons this is not incidental:
+#   1. Isolation. Kilo keeps its session store under HOME. A shared HOME would
+#      let any sandboxed run call `kilo session list` and read SIBLING RUNS'
+#      sessions -- defeating the point of the sandbox.
+#   2. The session store, which holds every subagent trajectory, is then
+#      preserved per run instead of accumulating in one multi-gigabyte global
+#      database.
+# Telemetry on the host must read this same HOME (see run-one.sh).
+KILO_HOME="$RUN_DIR/.kilo-home"
+mkdir -p "$KILO_HOME" "$RUN_DIR/.harness-tmp"
+
 exec docker run --rm \
   --name "ovc-$(printf '%s' "$RUN_ID" | tr -c 'A-Za-z0-9_.-' '-' | cut -c1-100)" \
+  --user "$HOST_UID:$HOST_GID" \
   --memory "$MEM" --cpus "$CPUS" --pids-limit "$PIDS" \
   --security-opt no-new-privileges \
   -v "$RUN_DIR:/work/run" \
@@ -51,7 +68,10 @@ exec docker run --rm \
   -e TMPDIR=/work/run/.harness-tmp \
   -e TMP=/work/run/.harness-tmp \
   -e TEMP=/work/run/.harness-tmp \
-  -e HOME=/home/runner \
+  -e HOME=/work/run/.kilo-home \
+  -e XDG_CONFIG_HOME=/work/run/.kilo-home/.config \
+  -e XDG_DATA_HOME=/work/run/.kilo-home/.local/share \
+  -e npm_config_cache=/work/run/.harness-tmp/npm \
   -w /work \
   "$IMAGE" \
   "$@"
