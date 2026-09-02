@@ -14,6 +14,23 @@ WATCH=0
 [ "${1:-}" = "-w" ] && { WATCH=1; shift; }
 FILTER="${1:-}"
 
+# Portable mtime in epoch seconds.
+#
+# Exit codes are useless here: GNU `stat -f %m` treats %m as a FILENAME, fails
+# on it, then prints a multi-line filesystem dump for the real file and still
+# exits 0. A `||` fallback therefore never fires and the caller ends up
+# comparing a paragraph to an integer. So validate the output instead.
+file_mtime() {
+  local v
+  v="$(stat -c %Y "$1" 2>/dev/null)"          # GNU
+  case "$v" in ''|*[!0-9]*) v="" ;; esac
+  if [ -z "$v" ]; then
+    v="$(stat -f %m "$1" 2>/dev/null)"        # BSD
+    case "$v" in ''|*[!0-9]*) v="" ;; esac
+  fi
+  printf '%s\n' "${v:-0}"
+}
+
 snapshot() {
   printf '\n%s  open-vs-closed run status\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   printf '%s\n' "----------------------------------------------------------------------------------------"
@@ -46,11 +63,12 @@ snapshot() {
     start="$(date -j -f '%Y-%m-%d %H:%M:%S' "$human" +%s 2>/dev/null \
              || date -d "$human" +%s 2>/dev/null || echo 0)"
     if [ -f "$d/status.txt" ]; then
-      # Portable: BSD stat -f %m, GNU stat -c %Y.
-      now="$(stat -f %m "$d/status.txt" 2>/dev/null || stat -c %Y "$d/status.txt" 2>/dev/null || echo 0)"
+      now="$(file_mtime "$d/status.txt")"
     else
       now="$(date +%s)"
     fi
+    case "$start" in ''|*[!0-9]*) start=0 ;; esac
+    case "$now"   in ''|*[!0-9]*) now=0 ;; esac
     if [ "$start" -gt 0 ] && [ "$now" -ge "$start" ]; then
       elapsed="$(( (now - start) / 60 ))m"
     else elapsed="-"; fi
