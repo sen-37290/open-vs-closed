@@ -1,0 +1,819 @@
+   Recommended Adult Immunization Schedule                                                                                                                                                                    UNITED STATES
+
+   for ages 19 years or older
+Vaccines in the Adult Immunization Schedule*
+                                                                                                                                                                                                           2025
+ Vaccine                                                   Abbreviation(s)        Trade name(s)                                  How to use the adult immunization schedule
+ COVID–19 vaccine
+                                                           1vCOV–mRNA
+                                                                                  Comirnaty/Pfizer–BioNTech COVID–19 Vaccine
+                                                                                  Spikevax/Moderna COVID–19 Vaccine              1   Determine
+                                                                                                                                     recommended
+                                                                                                                                                           2   Assess need
+                                                                                                                                                               for additional
+                                                                                                                                                                                     3   Review vaccine
+                                                                                                                                                                                         types, dosing
+                                                                                                                                                                                                                4   Review
+                                                                                                                                                                                                                    contraindications
+                                                           1vCOV–aPS              Novavax COVID–19 Vaccine                           vaccinations by age       recommended               frequencies and            and precautions
+ Haemophilus influenzae type b vaccine                     Hib                    ActHIB, Hiberix, PedvaxHIB                         (Table 1)                 vaccinations by           intervals, and             for vaccine types
+                                                                                                                                                               medical condition         considerations for         (Appendix)
+ Hepatitis A vaccine                                       HepA                   Havrix, Vaqta                                                                or other indication       special situations
+ Hepatitis A and hepatitis B vaccine                       HepA–HepB              Twinrix                                                                      (Table 2)                 (Notes)
+                                                                                  Engerix–B, Heplisav–B, PreHevbrio,
+ Hepatitis B vaccine                                       HepB
+                                                                                  Recombivax HB
+ Human papillomavirus vaccine                              HPV                    Gardasil 9
+                                                                                                                               Report
+                                                           IIV3                   Multiple
+                                                                                                                               y Suspected cases of reportable vaccine–preventable diseases or outbreaks to
+ Influenza vaccine (inactivated, egg-based)                aIIV3                  Fluad                                          the local or state health department
+                                                           HD–IIV3                Fluzone High–Dose                            y Clinically significant adverse events to the Vaccine Adverse Event Reporting System at
+ Influenza vaccine (inactivated, cell–culture)             ccIIV3                 Flucelvax                                      www.vaers.hhs.gov or 800‑822‑7967
+ Influenza vaccine (recombinant)                           RIV3                   Flublok                                      Questions or comments
+ Influenza vaccine (live, attenuated)                      LAIV3                  FluMist                                      Contact www.cdc.gov/cdc–info or 800-CDC-INFO (800-232-4636), in English or Spanish,
+                                                                                                                               8 a.m.–8 p.m. ET, Monday through Friday, excluding holidays.
+ Measles, mumps, and rubella vaccine                       MMR                    M–M–R II, Priorix
+
+                                                           MenACWY–CRM            Menveo                                               Download the CDC Vaccine Schedules app for providers at
+ Meningococcal serogroups A, C, W, Y vaccine                                                                                           www.cdc.gov/vaccines/hcp/imz-schedules/app.html.
+                                                           MenACWY–TT             MenQuadfi
+                                                           MenB–4C                Bexsero
+ Meningococcal serogroup B vaccine                                                                                             Helpful information
+                                                           MenB–FHbp              Trumenba                                     y Complete Advisory Committee on Immunization Practices (ACIP) recommendations:
+                                                           MenACWY–TT/                                                           www.cdc.gov/acip-recs/hcp/vaccine-specific/
+ Meningococcal serogroup A, B, C, W, Y vaccine                                    Penbraya
+                                                           MenB–FHbp                                                           y ACIP Shared Clinical Decision–Making Recommendations:
+ Mpox vaccine                                              Mpox                   Jynneos                                        www.cdc.gov/acip/vaccine-recommendations/shared-clinical-decision-making.html
+                                                           PCV15                  Vaxneuvance                                  y General Best Practice Guidelines for Immunization
+ Pneumococcal conjugate vaccine                            PCV20                  Prevnar 20
+                                                                                                                                 www.cdc.gov/vaccines/hcp/imz-best-practices/index.html
+                                                                                                                               y Vaccine information statements: www.cdc.gov/vaccines/hcp/current-vis/index.html
+                                                           PCV21                  Capvaxive
+                                                                                                                               y Manual for the Surveillance of Vaccine–Preventable Diseases
+ Pneumococcal polysaccharide vaccine                       PPSV23                 Pneumovax 23
+                                                                                                                                 (including case identification and outbreak response):
+ Poliovirus vaccine (inactivated)                          IPV                    Ipol                                           www.cdc.gov/surv-manual/php/index.html
+ Respiratory syncytial virus vaccine                       RSV                    Abrysvo, Arexvy, mResvia
+ Tetanus and diphtheria vaccine                            Td                     Tenivac                                                                                                                                 Scan QR code
+ Tetanus, diphtheria, and acellular pertussis                                                                                                                                                                              for access to
+                                                           Tdap                   Adacel, Boostrix                                                                                                                       online schedule
+ vaccine
+ Varicella vaccine                                         VAR                    Varivax
+ Zoster vaccine, recombinant                               RZV                    Shingrix
+*Administer recommended vaccines if vaccination history is incomplete or unknown.
+  Do not restart or add doses to vaccine series if there are extended intervals between doses.
+ The use of trade names is for identification purposes only and does not imply endorsement by the ACIP or CDC.
+Revised 07/02/2025 (as amended on April 27, 2026 to add the ACIP's April 2025 RSV recommendation as adopted by HHS)                                                                                                        CS363989-A
+Table 1 Recommended Adult Immunization Schedule by Age Group, United States, 2025
+Vaccine                                                19–26 years                                        27–49 years                                   50–64 years                                    ≥65 years
+                                                                                                                                                                                              2 or more doses of 2024-2025
+COVID–19                                                                              1 or more doses of 2024–2025 vaccine (See Notes)
+                                                                                                                                                                                                   vaccine (See Notes)
+
+Influenza inactivated (IIV3, ccIIV3)
+                                                                                                          1 dose annually
+Influenza recombinant (RIV3)
+                                                                                                                                                                                                     1 dose annually
+                                                                                                                                                                                             (HD–IIV3, RIV3, or aIIV3 preferred)
+Influenza inactivated (aIIV3; HD–IIV3)
+                                                                                               Solid organ transplant (See Notes)
+Influenza recombinant (RIV3)
+
+Influenza live, attenuated
+                                                                                1 dose annually
+(LAIV3)
+
+Respiratory syncytial virus
+                                                          Seasonal administration during pregnancy (See Notes)                                             50 through 74 years (See Notes)                        ≥75 years
+(RSV)
+
+Tetanus, diphtheria, pertussis                                                               1 dose Tdap each pregnancy; 1 dose Td/Tdap for wound management (See Notes)
+(Tdap or Td)                                                                                                   1 dose Tdap, then Td or Tdap booster every 10 years
+Measles, mumps, rubella                                                                                         1 or 2 doses depending on indication                                               For health care personnel
+(MMR)                                                                                                                   (if born in 1957 or later)                                                        (See Notes)
+
+Varicella                                                                        2 doses
+                                                                                                                                                                              2 doses
+(VAR)                                                                   (if born in 1980 or later)
+
+Zoster recombinant
+                                                         2 doses for immunocompromising conditions (See Notes)                                                                   2 doses
+(RZV)
+
+Human papillomavirus                          2 or 3 doses depending on age at
+                                                                                                     27 through 45 years
+(HPV)                                           initial vaccination or condition
+
+Pneumococcal                                                                                                                                                                    See Notes
+(PCV15, PCV20, PCV21, PPSV23)                                                                                                                                                                            See Notes
+Hepatitis A
+                                                                                                                     2, 3, or 4 doses depending on vaccine
+(HepA)
+
+Hepatitis B
+(HepB)                                                                 2, 3, or 4 doses depending on vaccine or 2,
+                                                                                                                condition
+                                                                                                                   3, or 4 doses depending on vaccine or condition
+
+Meningococcal A, C, W, Y
+                                                                                               1 or 2 doses depending on indication (See Notes for booster recommendations)
+(MenACWY)
+
+Meningococcal B
+                                                                                                                           2 or 3 doses depending on vaccine and indication (See Notes for booster recommendations)
+(MenB)                                         19 through 23 years
+Haemophilus influenzae type b
+                                                                                                                     1 or 3 doses depending on indication
+(Hib)
+
+Mpox                                                                                                                                  2 doses
+
+Inactivated poliovirus
+                                                                                 Complete 3-dose series if incompletely vaccinated. Self–report of previous doses acceptable (See Notes)
+(IPV)
+
+    Recommended vaccination for adults who meet age requirement,
+     lack documentation of vaccination, or lack evidence of immunity                   Recommended vaccination for adults with an
+                                                                                        additional risk factor or another indication               Recommended vaccination based on shared
+                                                                                                                                                    clinical decision–making                                No Guidance/
+                                                                                                                                                                                                             Not Applicable
+
+                                                                                                                                                                                                                               Page 2
+ Table 2 Recommended Adult Immunization Schedule by Medical Condition or Other Indication, United States, 2025
+Always use this table in conjunction with Table 1 and the Notes that follow. Medical conditions or indications are often not mutually exclusive. If multiple medical conditions or indications are present, refer to
+guidance in all relevant columns. See Notes for medical conditions or indications not listed.
+                                                                                             HIV infection CD4
+                                                                                                                                                                                                           Kidney failure,
+                                                                                           percentage and count
+                                                  Immunocompromised                                                                                                Asplenia,                                 End–stage         Chronic liver
+                                                     (excluding HIV                      <15% or              ≥15% and             Men who have sex              complement         Heart or lung           renal disease        disease;                         Health care
+ VACCINE                     Pregnancy                  infection)                      <200/mm3              ≥200/mm3                with men                    deficiency          disease               or on dialysis     alcoholisma           Diabetes     Personnelb
+
+ COVID–19                                                              See Notes
+
+ Influenza inactivated                            Solid organ transplant
+                                                                                                                                                                                1 dose annually
+ Influenza recombinant                                  (See Notes)
+                                                                                                                                     1 dose annually
+ LAIV3                                                                                                                                                                                                                                1 dose annually if age 19–49 years
+                                                                                                                                   if age 19–49 years
+                            Seasonal
+                                                                                                                                                                                                                             Liver disease
+ RSV                      administration                               See Notes                                                                                                      See Notes                                                     See Notes
+                                                                                                                                                                                                                              (See Notes)
+                           (See Notes)
+                         Tdap: 1 dose each
+ Tdap or Td                                                                                                                               1 dose Tdap, then Td or Tdap booster every 10 years
+                            pregnancy
+
+ MMR                               *
+
+ VAR                               *                                                                          See Notes
+
+ RZV                                                                              See Notes
+
+ HPV                               *                                    3-dose series if indicated
+
+ Pneumococcal
+
+ HepA
+
+ Hep B                       See Notes
+                                                                                                                                                                                                                                                 Age ≥ 60 years
+
+ MenACWY
+
+
+ MenB
+
+                                                                                                                                                                   Asplenia:
+ Hib                                                       HSCT: 3 dosesc
+                                                                                                                                                                    1 dose
+
+ Mpox                        See Notes                                                                                                  See Notes                                                                                                                 See Notes
+
+
+ IPV                                                                                                   Complete 3-dose series if incompletely vaccinated. Self–report of previous doses acceptable (See Notes)
+
+
+                                                                                                                                                                                                                                                       
+       Recommended for all adults                         Not recommended for all                      Recommended based on                   Recommended for all adults,                 Precaution: Might be                 Contraindicated or not             No Guidance/
+       who lack documentation of                          adults, but recommended                      shared clinical decision–              and additional doses may be                 indicated if benefit of              recommended                        Not Applicable
+       vaccination, OR lack evidence                      for some adults based on                     making                                 necessary based on medical                  protection outweighs                 *Vaccinate after pregnancy,
+       of immunity                                        either age OR increased                                                             condition or other indications.             risk of adverse reaction             if indicated
+                                                          risk for or severe outcomes                                                         See Notes.
+                                                          from disease
+
+a. Precaution for LAIV3 does not apply to alcoholism.		               b. See Notes for influenza; hepatitis B; measles, mumps, and rubella; and varicella vaccinations.		         c. Hematopoietic stem cell transplant.
+
+                                                                                                                                                                                                                                                                           Page 3
+  Notes           Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+For vaccination recommendations for persons ages            COVID–19 vaccination
+18 years or younger, see the Recommended Child and
+Adolescent Immunization Schedule, 2025: www.cdc.gov/       Routine vaccination                                        Special situations
+vaccines/hcp/imz-schedules/child-adolescent-age.html       Age 19–64 years (not pregnant)                             Persons who are moderately or severely
+                                                           y Unvaccinated:                                            immunocompromised. Use vaccine from the same
+Additional Information
+                                                                                                                      manufacturer for all doses in the initial vaccination series.
+y For calculating intervals between doses, 4 weeks =         - 1 dose 2024–25 Moderna or Pfizer-BioNTech
+  28 days. Intervals of ≥4 months are determined by          - 2 doses 2024–25 Novavax at 0, 3–8 weeks                y Unvaccinated:
+  calendar months.                                                                                                      - 4 doses (3-dose initial series 2024–25 Moderna
+                                                           y Previously vaccinated before 2024–25 vaccine with:
+y Within a number range (e.g., 12–18), a dash (–) should                                                                  at 0, 4 weeks, and at least 4 weeks after dose 2,
+                                                             - 1 or more doses Moderna or Pfizer-BioNTech: 1 dose
+  be read as “through.”                                                                                                   followed by 1 dose 2024–25 Moderna or Novavax or
+                                                               2024–25 Moderna or Novavax or Pfizer-BioNTech at           Pfizer-BioNTech 6 months later [minimum interval
+y Vaccine doses administered ≤4 days before the                least 8 weeks after the most recent dose.
+  minimum age or interval are considered valid. Doses                                                                     2 months]). May administer additional doses.*
+                                                             - 1 dose Novavax: 1 dose 2024–25 Novavax 3–8 weeks
+  of any vaccine administered ≥5 days earlier than the                                                                  - 4 doses (3-dose initial series 2024–25 Pfizer-
+  minimum age or minimum interval should not be                after most recent dose. If more than 8 weeks after         BioNTech at 0, 3 weeks, and at least 4 weeks after
+  counted as valid and should be repeated. The repeat          most recent dose, administer 1 dose 2024–25                dose 2, followed by 1 dose 2024–25 Moderna or
+  dose should be spaced after the invalid dose by              Moderna or Novavax or Pfizer-BioNTech.                     Novavax or Pfizer-BioNTech 6 months later [minimum
+  the recommended minimum interval. For further              - 2 or more doses Novavax: 1 dose 2024–25 Moderna            interval 2 months]). May administer additional
+  details, see Table 3–2, Recommended and minimum              or Novavax or Pfizer-BioNTech at least 8 weeks after       doses.*
+  ages and intervals between vaccine doses, in General         the most recent dose.                                    - 3 doses (2-dose initial series 2024–25 Novavax at
+  Best Practice Guidelines for Immunization at www.cdc.      - 1 or more doses Janssen: 1 dose 2024–25 Moderna
+  gov/vaccines/hcp/imz-best-practices/timing-spacing-                                                                     0, 3 weeks, followed by 1 dose Moderna or Novavax
+                                                               or Novavax or Pfizer-BioNTech.                             or Pfizer-BioNTech 6 months later [minimum interval
+  immunobiologics.html.
+                                                           Age 65 years and older                                         2 months]). May administer additional doses.*
+y Information on travel vaccination requirements and
+  recommendations is available at www.cdc.gov/travel/.     y Unvaccinated: follow recommendations above               y Incomplete initial vaccination series before
+y For vaccination of persons with immunodeficiencies,        for unvaccinated persons ages 19–64 years and              2024–25 vaccine:
+  see Table 8–1, Vaccination of persons with primary         administer dose 2 of 2024–25 Moderna or Novavax            - Previous vaccination with Moderna
+  and secondary immunodeficiencies, in General               or Pfizer-BioNTech 6 months later (minimum interval           1 dose Moderna: complete initial series with
+  Best Practice Guidelines for Immunization at www.          2 months).                                                     2 doses 2024–25 Moderna at least 4 weeks apart
+  cdc.gov/vaccines/hcp/imz-best-practices/altered-                                                                          (administer dose 1 4 weeks after most recent dose),
+                                                           y Previously vaccinated before 2024–25 vaccine:
+  immunocompetence.html.                                                                                                    followed by 1 dose 2024–25 Moderna or Novavax or
+                                                             follow recommendations above for previously
+y For information about vaccination in the setting of a      vaccinated persons ages 19–64 years and administer             Pfizer-BioNTech 6 months later (minimum interval
+  vaccine–preventable disease outbreak, contact your         dose 2 of 2024–25 Moderna or Novavax or Pfizer-                2 months). May administer additional doses.*
+  state or local health department.
+                                                             BioNTech 6 months later (minimum interval 2 months).          2 doses Moderna: complete initial series with
+y The National Vaccine Injury Compensation Program                                                                          1 dose 2024–25 Moderna at least 4 weeks after
+  (VICP) is a no–fault alternative to the traditional                                                                       most recent dose, followed by 1 dose 2024–25
+  legal system for resolving vaccine injury claims. All                                                                     Moderna or Novavax or Pfizer-BioNTech 6 months
+  vaccines included in the adult immunization schedule
+                                                                                                                            later (minimum interval 2 months). May administer
+  except PPSV23, RSV, RZV, Mpox, and COVID–19
+  vaccines are covered by the National Vaccine Injury                                                                       additional doses.*
+  Compensation Program (VICP). Mpox and COVID–19
+  vaccines are covered by the Countermeasures Injury
+  Compensation Program (CICP). For more information,
+  see www.hrsa.gov/vaccinecompensation or www.
+  hrsa.gov/cicp.
+                                                                                                                                                                             Page 4
+  Notes           Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+ COVID-19 vaccination - continued                                                                                         Hepatitis A vaccination
+ - Previous vaccination with Pfizer-BioNTech                 *Additional doses of 2024–25 COVID-19 vaccine               Routine vaccination
+   1 dose Pfizer-BioNTech: complete initial series          for moderately or severely immunocompromised:               y Any person who is not fully vaccinated and requests
+     with 2 doses 2024–25 Pfizer-BioNTech at least           based on shared clinical decision-making and                  vaccination (identification of risk factor not required):
+     4 weeks apart (administer dose 1 3 weeks after          administered at least 2 months after the most recent          complete 2-dose series HepA (Havrix 6–12 months
+     most recent dose), followed by 1 dose 2024–25           dose (see Table 2 at www.cdc.gov/covid/hcp/vaccine-           apart or Vaqta 6–18 months apart [minimum interval:
+     Moderna or Novavax or Pfizer-BioNTech 6 months          considerations/immunocompromised.html#heading-                6 months]) or 3-dose series HepA–HepB (Twinrix at 0,
+     later (minimum interval 2 months). May administer       afhenymeej). For description of moderate and severe           1, 6 months [minimum intervals: dose 1 to dose 2 =
+     additional doses.*                                      immunocompromising conditions and treatment,                  4 weeks; dose 2 to dose 3 = 5 months])
+    2 doses Pfizer-BioNTech: complete initial series with   see www.cdc.gov/covid/hcp/vaccine-considerations/
+                                                                                                                         Special situations
+     1 dose 2024–25 Pfizer-BioNTech at least 4 weeks         immunocompromised.html#heading-ijufqampvj.
+                                                                                                                         y Any person who is not fully vaccinated and who is at
+     after most recent dose, followed by 1 dose 2024–25      Unvaccinated persons have never received any
+                                                                                                                           risk for hepatitis A virus infection or severe disease
+     Moderna or Novavax or Pfizer-BioNTech 6 months          COVID-19 vaccine doses. There is no preferential
+                                                                                                                           from hepatitis A virus infection: complete 2-dose
+     later (minimum interval 2 months). May administer       recommendation for the use of one COVID-19 vaccine
+                                                                                                                           series HepA or 3-dose series HepA–HepB as above.
+     additional doses.*                                      over another when more than one recommended age-
+                                                                                                                           Risk factors include:
+ - Previous vaccination with Novavax                         appropriate vaccine is available. Administer an age-
+                                                                                                                           - Chronic liver disease including persons with
+    1 dose Novavax: complete initial series with            appropriate COVID-19 vaccine product for each dose.
+                                                                                                                             hepatitis B, hepatitis C, cirrhosis, fatty liver disease,
+     1 dose 2024–25 Novavax at least 3 weeks after           For information about interchangeability of COVID-19            alcoholic liver disease, autoimmune hepatitis, alanine
+     most recent dose, followed by 1 dose 2024–25            vaccines, see www.cdc.gov/covid/hcp/vaccine-                    aminotransferase (ALT) or aspartate aminotransferase
+     Moderna or Novavax or Pfizer-BioNTech 6 months          considerations/implementation.html#cdc_clinical_                (AST) level greater than twice the upper limit of
+     later (minimum interval 2 months). May administer       guidance_prevent_key-interchangeability-of-covid-19-            normal.
+     additional doses.*                                      vaccines.
+                                                                                                                           - HIV infection
+y Completed the initial vaccination series before            Current COVID-19 schedule and dosage formulation              - Men who have sex with men
+ 2024–25 vaccine with:                                       available at www.cdc.gov/covid/hcp/vaccine-
+                                                                                                                           - Injection or noninjection drug use
+ - 3 or more doses Moderna or 3 or more doses Pfizer-        considerations/index.html. For more information on
+                                                                                                                           - Persons experiencing homelessness
+   BioNTech: 2 doses 2024–25 Moderna or Novavax or           Emergency Use Authorization (EUA) indications for
+                                                             COVID-19 vaccines, see www.fda.gov/emergency-                 - Work with hepatitis A virus in research laboratory
+   Pfizer-BioNTech 6 months apart (minimum interval
+   2 months). Administer dose 1 at least 8 weeks after       preparedness-and-response/coronavirus-disease-2019-             or with nonhuman primates with hepatitis A
+   the most recent dose. May administer additional           covid-19/covid-19-vaccines.                                     virus infection
+   doses.*                                                                                                                 - Travel in countries with high or intermediate
+                                                              Haemophilus influenzae type b vaccination                      endemic hepatitis A: HepA–HepB (Twinrix) may be
+ - 2 or more doses Novavax: 2 doses 2024–25 Moderna
+   or Novavax or Pfizer-BioNTech 6 months apart                                                                              administered on an accelerated schedule of 3 doses
+                                                             Special situations
+   (minimum interval 2 months). Administer dose                                                                              at 0, 7, and 21–30 days, followed by a booster dose
+                                                             y Anatomical or functional asplenia (including sickle           at 12 months.
+   1 at least 8 weeks after the most recent dose. May          cell disease): 1 dose if previously did not receive Hib
+   administer additional doses.*                                                                                           - Close, personal contact with international adoptee
+                                                               vaccine                                                       (e.g., household or regular babysitting) in first 60 days
+                                                               - Elective splenectomy: 1 dose preferably at least            after arrival from country with high or intermediate
+                                                                 14 days before splenectomy                                  endemic hepatitis A: dose 1 as soon as adoption
+                                                             y Hematopoietic stem cell transplant (HSCT):                    is planned; preferably at least 2 weeks before
+                                                               3-dose series 4 weeks apart starting 6–12 months              adoptee’s arrival.
+                                                               after successful transplant, regardless of Hib
+                                                               vaccination history                                                                                              Page 5
+ Notes           Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+
+Hepatitis A vaccination - continued                       Hepatitis B vaccination                                          Current or recent injection drug use
+                                                                                                                           Percutaneous or mucosal risk for exposure to
+- Pregnancy if at risk for infection or severe outcome   Routine vaccination
+                                                                                                                            blood e.g., household contacts of HBsAg–positive
+  from infection during pregnancy                        y Age 19 through 59 years: complete a 2- or 3- or                  persons, residents and staff of facilities for
+- Settings for exposure, including health care setting     4-dose series                                                    developmentally disabled persons, health care and
+  serving persons who use injection or noninjection        - 2-dose series only applies when 2 doses of                     public safety personnel with reasonably anticipated
+  drugs, or group homes and nonresidential day care          Heplisav–B are used at least 4 weeks apart                     risk for exposure to blood or blood–contaminated
+  facilities for developmentally disabled persons          - 3-dose series Engerix–B, PreHevbrio*, or Recombivax            body fluids, persons on maintenance dialysis
+  (individual risk factor screening not required)            HB at 0, 1, 6 months (minimum intervals: dose 1 to             (including in–center or home hemodialysis and
+                                                             dose 2 = 4 weeks; dose 2 to dose 3 = 8 weeks; dose 1           peritoneal dialysis), persons who are predialysis,
+                                                             to dose 3 = 16 weeks)                                          and patients with diabetes**
+                                                           - 3-dose series HepA–HepB (Twinrix) at 0, 1, 6 months           Incarceration
+                                                             (minimum intervals: dose 1 to dose 2 = 4 weeks; dose          Travel in countries with high or intermediate
+                                                             2 to dose 3 = 5 months)                                        endemic hepatitis B
+                                                           - 4-dose series HepA–HepB (Twinrix) accelerated              **Age 60 years or older with diabetes: Based on
+                                                             schedule of 3 doses at 0, 7, and 21–30 days, followed      shared clinical decision making, 2-, 3-, or 4-dose series
+                                                             by a booster dose at 12 months                             as above.
+                                                         *Note: PreHevbrio is not recommended in pregnancy              Special situations
+                                                         due to lack of safety data in pregnant women.                  y Patients on dialysis: complete a 3- or 4-dose series
+                                                         y Age 60 years or older without known risk factors               - 3-dose series Recombivax HB at 0, 1, 6 months
+                                                           for hepatitis B virus infection may receive a HepB               (Note: Use Dialysis Formulation 1 mL = 40 mcg)
+                                                           vaccine series.                                                - 4-dose series Engerix–B at 0, 1, 2, and 6 months
+                                                         y Age 60 years or older with known risk factors for                (Note: Use 2 mL dose instead of the normal adult
+                                                           hepatitis B virus infection should receive a HepB                dose of 1 mL)
+                 WHITE SPACE                               vaccine series.                                              y Age 20 years or older with an immunocompromising
+                INTENTIONALLY                            y Any adult age 60 years of age or older who requests           condition: complete a 2- or 3- or 4-dose series.
+                  LEFT BLANK                               HepB vaccination should receive a HepB vaccine series.        - 3-dose series Recombivax HB at 0,1, 6 months
+                                                           - Risk factors for hepatitis B virus infection include:         (Note: Use Dialysis Formulation 1ml = 40 mcg)
+                                                              Chronic liver disease including persons                   - 4-dose series Engerix–B at 0,1,2, and 6 months
+                                                               with hepatitis C, cirrhosis, fatty liver disease,           (Note: Use 2mL dose instead of the normal adult
+                                                               alcoholic liver disease, autoimmune hepatitis,              dose of 1mL)
+                                                               alanine aminotransferase (ALT) or aspartate               - 2-doses series Heplisav–B at 0, 1 months
+                                                               aminotransferase (AST) level greater than twice the       - 3-dose series PreHevbrio* at 0,1, 6 months
+                                                               upper limit of normal.
+                                                              HIV infection
+                                                              Sexual exposure risk e.g., sex partners of hepatitis B
+                                                               surface antigen (HBsAg)–positive persons, sexually
+                                                               active persons not in mutually monogamous
+                                                               relationships, persons seeking evaluation or
+                                                               treatment for a sexually transmitted infection,
+                                                               men who have sex with men
+                                                                                                                                                                              Page 6
+  Notes            Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+
+ Human papillomavirus vaccination                               Influenza vaccination                                        Measles, mumps, and rubella vaccination
+Routine vaccination                                            Routine vaccination                                          Routine vaccination
+y All persons through age 26 years: complete 2– or             y Age 19 years or older: 1 dose any influenza vaccine        y No evidence of immunity to measles, mumps, or
+  3-dose series depending on age at initial vaccination          appropriate for age and health status annually               rubella: 1 dose
+  or condition.                                                  - Solid organ transplant recipients aged 19                  - Evidence of immunity: Born before 1957 (except for
+  - Age 9–14 years at initial vaccination and received             through 64 years receiving immunosuppressive                 health care personnel, see below), documentation
+    1 dose or 2 doses less than 5 months apart:                    medications: HD–IIV3 and aIIV3 are acceptable                of receipt of MMR vaccine, laboratory evidence of
+    1 additional dose                                              options. No preference over other age–appropriate            immunity or disease (diagnosis of disease without
+  - Age 9–14 years at initial vaccination and received             IIV3 or RIV3.                                                laboratory confirmation is not evidence of immunity)
+    2 doses at least 5 months apart: HPV vaccination             - Age 65 years or older: Any one of HD-IIV3, RIV3, or      Special situations
+    series complete, no additional dose needed                     aIIV3 is preferred. If none of these three vaccines is   y Pregnancy with no evidence of immunity to rubella:
+  - Age 15 years or older at initial vaccination: 3-dose           available, then any other age–appropriate influenza        MMR contraindicated during pregnancy; after
+    series at 0, 1–2 months, 6 months (minimum                     vaccine should be used.                                    pregnancy (before discharge from health care facility):
+    intervals: dose 1 to dose 2 = 4 weeks; dose 2 to dose      y For the 2024–25 season, see www.cdc.gov/mmwr/                1 dose
+    3 = 12 weeks; dose 1 to dose 3 = 5 months; repeat            volumes/73/rr/rr7305a1.htm                                 y Nonpregnant women of childbearing age with no
+    dose if administered too soon)
+                                                               y For the 2025–26 season, see the 2025–26 ACIP                 evidence of immunity to rubella: 1 dose
+y No additional dose recommended when any HPV                    influenza vaccine recommendations.                         y HIV infection with CD4 percentages ≥15% and CD4
+  vaccine series of any valency has been completed             Special situations                                             count ≥200 cells/mm3 for at least 6 months and no
+  using the recommended dosing intervals.
+                                                               y Close contacts (e.g., caregivers, healthcare                 evidence of immunity to measles, mumps, or rubella:
+Shared clinical decision–making                                  workers) of severely immunosuppressed persons                complete 2-dose series at least 4 weeks apart; MMR
+y Adults age 27–45 years: Based on shared clinical               who require a protected environment: should not              contraindicated for HIV infection with CD4 percentage
+  decision–making, complete a 2-dose series (if initiated        receive LAIV3. If LAIV3 is given, they should avoid          <15% or CD4 count <200 cells/mm3
+  age 9–14 years) or 3-dose series (if initiated ≥15 years).     contact with/caring for such immunosuppressed              y Severe immunocompromising conditions:
+For additional information on shared clinical decision–          persons for 7 days after vaccination.                        MMR contraindicated
+making for HPV; see www.cdc.gov/vaccines/hcp/admin/            Note: Persons with an egg allergy can receive any            y Students in postsecondary educational institutions,
+downloads/isd–job–aid–scdm–hpv–shared–clinical–                influenza vaccine (egg-based or non–egg based)                 international travelers, and household or close,
+decision–making–hpv.pdf                                        appropriate for age and health status.                         personal contacts of immunocompromised persons
+Special situations                                                                                                            with no evidence of immunity to measles, mumps,
+y Age ranges recommended above for routine and                                                                                or rubella: complete 2-dose series at least 4 weeks
+  catch–up vaccination or shared clinical decision–                                                                           apart if previously did not receive any doses of MMR
+  making also apply in special situations                                                                                     or 1 dose if previously received 1 dose MMR
+  - Immunocompromising conditions, including HIV                                                                            y In mumps outbreak settings, for information about
+    infection: complete 3-dose series, even for those                                                                         additional doses of MMR (including 3rd dose of MMR), see
+                                                                                   WHITE SPACE
+    who initiate vaccination at age 9 through 14 years.                                                                       www.cdc.gov/mmwr/volumes/67/wr/mm6701a7.htm
+                                                                                  INTENTIONALLY
+  - Pregnancy: Pregnancy testing is not needed before
+    vaccination. HPV vaccination is not recommended                                 LEFT BLANK
+    until after pregnancy. No intervention needed if
+    inadvertently vaccinated while pregnant.
+
+
+                                                                                                                                                                                 Page 7
+  Notes          Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+
+ Measles, mumps, and rubella vaccination                   Meningococcal vaccination
+ - continued
+                                                          Special situations for MenACWY                               Special situations for MenB
+y Health care personnel:                                  y Anatomical or functional asplenia (including sickle        y Anatomical or functional asplenia (including sickle
+ - Born before 1957 with no evidence of immunity            cell disease), HIV infection, persistent complement          cell disease), persistent complement component
+   to measles, mumps, or rubella: Consider 2-dose           component deficiency, complement inhibitor (e.g.,            deficiency, complement inhibitor (e.g., eculizumab,
+   series at least 4 weeks apart for protection against     eculizumab, ravulizumab) use: 2-dose primary                 ravulizumab) use, or microbiologists routinely
+   measles or mumps or 1 dose for protection against        series Menveo or MenQuadfi at least 8 weeks apart;           exposed to Neisseria meningitidis.
+   rubella.                                                 1 booster dose 5 years after primary series and every        - Bexsero or Trumenba (use same brand for all doses
+                                                            5 years if risk remains                                        including booster doses): 3-dose primary series at
+ - Born in 1957 or later with no evidence of immunity
+   to measles, mumps, or rubella: complete 2-dose         y Travel in countries with hyperendemic or epidemic              0, 1–2, 6 months (if dose 2 was administered at least
+   series at least 4 weeks apart for protection against     meningococcal disease, or for microbiologists                  6 months after dose 1, dose 3 not needed; if dose 3
+   measles or mumps or at least 1 dose for protection       routinely exposed to Neisseria meningitidis: 1 dose            is administered earlier than 4 months after dose 2, a
+   against rubella.                                         Menveo or MenQuadfi; 1 booster dose 5 years after              4th dose should be administered at least 4 months
+                                                            primary series and every 5 years if risk remains               after dose 3).
+                                                          y First–year college students who live in residential          - Booster doses: 1 booster dose one year after primary
+                                                            housing (if not previously vaccinated at age 16 years          series and every 2–3 years if risk remains
+                                                            or older) or military recruits: 1 dose Menveo or           y Pregnancy: Delay MenB until after pregnancy due to
+                                                            MenQuadfi                                                    lack of safety data in pregnant women. May administer
+                                                          Note: MenACWY vaccines may be administered                     if at increased risk and vaccination benefits outweigh
+                                                          simultaneously with MenB vaccines if indicated, but            potential risks.
+                                                          at a different anatomic site, if feasible.
+                                                                                                                       For MenB recommendations in outbreak setting (e.g.,
+                                                          For MenACWY recommendations in outbreak setting              in community or organizational settings, or among men
+                                                          (e.g., in community or organizational settings, or           who have sex with men) and additional meningococcal
+                                                          among men who have sex with men) and additional              vaccination information, see ww.cdc.gov/mmwr/
+                                                          meningococcal vaccination information, see www.cdc.          volumes/69/rr/rr6909a1.htm.
+                                                          gov/mmwr/volumes/69/rr/rr6909a1.htm
+                                                                                                                       Note: MenB vaccines may be administered
+                  WHITE SPACE                             Shared clinical decision–making for MenB                     simultaneously with MenACWY vaccines if indicated,
+                                                          y Adolescents and young adults age 16–23 years               but at a different anatomic site, if feasible.
+                 INTENTIONALLY
+                                                            (age 16–18 years preferred)* not at increased risk
+                   LEFT BLANK                               for meningococcal disease: based on shared clinical        Adults may receive a single dose of Penbraya
+                                                            decision–making                                            (MenACWY–TT/MenB–FHbp) as an alternative to
+                                                            - Bexsero or Trumenba (use same brand for all
+                                                                                                                       separate administration of MenACWY and MenB when
+                                                              doses): 2-dose series at least 6 months apart (if dose   both vaccines would be given on the same clinic day.
+                                                              2 is administered earlier than 6 months, administer      For adults not at increased risk, if Penbraya is used for
+                                                              dose 3 at least 4 months after dose 2)                   dose 1 MenB, then MenB–FHbp (Trumenba) should be
+                                                                                                                       administered for dose 2 MenB. For adults at increased
+                                                          *To optimize rapid protection (e.g., for students starting
+                                                                                                                       risk of meningococcal disease, Penbraya may be used
+                                                          college in less than 6 months), a 3-dose series (0, 1–2,
+                                                                                                                       for additional MenACWY and MenB doses (including
+                                                          6 months) may be administered.
+                                                                                                                       booster doses) if both would be given on the same
+                                                          For additional information on shared clinical decision–      clinic day and at least 6 months have elapsed since
+                                                          making for MenB, see www.cdc.gov/vaccines/media/             most recent Penbraya dose.
+                                                          pdfs/2025/03/2024-isd-job-aid-scdm-menb-508-
+                                                          remediated.pdf
+                                                                                                                                                                           Page 8
+  Notes            Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+
+ Mpox vaccination                                              Pneumococcal vaccination
+Special situations                                            Routine vaccination                                          Special situations
+y Any person at risk for mpox infection: complete             y Age 50 years or older who have:                            y Age 19–49 years with certain underlying medical
+  2-dose series, 28 days apart.                                 - Not previously received a dose of PCV13, PCV15,            conditions or other risk factors** who have:
+  Risk factors for mpox infection include:                        PCV20, or PCV21 or whose previous vaccination              - Not previously received a PCV13, PCV15, PCV20,
+  - Persons who are gay or bisexual, and other MSM,               history is unknown: 1 dose PCV15 or 1 dose PCV20             or PCV21 or whose previous vaccination history is
+    transgender or nonbinary people who in the past               or 1 dose PCV21                                              unknown: 1 dose PCV15 or 1 dose PCV20 or 1 dose
+    6 months have had:                                             If PCV15 is used, administer 1 dose PPSV23 at least        PCV21
+     A new diagnosis of at least 1 sexually transmitted            1 year after the PCV15 dose (may use minimum                If PCV15 is used, administer 1 dose PPSV23
+      disease                                                       interval of 8 weeks for adults with an                       at least 1 year after the PCV15 dose (may use
+     More than 1 sex partner                                       immunocompromising condition,* cochlear                      minimum interval of 8 weeks for adults with
+     Sex at a commercial sex venue                                 implant, or cerebrospinal fluid leak).                       an immunocompromising condition,* cochlear
+                                                                - Previously received only PCV7: follow the                      implant, or cerebrospinal fluid leak).
+     Sex in association with a large public event in
+      a geographic area where mpox transmission is                recommendation above.                                      - Previously received only PCV7: follow the
+      occurring                                                 - Previously received only PCV13: 1 dose PCV20 or              recommendation above.
+  - Persons who are sexual partners of the persons                1 dose PCV21 at least 1 year after the last PCV13 dose     - Previously received only PCV13: 1 dose PCV20 or
+    described above                                             - Previously received only PPSV23: 1 dose PCV15 or             1 dose PCV21 at least 1 year after the last PCV13 dose
+  - Persons who anticipate experiencing any of the                1 dose PCV20 or 1 dose PCV21, at least 1 year after        - Previously received only PPSV23: 1 dose PCV15 or
+    situations described above                                    the last PPSV23 dose.                                        1 dose PCV20 or 1 dose PCV21, at least 1 year after
+                                                                   If PCV15 is used, no additional PPSV23 doses are           the last PPSV23 dose.
+y Pregnancy: There is currently no ACIP recommendation
+                                                                    recommended.                                                If PCV15 is used, no additional PPSV23 doses are
+  for Jynneos use in pregnancy due to lack of safety data
+                                                                - Previously received both PCV13 and PPSV23 but                  recommended.
+  in pregnant women. Pregnant women with any risk
+  factor described above may receive Jynneos.                     NO PPSV23 was received at age 65 years or older:           - Previously received PCV13 and 1 dose of PPSV23:
+                                                                  1 dose PCV20 or 1 dose PCV21 at least 5 years after           Cochlear implant, cerebrospinal fluid leak, or an
+y Health care personnel: Vaccination to protect against
+                                                                  the last pneumococcal vaccine dose.                            immunocompromising condition*: 1 dose PCV20
+  occupational risk in healthcare settings is not routinely
+                                                                - Previously received both PCV13 and PPSV23, AND                 or 1 dose PCV21 at least 5 years after the last
+  recommended.
+                                                                  PPSV23 was received at age 65 years or older: Based            pneumococcal vaccine dose.
+  For detailed information, see www.cdc.gov/monkeypox/            on shared clinical decision–making, 1 dose of PCV20           Alcoholism, chronic heart/liver/lung disease,
+  hcp/vaccine-considerations/.                                    or 1 dose of PCV21 at least 5 years after the last             cigarette smoking, or diabetes mellitus: no
+                                                                  pneumococcal vaccine dose.                                     additional PCV or PPSV23 doses recommended at
+                                                                                                                                 this time. Review pneumococcal recommendations
+                                                                                                                                 when age 50 years or older.
+                                                                                                                           Adults aged 19 years and older who have received
+                                                                                                                           PCV20 or PCV21: no additional pneumococcal vaccine
+                                                                                                                           dose recommended.
+                                                  WHITE SPACE
+                                                 INTENTIONALLY                                                             Pregnancy: no recommendation for PCV or PPSV23
+                                                                                                                           due to limited data. Summary of existing data on
+                                                   LEFT BLANK
+                                                                                                                           pneumococcal vaccination during pregnancy can
+                                                                                                                           be found at www.cdc.gov/mmwr/volumes/72/rr/
+                                                                                                                           rr7203a1.htm.
+                                                                                                                                                                                Page 9
+  Notes            Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+
+ Pneumococcal vaccination - continued                          Poliovirus vaccination                                       Respiratory syncytial virus vaccination
+PPSV23 not available: adults aged 19 years or older           Routine vaccination                                          Routine vaccination
+who received PCV15 but have not yet completed                 y Adults known or suspected to be unvaccinated               y Pregnant women of any age:
+PPSV23 series, can complete the series with either              or incompletely vaccinated: administer remaining             - Pregnant at 32 weeks 0 days through 36 weeks
+1 dose of PCV20 or 1 dose of PCV21 if they no longer            doses (1, 2, or 3 IPV doses) to complete a 3-dose              and 6 days gestation from September through
+have access to PPSV23.                                          primary series.* Unless there are specific reasons to          January in most of the continental United States*:
+For guidance on determining which pneumococcal                  believe they were not vaccinated, most adults who              1 dose Abrysvo. Administer RSV vaccine regardless
+vaccines a patient needs and when, please refer to              were born and raised in the United States can assume           of previous RSV infection.
+the mobile app which can be downloaded here:                    they were vaccinated against polio as children.              - Either maternal RSV vaccination with Abrysvo
+www.cdc.gov/pneumococcal/hcp/vaccine-                         Special situations                                               or infant immunization with nirsevimab (RSV
+recommendations/app.html.                                     y Adults at increased risk for exposure to poliovirus            monoclonal antibody) is recommended to prevent
+*Note: Immunocompromising conditions                            who completed primary series*: may administer one              severe respiratory syncytial virus disease in infants.
+include chronic renal failure, nephrotic syndrome,              lifetime IPV booster.                                        - All other pregnant women: RSV vaccine not
+immunodeficiencies, iatrogenic immunosuppression,             *Note: Complete primary series consists of at least              recommended
+generalized malignancy, HIV infection, Hodgkin disease,       3 doses of IPV or trivalent oral poliovirus vaccine (tOPV)     - Subsequent pregnancies: additional doses not
+leukemia, lymphoma, multiple myeloma, solid organ             in any combination.                                              recommended. No data are available to inform
+transplant, congenital or acquired asplenia, or sickle cell                                                                    whether additional doses are needed in subsequent
+disease or other hemoglobinopathies.                          For detailed information, see www.cdc.gov/polio/hcp/
+                                                                                                                               pregnancies. Infants born to pregnant women who
+                                                              vaccine-considerations/index.html
+**Note: Underlying medical conditions or other                                                                                 received RSV vaccine during a previous pregnancy
+risk factors include alcoholism, chronic heart/liver/                                                                          should receive nirsevimab.
+lung disease, chronic renal failure, cigarette smoking,                                                                    *Note: Providers in jurisdictions with RSV seasonality
+cochlear implant, congenital or acquired asplenia,                                                                         that differs from most of the continental United States
+CSF leak, diabetes mellitus, generalized malignancy,                                                                       (e.g., Alaska, jurisdictions with tropical climate) should
+HIV infection, Hodgkin disease, immunodeficiencies,                                                                        follow guidance from public health authorities on
+iatrogenic immunosuppression, leukemia, lymphoma,                                                                          timing of administration. Refer to the 2025 Child and
+multiple myeloma, nephrotic syndrome, solid                                                                                Adolescent Immunization Schedule for considerations
+organ transplant, or sickle cell disease or other                                                                          regarding nirsevimab administration to infants.
+hemoglobinopathies.
+                                                                                                                           Age 75 years or older
+                                                                                 WHITE SPACE                               y Unvaccinated: 1 dose (Arexvy or Abrysvo or mResvia).
+                                                                                INTENTIONALLY                                Additional doses not recommended
+                                                                                  LEFT BLANK                               y Previously vaccinated: additional doses not
+                                                                                                                             recommended. No data are available to inform
+                                                                                                                             whether additional doses are needed.
+
+
+
+
+                                                                                                                                                                               Page 10
+  Notes            Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+
+ Respiratory syncytial virus vaccination - continued                                                                      Tetanus, diphtheria, and pertussis vaccination
+Special situations                                          - Chronic hematologic conditions e.g., sickle cell           Routine vaccination
+y Age 50–74 years:                                           disease, thalassemia
+                                                                                                                         y Completed primary series and received at least
+  ‑ Unvaccinated and at increased risk of severe RSV        - Severe obesity (body mass index ≥ 40 kg/m2)                  1 dose Tdap at age 10 years or older: Td or Tdap every
+    disease**: 1 dose (Arexvy or Abrysvo or mResvia).       - Moderate or severe immune compromise                         10 years thereafter
+    Additional doses not recommended.                                                                                    y Completed primary series and did NOT receive Tdap
+                                                            - Residence in a nursing home
+  ‑ Previously vaccinated: additional doses not                                                                            at age 10 years or older: 1 dose Tdap, then Td or Tdap
+                                                            - Other chronic medical conditions or risk factors that
+    recommended. No data are available to inform                                                                           every 10 years thereafter
+    whether additional doses are needed.                     a health care provider determines would increase the
+                                                             risk of severe disease due to viral respiratory infection   y Unvaccinated or incomplete primary vaccination
+Persons 50 years and older can get RSV vaccine at any        e.g., frailty, concern for presence of undiagnosed            series for tetanus, diphtheria, or pertussis: administer
+time but it is best to administer in late summer and         chronic medical conditions, residence in a remote             remaining doses (1, 2, or 3 doses) to complete 3-dose
+early fall before RSV spreads in communities—ideally         or rural community where escalation of medical care           primary series. 1 dose Tdap followed by 1 dose Td or
+August through October in most of continental United         is challenging.                                               Tdap at least 4 weeks later, and a third dose of Td or
+States. For further guidance, see www.cdc.gov/mmwr/                                                                        Tdap 6–12 months later (Tdap is preferred as first dose
+volumes/73/wr/mm7332e1.htm.                                                                                                and can be substituted for any Td dose), then Td or
+**Note: People can self–attest to the presence of a risk                                                                   Tdap every 10 years thereafter.
+factor. The following medical and other conditions                                                                       Special situations
+increase the risk of severe RSV disease:                                                                                 y Pregnancy: 1 dose Tdap during each pregnancy,
+ - Chronic cardiovascular disease e.g., heart failure,                                                                     preferably in early part of gestational weeks 27–36
+  coronary artery disease, congenital heart disease.                                                                     y Wound management: Persons with 3 or more doses
+  Excludes isolated hypertension.                                                                                          of tetanus–toxoid–containing vaccine: For clean and
+ - Chronic lung or respiratory disease e.g., chronic                                                                       minor wounds, administer Tdap or Td if more than 10
+  obstructive pulmonary disease, emphysema, asthma,                                                                        years since last dose of tetanus–toxoid–containing
+  interstitial lung disease, cystic fibrosis                                                                               vaccine; for all other wounds, administer Tdap or Td if
+                                                                                                                           more than 5 years since last dose of tetanus–toxoid–
+ - End stage renal disease or dependence on
+                                                                              WHITE SPACE                                  containing vaccine. Tdap is preferred for persons who
+  hemodialysis or other renal replacement therapy
+                                                                                                                           have not previously received Tdap or whose Tdap
+ - Diabetes mellitus complicated by chronic kidney                           INTENTIONALLY                                 history is unknown. If a tetanus–toxoid–containing
+  disease, neuropathy, retinopathy, or other end–organ                         LEFT BLANK                                  vaccine is indicated for a pregnant woman, use Tdap.
+  damage                                                                                                                   For detailed information, see www.cdc.gov/mmwr/
+ - Diabetes mellitus requiring treatment with insulin or                                                                   volumes/69/wr/mm6903a5.htm
+  sodium–glucose cotransporter 2 (SGLT2) inhibitor
+ - Neurologic or neuromuscular conditions causing
+  impaired airway clearance or respiratory muscle
+  weakness e.g., post–stroke dysphagia, amyotrophic
+  lateral sclerosis, muscular dystrophy. Excludes history
+  of stroke without impaired airway clearance.
+ - Chronic liver disease e.g., cirrhosis
+
+
+
+                                                                                                                                                                             Page 11
+  Notes            Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+
+ Varicella vaccination                                          Zoster vaccination
+Routine vaccination                                            Routine vaccination
+y No evidence of immunity to varicella: 2-dose series          y Age 50 years or older*: 2-dose series recombinant
+  4–8 weeks apart if previously did not receive varicella–       zoster vaccine (RZV, Shingrix) 2–6 months apart
+  containing vaccine (VAR or MMRV [measles–mumps–                (minimum interval: 4 weeks; repeat dose if
+  rubella–varicella vaccine] for children); if previously        administered too soon), regardless of previous
+  received 1 dose varicella–containing vaccine, 1 dose at        herpes zoster or history of zoster vaccine live
+  least 4 weeks after first dose.                                (ZVL, Zostavax) vaccination.
+  - Evidence of immunity: U.S.–born before 1980                *Note: Serologic evidence of prior varicella is not
+    (except for pregnant women and health care                 necessary for zoster vaccination. However, if serologic
+    personnel [see below]), documentation of 2 doses           evidence of varicella susceptibility becomes available,
+    varicella–containing vaccine at least 4 weeks apart,       providers should follow ACIP guidelines for varicella
+    diagnosis or verification of history of varicella or       vaccination first. RZV is not indicated for the prevention
+    herpes zoster by a health care provider, laboratory        of varicella, and there are limited data on the use of
+    evidence of immunity or disease.                           RZV in persons without a history of varicella or varicella
+Special situations                                             vaccination.
+y Pregnancy with no evidence of immunity to                    Special situations
+  varicella: VAR contraindicated during pregnancy;             y Pregnancy: There is currently no ACIP
+  after pregnancy (before discharge from health care             recommendation for RZV use in pregnancy.                    WHITE SPACE
+  facility), 1 dose if previously received 1 dose varicella–     Consider delaying RZV until after pregnancy.               INTENTIONALLY
+  containing vaccine or dose 1 of 2-dose series
+  (dose 2: 4–8 weeks later) if previously did not receive
+                                                               y Immunocompromising conditions (including                     LEFT BLANK
+                                                                 persons with HIV regardless of CD4 count)**: 2-dose
+  any varicella–containing vaccine, regardless of
+                                                                 series recombinant zoster vaccine (RZV, Shingrix)
+  whether U.S.–born before 1980.
+                                                                 2–6 months apart (minimum interval: 4 weeks;
+y Health care personnel with no evidence of immunity             repeat dose if administered too soon). For detailed
+  to varicella: 1 dose if previously received 1 dose             information, see www.cdc.gov/shingles/hcp/vaccine–
+  varicella–containing vaccine; 2-dose series 4–8 weeks          considerations/immunocompromised–adults.html
+  apart if previously did not receive any varicella–
+                                                               **Note: If there is no documented history of varicella,
+  containing vaccine, regardless of whether U.S.–born
+                                                               varicella vaccination, or herpes zoster, providers should
+  before 1980.
+                                                               refer to the clinical considerations for use of RZV in
+y HIV infection with CD4 percentages ≥15% and CD4              immunocompromised adults aged ≥19 years and the
+  count ≥200 cells/mm3 with no evidence of immunity:           ACIP varicella vaccine recommendations for further
+  Vaccination may be considered (2 doses 3 months              guidance: www.cdc.gov/mmwr/volumes/71/wr/
+  apart); VAR contraindicated for HIV infection with CD4       mm7103a2.htm
+  percentage <15% or CD4 count <200 cells/mm3.
+y Severe immunocompromising conditions:
+  VAR contraindicated
+
+
+
+
+                                                                                                                                            Page 12
+    Appendix                          Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+Contraindications and Precautions to Commonly Used Vaccines
+Adapted from Table 4–1 in Advisory Committee on Immunization Practices (ACIP) General Best Practice Guidelines for Immunization: Contraindication and Precautions, Prevention and Control of Seasonal Influenza with
+Vaccines: Recommendations of the Advisory Committee on Immunization Practices—United States, 2024–25 Influenza Season | MMWR (cdc.gov), and Contraindications and Precautions for COVID–19 Vaccination
+
+ Vaccines and Other
+                                   Contraindicated or Not Recommended1                                                                      Precautions2
+ Immunizing Agents
+ COVID–19 mRNA vaccines            • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a component of                • Diagnosed non–severe allergy (e.g., urticaria beyond the injection site) to a component of
+ [Pfizer–BioNTech, Moderna]          an mRNA COVID–19 vaccine3                                                                                an mRNA COVID–19 vaccine3; or non–severe, immediate (onset less than 4 hours) allergic
+                                                                                                                                              reaction after administration of a previous dose of an mRNA COVID–19 vaccine
+                                                                                                                                            • Myocarditis or pericarditis within 3 weeks after a dose of any COVID–19 vaccine
+                                                                                                                                            • Multisystem inflammatory syndrome in children (MIS–C) or multisystem inflammatory
+                                                                                                                                              syndrome in adults (MIS–A)
+                                                                                                                                            • Moderate or severe acute illness, with or without fever
+ COVID–19 protein subunit          • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a component of a              • Diagnosed non–severe allergy (e.g., urticaria beyond the injection site) to a component of
+ vaccine                             Novavax COVID–19 vaccine3                                                                                Novavax COVID–19 vaccine3; or non–severe, immediate (onset less than 4 hours) allergic
+ [Novavax]                                                                                                                                    reaction after administration of a previous dose of a Novavax COVID–19 vaccine
+                                                                                                                                            • Myocarditis or pericarditis within 3 weeks after a dose of any COVID–19 vaccine
+                                                                                                                                            • Multisystem inflammatory syndrome in children (MIS–C) or multisystem inflammatory
+                                                                                                                                              syndrome in adults (MIS–A)
+                                                                                                                                            • Moderate or severe acute illness, with or without fever
+ Influenza, egg-based,             • Severe allergic reaction (e.g., anaphylaxis) after previous dose of any influenza vaccine              • Guillain–Barré syndrome (GBS) within 6 weeks after a previous dose of any
+ inactivated injectable (IIV3)       (i.e., any egg-based IIV, ccIIV, RIV, or LAIV of any valency)                                            type of influenza vaccine
+                                   • Severe allergic reaction (e.g., anaphylaxis) to any vaccine component4 (excluding egg)                 • Moderate or severe acute illness with or without fever
+ Influenza, cell culture–based     • Severe allergic reaction (e.g., anaphylaxis) to any ccIIV of any valency, or to any                    • Guillain–Barré syndrome (GBS) within 6 weeks after a previous dose of any
+ inactivated injectable (ccIIV3)     component4 of ccIIV3                                                                                     type of influenza vaccine
+ [Flucelvax]                                                                                                                                • Persons with a history of severe allergic reaction (e.g., anaphylaxis) after a previous dose of
+                                                                                                                                              any egg-based IIV, RIV, or LAIV of any valency. If using ccIIV3, administer in medical setting
+                                                                                                                                              under supervision of health care provider who can recognize and manage severe allergic
+                                                                                                                                              reactions. May consult an allergist.
+                                                                                                                                            • Moderate or severe acute illness with or without fever
+ Influenza, recombinant            • Severe allergic reaction (e.g., anaphylaxis) to any RIV of any valency, or to any component4 of RIV3   • Guillain–Barré syndrome (GBS) within 6 weeks after a previous dose of any
+ injectable (RIV3)                                                                                                                            type of influenza vaccine
+ [Flublok]                                                                                                                                  • Persons with a history of severe allergic reaction (e.g., anaphylaxis) after a previous dose of
+                                                                                                                                              any egg-based IIV, ccIIV, or LAIV of any valency. If using RIV3, administer in medical setting
+                                                                                                                                              under supervision of health care provider who can recognize and manage severe allergic
+                                                                                                                                              reactions. May consult an allergist.
+                                                                                                                                            • Moderate or severe acute illness with or without fever
+ Influenza, live attenuated        • Severe allergic reaction (e.g., anaphylaxis) after previous dose of any influenza vaccine              • Guillain–Barré syndrome (GBS) within 6 weeks after a previous dose of any
+ (LAIV3)                             (i.e., any egg-based IIV, ccIIV, RIV, or LAIV of any valency)                                            type of influenza vaccine
+ [Flumist]                         • Severe allergic reaction (e.g., anaphylaxis) to any vaccine component4 (excluding egg)                 • Asthma in persons aged 5 years or older
+                                   • Anatomic or functional asplenia                                                                        • Persons with underlying medical conditions (other than those listed under
+                                   • Immunocompromised due to any cause including, but not limited to, medications and                        contraindications) that might predispose to complications after wild–type influenza virus
+                                     HIV infection                                                                                            infection [e.g., chronic pulmonary, cardiovascular (except isolated hypertension), renal,
+                                   • Close contacts or caregivers of severely immunosuppressed persons who require a                          hepatic, neurologic, hematologic, or metabolic disorders (including diabetes mellitus)]
+                                     protected environment                                                                                  • Moderate or severe acute illness with or without fever
+                                   • Pregnancy
+                                   • Cochlear implant
+                                   • Active communication between the cerebrospinal fluid (CSF) and the oropharynx,
+                                     nasopharynx, nose, ear, or any other cranial CSF leak
+                                   • Received influenza antiviral medications oseltamivir or zanamivir within the previous
+                                     48 hours, peramivir within the previous 5 days, or baloxavir within the previous 17 days.
+1. When a contraindication is present, a vaccine should NOT be administered. Kroger A, Bahta L, Hunter P. ACIP General Best Practice Guidelines for Immunization.
+2. When a precaution is present, vaccination should generally be deferred but might be indicated if the benefit of protection from the vaccine outweighs the risk for an adverse reaction. Kroger A, Bahta L, Hunter P. ACIP General
+   Best Practice Guidelines for Immunization.
+3. See package inserts and FDA EUA fact sheets for a full list of vaccine ingredients. mRNA COVID–19 vaccines contain polyethylene glycol (PEG).
+4. Vaccination providers should check FDA–approved prescribing information for the most complete and updated information, including contraindications, warnings, and precautions. See Package inserts for U.S.–licensed
+   vaccines.
+
+
+                                                                                                                                                                                                                                        Page 13
+   Appendix                                 Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+Vaccine                                      Contraindicated or Not Recommended1                                                                                            Precautions2
+Haemophilus influenzae type b (Hib)          • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness with or without fever
+Hepatitis A (HepA)                           • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3 including neomycin             • Moderate or severe acute illness with or without fever
+Hepatitis B (HepB)                           • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3 including yeast                • Moderate or severe acute illness with or without fever
+                                             • Pregnancy: PreHevbrio is not recommended due to lack of safety data in pregnant women. Use other hepatitis B
+                                               vaccines if HepB is indicated4
+Hepatitis A–Hepatitis B vaccine              • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3 including neomycin and yeast   • Moderate or severe acute illness with or without fever
+(HepA–HepB) [Twinrix]
+
+Human papillomavirus (HPV)                   • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness with or without fever
+                                             • Pregnancy: HPV vaccination not recommended
+Measles, mumps, rubella (MMR)                • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Recent (≤11 months) receipt of antibody–containing blood product (specific
+                                             • Severe immunodeficiency (e.g., hematologic and solid tumors, receipt of chemotherapy, congenital immunodeficiency,             interval depends on product)
+                                               long–term immunosuppressive therapy or patients with HIV infection who are severely immunocompromised)                       • History of thrombocytopenia or thrombocytopenic purpura
+                                             • Pregnancy                                                                                                                    • Need for tuberculin skin testing or interferon–gamma release assay (IGRA) testing
+                                             • Family history of altered immunocompetence, unless verified clinically or by laboratory testing as immunocompetent           • Moderate or severe acute illness with or without fever
+Meningococcal ACWY (MenACWY)                 • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness with or without fever
+(MenACWY–CRM) [Menveo]                       • For MenACWY–CRM only: severe allergic reaction to any diphtheria toxoid– or CRM197–containing vaccine
+(MenACWY–TT) [MenQuadfi]                     • For MenACWY–TT only: severe allergic reaction to a tetanus toxoid–containing vaccine
+Meningococcal B (MenB)                       • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Pregnancy
+MenB–4C [Bexsero]                                                                                                                                                           • For MenB–4C only: Latex sensitivity
+MenB–FHbp [Trumenba]                                                                                                                                                        • Moderate or severe acute illness with or without fever
+Meningococcal ABCWY                          • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness, with or without fever
+(MenACWY–TT/MenB–FHbp)                       • Severe allergic reaction to a tetanus toxoid–containing vaccine
+[Penbraya]
+Mpox [Jynneos]                               • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness, with or without fever
+Pneumococcal conjugate                       • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness with or without fever
+(PCV15, PCV20, PCV21)                        • Severe allergic reaction (e.g., anaphylaxis) to any diphtheria–toxoid–containing vaccine or to its vaccine component3
+Pneumococcal polysaccharide (PPSV23)         • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness with or without fever
+Poliovirus vaccine, inactivated (IPV)        • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Pregnancy
+                                                                                                                                                                            • Moderate or severe acute illness with or without fever
+Respiratory syncytial virus vaccine (RSV)    • Severe allergic reaction (e.g., anaphylaxis) to a vaccine component                                                          • Moderate or severe acute illness with or without fever
+Tetanus, diphtheria, and acellular           • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Guillain–Barré syndrome (GBS) within 6 weeks after a previous dose of tetanus–
+pertussis (Tdap)                             • For Tdap only: Encephalopathy (e.g., coma, decreased level of consciousness, prolonged seizures), not attributable to          toxoid–containing vaccine
+Tetanus, diphtheria (Td)                       another identifiable cause, within 7 days of administration of previous dose of DTP, DTaP, or Tdap                           • History of Arthus–type hypersensitivity reactions after a previous dose of
+                                                                                                                                                                              diphtheria–toxoid containing or tetanus–toxoid–containing vaccine; defer
+                                                                                                                                                                              vaccination until at least 10 years have elapsed since the last tetanus–toxoid–
+                                                                                                                                                                              containing vaccine
+                                                                                                                                                                            • Moderate or severe acute illness with or without fever
+                                                                                                                                                                            • For Tdap only: Progressive or unstable neurological disorder, uncontrolled
+                                                                                                                                                                              seizures, or progressive encephalopathy until a treatment regimen has been
+                                                                                                                                                                              established and the condition has stabilized
+Varicella (VAR)                              • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Recent (≤11 months) receipt of antibody–containing blood product (specific
+                                             • Severe immunodeficiency (e.g., hematologic and solid tumors, receipt of chemotherapy, congenital immunodeficiency,             interval depends on product)
+                                               long–term immunosuppressive therapy or patients with HIV infection who are severely immunocompromised)                       • Receipt of specific antiviral drugs (acyclovir, famciclovir, or valacyclovir) 24 hours
+                                             • Pregnancy                                                                                                                      before vaccination (avoid use of these antiviral drugs for 14 days after vaccination)
+                                             • Family history of altered immunocompetence, unless verified clinically or by laboratory testing as immunocompetent           • Use of aspirin or aspirin–containing products
+                                                                                                                                                                            • Moderate or severe acute illness with or without fever
+Zoster recombinant vaccine (RZV)             • Severe allergic reaction (e.g., anaphylaxis) after a previous dose or to a vaccine component3                                • Moderate or severe acute illness with or without fever
+                                                                                                                                                                            • Current episode of herpes zoster
+1. When a contraindication is present, a vaccine should NOT be administered. Kroger A, Bahta L, Hunter P. ACIP General Best Practice Guidelines for Immunization. www.cdc.gov/vaccines/hcp/imz-best-practices/contraindications-precautions.html.
+2. When a precaution is present, vaccination should generally be deferred but might be indicated if the benefit of protection from the vaccine outweighs the risk for an adverse reaction. Kroger A, Bahta L, Hunter P. ACIP General Best Practice Guidelines
+   for Immunization. www.cdc.gov/vaccines/hcp/imz-best-practices/contraindications-precautions.html.
+3. Vaccination providers should check FDA–approved prescribing information for the most complete and updated information, including contraindications, warnings, and precautions. Package inserts for U.S.–licensed vaccines are available at www.
+   fda.gov/vaccines–blood–biologics/approved–products/vaccines–licensed–use–united–states.
+4. For information on the pregnancy exposure registry for persons who were inadvertently vaccinated with PreHevbrio while pregnant, please visit www.prehevbrio.com/#safety.
+                                                                                                                                                                                                                                                            Page 14
+     Addendum                               Recommended Adult Immunization Schedule for Ages 19 Years or Older, United States, 2025
+In addition to the recommendations presented in the previous sections of this immunization schedule, CDC has approved the following ACIP recommendations since October 24, 2024.
+
+
+    Vaccines                             Recommendations                                                                                                                                                         Effective Date of Recommendation†
+
+    Meningococcal                        ACIP recommends GSK's MenABCWY vaccine may be used when both MenACWY and MenB are indicated at the same visit*                                                           June 25, 2025
+    (MenACWY-CRM/MenB-4C,                *(1) healthy persons aged 16–23 years (routine schedule) when shared clinical decision-making favors administration of MenB vaccine and (2) persons aged ≥10 years
+    Penmenvy)                            who are at increased risk for meningococcal disease (e.g., because of persistent complement deficiencies, complement inhibitor use, or functional or anatomic asplenia).
+
+
+
+
+    RSV                                   ACIP recommends adults 50–59 years of age who are at increased risk of severe RSV diseasea receive a single dose of RSV vaccine.b,c                                    June 25, 2025
+    (Abrysvo,Arexvy,mResvia)              a. CDC will publish Clinical Considerations that describe chronic medical conditions and other risk factors for severe RSV disease for use in this risk-based
+                                             recommendation.
+                                          b. At this time, RSV vaccination is recommended as a single dose only. Persons who have already received RSV vaccination are NOT recommended to receive another
+                                             dose.
+                                          c. RSV vaccine can be administered with any product licensed in this age group.
+
+    Note: As of May 29, 2025, the schedule incorporates the HHS directive regarding COVID-19 vaccine recommendations. (Changes were made to tables and notes for COVID-19 vaccines in pregnant women.)
+
+The effective date is the date when the recommendation was adopted and became official.
+†
+
+
+
+
+                                                                                                                                                                                                                                               Page 15
+
