@@ -484,11 +484,25 @@ if [ "$DIRECTIONAL_REQUIRED" = "1" ]; then
   if [ "$RUN_STATUS_NOW" = "OK" ]; then
     log "running directional-control browser gate"
     record_intervention "directional_gate" "post_ok_verification" "start"
-    set +e
-    "$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/verify_directional_controls.py" \
-      --run "$RUN_DIR" > "$RUN_DIR/directional-controls.txt" 2>&1
-    DIRECTIONAL_RC=$?
-    set -e
+    # Retry ONLY when the browser itself failed to start. Chromium can abort
+    # under resource contention when several runs finish together, and a
+    # crashed browser previously condemned a perfectly good artifact with
+    # zero checks attempted. A genuine check failure (keys inverted, probe
+    # missing) is never retried: that is the model's result, not a flake.
+    DIRECTIONAL_RC=1
+    for attempt in 1 2 3; do
+      set +e
+      "$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/verify_directional_controls.py" \
+        --run "$RUN_DIR" > "$RUN_DIR/directional-controls.txt" 2>&1
+      DIRECTIONAL_RC=$?
+      set -e
+      [ "$DIRECTIONAL_RC" -eq 0 ] && break
+      grep -q 'debugging port\|browser exited\|no compatible Chromium' \
+        "$RUN_DIR/directional-controls.txt" 2>/dev/null || break
+      log "directional gate: browser failed to start (attempt $attempt/3), retrying"
+      record_intervention "directional_gate" "browser_start_failure" "attempt=$attempt"
+      sleep 15
+    done
     record_intervention "directional_gate" "post_ok_verification" "rc=$DIRECTIONAL_RC"
     [ "$DIRECTIONAL_RC" -eq 0 ] && log "directional gate PASSED" \
                                 || log "directional gate FAILED (recorded, not retried): $RUN_DIR/directional-controls.txt"
