@@ -40,11 +40,32 @@ case "$PROMPT_FILE_IN" in
 esac
 [ -f "$PROMPT_FILE" ] || die "prompt file not found: $PROMPT_FILE"
 [ -d "$SKILL_DIR" ]   || die "pinned skill not found at $SKILL_DIR"
-[ -n "${OPENROUTER_API_KEY:-}" ] || die "OPENROUTER_API_KEY is not set (put it in experiment-config/models.env, which is gitignored)"
-
 # ONE model for the whole run: the session, and every subagent it chooses to
 # spawn at any depth, all run on this. Nothing else is pinned.
 RUN_MODEL="$(resolve_model "$MODEL_ALIAS")"
+
+# Select and validate the credential for THIS run. Arms no longer share one
+# transport: glm/kimi/flash go through OpenRouter on one key, while fable-5-1
+# comes direct from Anthropic on a key chosen PER PROMPT, so four concurrent
+# runs never contend for one rate limit.
+#
+# Checked up front because the alternative is a run that launches, burns twenty
+# minutes of wall clock and then dies on an auth error.
+RUN_KEY_VAR="$(resolve_api_key_var "$MODEL_ALIAS" "$PROMPT_FILE")"
+[ -n "$RUN_KEY_VAR" ] || die "no API key variable is defined for provider '${RUN_MODEL%%/*}'"
+RUN_KEY_VALUE="$(read_api_key "$RUN_KEY_VAR")"
+[ -n "$RUN_KEY_VALUE" ] || die "$RUN_KEY_VAR is not set (put it in experiment-config/models.env, which is gitignored)"
+
+# The kilo harness authenticates to Anthropic through ANTHROPIC_API_KEY, so the
+# per-prompt key is promoted into that name for this process only. The four
+# SEN_* variables are deliberately NOT exported onward: the run -- and the
+# sandbox container, which inherits only ANTHROPIC_API_KEY -- sees exactly one
+# Anthropic credential, its own.
+if [ "${RUN_MODEL%%/*}" = "anthropic" ]; then
+  export ANTHROPIC_API_KEY="$RUN_KEY_VALUE"
+fi
+log "credential: \$$RUN_KEY_VAR (value not shown)"
+
 assert_model_visible "$RUN_MODEL"
 
 if [ -n "${COORDINATOR_MODEL:-}" ] || [ -n "${CRITIC_MODEL:-}" ]; then

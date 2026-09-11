@@ -44,6 +44,10 @@ load_config() {
   : "${FABLE_PROVIDER:=openrouter}"
   : "${GLM_MODEL:=z-ai/glm-5.3}"
   : "${FABLE_MODEL:=anthropic/claude-fable-5}"
+  # Fable 5.1 is served DIRECT from Anthropic, not through OpenRouter: the key
+  # is ANTHROPIC_API_KEY and the id carries no vendor prefix.
+  : "${FABLE51_PROVIDER:=anthropic}"
+  : "${FABLE51_MODEL:=claude-fable-5-1}"
   : "${FLASH_PROVIDER:=openrouter}"
   : "${FLASH_MODEL:=z-ai/glm-5.3-flash}"
   : "${FLASH_UPSTREAM:=}"
@@ -72,6 +76,10 @@ load_config() {
   : "${GLM_UPSTREAM_IGNORE:=}"
   : "${FABLE_UPSTREAM:=}"
   : "${FABLE_UPSTREAM_IGNORE:=}"
+  # Upstream pinning is an OpenRouter routing concept. Anthropic serves the
+  # model itself, so these stay empty and no provider block is emitted.
+  : "${FABLE51_UPSTREAM:=}"
+  : "${FABLE51_UPSTREAM_IGNORE:=}"
   : "${RUN_TIMEOUT_SECONDS:=14400}"
   : "${MAX_PARALLEL:=2}"
   : "${HARNESS_NAME:=kilo-cli}"
@@ -83,10 +91,11 @@ resolve_model() {
   case "$1" in
     glm-5.3|glm|GLM)     printf '%s/%s\n' "$GLM_PROVIDER" "$GLM_MODEL" ;;
     fable-5|fable|FABLE) printf '%s/%s\n' "$FABLE_PROVIDER" "$FABLE_MODEL" ;;
+    fable-5-1|fable-5.1|fable51|FABLE51) printf '%s/%s\n' "$FABLE51_PROVIDER" "$FABLE51_MODEL" ;;
     kimi-k3|kimi|KIMI)   printf '%s/%s\n' "$KIMI_PROVIDER" "$KIMI_MODEL" ;;
     glm-5.3-flash|flash) printf '%s/%s\n' "$FLASH_PROVIDER" "$FLASH_MODEL" ;;
     */*/*|*/*)           printf '%s\n' "$1" ;;
-    *) die "unknown model alias '$1' (expected: glm-5.3, glm-5.3-flash, fable-5, kimi-k3, or an explicit provider/model id)" ;;
+    *) die "unknown model alias '$1' (expected: glm-5.3, glm-5.3-flash, fable-5, fable-5-1, kimi-k3, or an explicit provider/model id)" ;;
   esac
 }
 
@@ -95,6 +104,7 @@ resolve_upstream() {
   case "$1" in
     glm-5.3|glm|GLM)     printf '%s\n' "${GLM_UPSTREAM:-}" ;;
     fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM:-}" ;;
+    fable-5-1|fable-5.1|fable51|FABLE51) printf '%s\n' "${FABLE51_UPSTREAM:-}" ;;
     kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM:-}" ;;
     glm-5.3-flash|flash) printf '%s\n' "${FLASH_UPSTREAM:-}" ;;
     *)                   printf '%s\n' "${UPSTREAM:-}" ;;
@@ -106,10 +116,40 @@ resolve_upstream_ignore() {
   case "$1" in
     glm-5.3|glm|GLM)     printf '%s\n' "${GLM_UPSTREAM_IGNORE:-}" ;;
     fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM_IGNORE:-}" ;;
+    fable-5-1|fable-5.1|fable51|FABLE51) printf '%s\n' "${FABLE51_UPSTREAM_IGNORE:-}" ;;
     kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM_IGNORE:-}" ;;
     glm-5.3-flash|flash) printf '%s\n' "${FLASH_UPSTREAM_IGNORE:-}" ;;
     *)                   printf '%s\n' "${UPSTREAM_IGNORE:-}" ;;
   esac
+}
+
+# Name of the environment variable holding the API key for this run.
+#
+# The fable-5-1 arm has ONE KEY PER PROMPT so that concurrent runs never share
+# a rate limit. The variable is derived from the prompt filename by convention:
+#
+#   prompts/sf-map.md -> SEN_WEBSITE_DEMO_SF_MAP_FABLE_5_1_API_KEY
+#
+# This prints the variable NAME, never its value: the secret then stays out of
+# logs, argv and `ps` output, and is read only by the caller that needs it.
+resolve_api_key_var() {
+  local alias="$1" prompt_file="$2" slug
+  case "$(resolve_model "$alias")" in
+    anthropic/*)
+      slug="$(basename "$prompt_file" .md | tr 'a-z-' 'A-Z_')"
+      case "$slug" in
+        ''|*[!A-Z0-9_]*) die "cannot derive an API key variable from prompt '$prompt_file' (slug '$slug' is not a valid variable fragment)" ;;
+      esac
+      printf 'SEN_WEBSITE_DEMO_%s_FABLE_5_1_API_KEY\n' "$slug" ;;
+    openrouter/*) printf 'OPENROUTER_API_KEY\n' ;;
+    *)            printf '\n' ;;
+  esac
+}
+
+# Value of the above, or empty. Kept separate so callers that only want to
+# report on configuration never have to touch the secret.
+read_api_key() {
+  eval "printf '%s' \"\${$1:-}\""
 }
 
 # Confirm the harness can actually see the model. Never guesses.

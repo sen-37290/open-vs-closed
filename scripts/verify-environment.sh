@@ -170,6 +170,24 @@ if [ -n "${OPENROUTER_API_KEY:-}" ]; then
 else
   fail "OPENROUTER_API_KEY is empty — fill it in experiment-config/models.env (that file exists and is gitignored)"
 fi
+# The fable-5-1 arm carries one key per prompt so concurrent runs never share a
+# rate limit. Check each prompt we intend to run, by the same derivation
+# run-one.sh uses, so a missing key surfaces here and not four hours in.
+FABLE51_PROBE_KEY=""
+for _pf in "$EXP_ROOT"/prompts/brand-design.md \
+           "$EXP_ROOT"/prompts/interactive-design.md \
+           "$EXP_ROOT"/prompts/sf-map.md \
+           "$EXP_ROOT"/prompts/steam-redesign/steam-redesign.md; do
+  [ -f "$_pf" ] || continue
+  _var="$(resolve_api_key_var fable-5-1 "$_pf")"
+  _val="$(read_api_key "$_var")"
+  if [ -n "$_val" ]; then
+    pass "$_var present (value not shown)"
+    [ -z "$FABLE51_PROBE_KEY" ] && FABLE51_PROBE_KEY="$_val"
+  else
+    fail "$_var is empty — the fable-5-1 run of $(basename "$_pf" .md) has no credential"
+  fi
+done
 
 # Fetch the model list once. The first `kilo models` call may populate a cache
 # and return a short list, which previously caused a spurious "not visible"
@@ -200,6 +218,19 @@ if [ -n "${OPENROUTER_API_KEY:-}" ]; then
     check_model "Fable arm" "$(resolve_model fable-5)"
   else
     fail "could not retrieve the provider model list after 3 attempts"
+  fi
+fi
+
+# The fable-5-1 arm lives on a different provider, so it needs its own list.
+# `kilo models anthropic` authenticates through ANTHROPIC_API_KEY, so borrow
+# one per-prompt key purely for the probe -- exactly as run-one.sh does.
+if [ -n "$FABLE51_PROBE_KEY" ]; then
+  export ANTHROPIC_API_KEY="$FABLE51_PROBE_KEY"
+  if load_model_list "${FABLE51_PROVIDER:-anthropic}"; then
+    pass "anthropic model list retrieved ($(printf '%s\n' "$MODEL_LIST_CACHE" | grep -c .) models)"
+    check_model "Fable 5.1 arm" "$(resolve_model fable-5-1)"
+  else
+    fail "could not retrieve the anthropic model list after 3 attempts"
   fi
 fi
 
