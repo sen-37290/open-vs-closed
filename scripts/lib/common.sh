@@ -48,6 +48,10 @@ load_config() {
   # is ANTHROPIC_API_KEY and the id carries no vendor prefix.
   : "${FABLE51_PROVIDER:=anthropic}"
   : "${FABLE51_MODEL:=claude-fable-5-1}"
+  # Alias `astra`. Served DIRECT from OpenAI (OPENAI_API_KEY), not through
+  # OpenRouter, so the id carries no vendor prefix -- same shape as fable-5-1.
+  : "${ASTRA_PROVIDER:=openai}"
+  : "${ASTRA_MODEL:=gpt-6-astra}"
   : "${FLASH_PROVIDER:=openrouter}"
   : "${FLASH_MODEL:=z-ai/glm-5.3-flash}"
   : "${FLASH_UPSTREAM:=}"
@@ -80,6 +84,9 @@ load_config() {
   # model itself, so these stay empty and no provider block is emitted.
   : "${FABLE51_UPSTREAM:=}"
   : "${FABLE51_UPSTREAM_IGNORE:=}"
+  # Likewise: OpenAI serves astra itself, so there is no upstream to pin.
+  : "${ASTRA_UPSTREAM:=}"
+  : "${ASTRA_UPSTREAM_IGNORE:=}"
   : "${RUN_TIMEOUT_SECONDS:=14400}"
   : "${MAX_PARALLEL:=2}"
   : "${HARNESS_NAME:=kilo-cli}"
@@ -93,9 +100,10 @@ resolve_model() {
     fable-5|fable|FABLE) printf '%s/%s\n' "$FABLE_PROVIDER" "$FABLE_MODEL" ;;
     fable-5-1|fable-5.1|fable51|FABLE51) printf '%s/%s\n' "$FABLE51_PROVIDER" "$FABLE51_MODEL" ;;
     kimi-k3|kimi|KIMI)   printf '%s/%s\n' "$KIMI_PROVIDER" "$KIMI_MODEL" ;;
+    astra|gpt-6-astra|ASTRA) printf '%s/%s\n' "$ASTRA_PROVIDER" "$ASTRA_MODEL" ;;
     glm-5.3-flash|flash) printf '%s/%s\n' "$FLASH_PROVIDER" "$FLASH_MODEL" ;;
     */*/*|*/*)           printf '%s\n' "$1" ;;
-    *) die "unknown model alias '$1' (expected: glm-5.3, glm-5.3-flash, fable-5, fable-5-1, kimi-k3, or an explicit provider/model id)" ;;
+    *) die "unknown model alias '$1' (expected: glm-5.3, glm-5.3-flash, fable-5, fable-5-1, kimi-k3, astra, or an explicit provider/model id)" ;;
   esac
 }
 
@@ -106,6 +114,7 @@ resolve_upstream() {
     fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM:-}" ;;
     fable-5-1|fable-5.1|fable51|FABLE51) printf '%s\n' "${FABLE51_UPSTREAM:-}" ;;
     kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM:-}" ;;
+    astra|gpt-6-astra|ASTRA) printf '%s\n' "${ASTRA_UPSTREAM:-}" ;;
     glm-5.3-flash|flash) printf '%s\n' "${FLASH_UPSTREAM:-}" ;;
     *)                   printf '%s\n' "${UPSTREAM:-}" ;;
   esac
@@ -118,29 +127,44 @@ resolve_upstream_ignore() {
     fable-5|fable|FABLE) printf '%s\n' "${FABLE_UPSTREAM_IGNORE:-}" ;;
     fable-5-1|fable-5.1|fable51|FABLE51) printf '%s\n' "${FABLE51_UPSTREAM_IGNORE:-}" ;;
     kimi-k3|kimi|KIMI)   printf '%s\n' "${KIMI_UPSTREAM_IGNORE:-}" ;;
+    astra|gpt-6-astra|ASTRA) printf '%s\n' "${ASTRA_UPSTREAM_IGNORE:-}" ;;
     glm-5.3-flash|flash) printf '%s\n' "${FLASH_UPSTREAM_IGNORE:-}" ;;
     *)                   printf '%s\n' "${UPSTREAM_IGNORE:-}" ;;
   esac
 }
 
+# Uppercase variable-name fragment for a prompt, e.g. sf-map.md -> SF_MAP.
+# Shared by every per-prompt provider so a malformed prompt name fails the same
+# way whichever arm asked for it.
+prompt_key_slug() {
+  local slug
+  slug="$(basename "$1" .md | tr 'a-z-' 'A-Z_')"
+  case "$slug" in
+    ''|*[!A-Z0-9_]*) die "cannot derive an API key variable from prompt '$1' (slug '$slug' is not a valid variable fragment)" ;;
+  esac
+  printf '%s' "$slug"
+}
+
 # Name of the environment variable holding the API key for this run.
 #
-# The fable-5-1 arm has ONE KEY PER PROMPT so that concurrent runs never share
-# a rate limit. The variable is derived from the prompt filename by convention:
+# The direct-provider arms have ONE KEY PER PROMPT so that concurrent runs never
+# share a rate limit. The variable is derived from the prompt filename, but the
+# two arms use DIFFERENT layouts -- fable-5-1 SUFFIXES the arm, astra INFIXES
+# it:
 #
-#   prompts/sf-map.md -> SEN_WEBSITE_DEMO_SF_MAP_FABLE_5_1_API_KEY
+#   fable-5-1  prompts/sf-map.md -> SEN_WEBSITE_DEMO_SF_MAP_FABLE_5_1_API_KEY
+#   astra      prompts/sf-map.md -> SEN_ASTRA_WEBSITE_DEMO_SF_MAP_API_KEY
+#
+# Those are the names that actually exist in models.env, so the templates
+# cannot be unified; keep each one matching the file rather than tidying it.
 #
 # This prints the variable NAME, never its value: the secret then stays out of
 # logs, argv and `ps` output, and is read only by the caller that needs it.
 resolve_api_key_var() {
-  local alias="$1" prompt_file="$2" slug
+  local alias="$1" prompt_file="$2"
   case "$(resolve_model "$alias")" in
-    anthropic/*)
-      slug="$(basename "$prompt_file" .md | tr 'a-z-' 'A-Z_')"
-      case "$slug" in
-        ''|*[!A-Z0-9_]*) die "cannot derive an API key variable from prompt '$prompt_file' (slug '$slug' is not a valid variable fragment)" ;;
-      esac
-      printf 'SEN_WEBSITE_DEMO_%s_FABLE_5_1_API_KEY\n' "$slug" ;;
+    anthropic/*)  printf 'SEN_WEBSITE_DEMO_%s_FABLE_5_1_API_KEY\n' "$(prompt_key_slug "$prompt_file")" ;;
+    openai/*)     printf 'SEN_ASTRA_WEBSITE_DEMO_%s_API_KEY\n'     "$(prompt_key_slug "$prompt_file")" ;;
     openrouter/*) printf 'OPENROUTER_API_KEY\n' ;;
     *)            printf '\n' ;;
   esac

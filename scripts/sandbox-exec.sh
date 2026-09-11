@@ -112,6 +112,7 @@ exec docker run --rm \
   -v "$EXP_ROOT/kilo.jsonc:/work/kilo.jsonc:ro" \
   -e OPENROUTER_API_KEY \
   -e ANTHROPIC_API_KEY \
+  -e OPENAI_API_KEY \
   -e KILO_CONFIG_CONTENT \
   -e ONESHOT_WEBSITES_PYTHON=/usr/bin/python3 \
   -e ONESHOT_WEBSITES_BROWSER=/usr/bin/chromium \

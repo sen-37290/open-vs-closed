@@ -46,8 +46,8 @@ RUN_MODEL="$(resolve_model "$MODEL_ALIAS")"
 
 # Select and validate the credential for THIS run. Arms no longer share one
 # transport: glm/kimi/flash go through OpenRouter on one key, while fable-5-1
-# comes direct from Anthropic on a key chosen PER PROMPT, so four concurrent
-# runs never contend for one rate limit.
+# (Anthropic) and astra (OpenAI) come direct from their vendor on a key chosen
+# PER PROMPT, so four concurrent runs never contend for one rate limit.
 #
 # Checked up front because the alternative is a run that launches, burns twenty
 # minutes of wall clock and then dies on an auth error.
@@ -56,14 +56,19 @@ RUN_KEY_VAR="$(resolve_api_key_var "$MODEL_ALIAS" "$PROMPT_FILE")"
 RUN_KEY_VALUE="$(read_api_key "$RUN_KEY_VAR")"
 [ -n "$RUN_KEY_VALUE" ] || die "$RUN_KEY_VAR is not set (put it in experiment-config/models.env, which is gitignored)"
 
-# The kilo harness authenticates to Anthropic through ANTHROPIC_API_KEY, so the
-# per-prompt key is promoted into that name for this process only. The four
-# SEN_* variables are deliberately NOT exported onward: the run -- and the
-# sandbox container, which inherits only ANTHROPIC_API_KEY -- sees exactly one
-# Anthropic credential, its own.
-if [ "${RUN_MODEL%%/*}" = "anthropic" ]; then
-  export ANTHROPIC_API_KEY="$RUN_KEY_VALUE"
-fi
+# The kilo harness authenticates to each vendor through that vendor's canonical
+# variable, so the per-prompt key is promoted into that name for this process
+# only. The SEN_* variables are deliberately NOT exported onward: the run -- and
+# the sandbox container, which inherits only the canonical name -- sees exactly
+# one credential for its vendor, its own.
+#
+# This must happen BEFORE assert_model_visible: `kilo models <provider>` cannot
+# even enumerate a provider it has no credential for, and would report a
+# perfectly available model as missing.
+case "${RUN_MODEL%%/*}" in
+  anthropic) export ANTHROPIC_API_KEY="$RUN_KEY_VALUE" ;;
+  openai)    export OPENAI_API_KEY="$RUN_KEY_VALUE" ;;
+esac
 log "credential: \$$RUN_KEY_VAR (value not shown)"
 
 assert_model_visible "$RUN_MODEL"
