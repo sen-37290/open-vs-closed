@@ -57,7 +57,15 @@ _cpu=$(( _totcpu / SANDBOX_MAX_CONCURRENT )); [ "$_cpu" -lt 1 ] && _cpu=1
 MEM="${SANDBOX_MEMORY:-${_mem}g}"
 CPUS="${SANDBOX_CPUS:-$_cpu}"
 PIDS="${SANDBOX_PIDS:-2048}"
-echo "sandbox: mem=$MEM cpus=$CPUS (host ${_totmem}GB/${_totcpu}cpu / max ${SANDBOX_MAX_CONCURRENT} concurrent; identical for every run)" >&2
+# Chromium keeps renderer shared memory in /dev/shm. Docker's default is 64MB,
+# which is far too small: the browser aborts at startup with SIGABRT and the
+# directional-control gate records "browser exited before opening its debugging
+# port (-6)" with zero checks run -- an infrastructure failure that looks like
+# a model failure. It cost the 2026-09-11 steam-redesign run its gate, and the
+# existing start-failure retry does not help because the retry hits the same
+# ceiling.
+SHM="${SANDBOX_SHM_SIZE:-1g}"
+echo "sandbox: mem=$MEM cpus=$CPUS shm=$SHM (host ${_totmem}GB/${_totcpu}cpu / max ${SANDBOX_MAX_CONCURRENT} concurrent; identical for every run)" >&2
 
 # Run as the HOST user. The run directory is a bind mount owned by the host
 # user, so the container's own uid could not write to it -- every run would fail
@@ -96,7 +104,7 @@ done
 exec docker run --rm \
   --name "ovc-$(printf '%s' "$RUN_ID" | tr -c 'A-Za-z0-9_.-' '-' | cut -c1-100)" \
   --user "$HOST_UID:$HOST_GID" \
-  --memory "$MEM" --cpus "$CPUS" --pids-limit "$PIDS" \
+  --memory "$MEM" --cpus "$CPUS" --pids-limit "$PIDS" --shm-size "$SHM" \
   --security-opt no-new-privileges \
   -v "$RUN_DIR:/work/runs/$RUN_ID" \
   $PROV_MOUNTS \
