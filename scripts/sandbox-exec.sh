@@ -126,7 +126,16 @@ for suffix in json commit; do
   fi
 done
 
-exec docker run --rm \
+# --init puts tini at PID 1 to reap orphaned children.
+#
+# Without it PID 1 is the kilo harness itself, and node does not reap orphans.
+# Every Chromium that outlives its immediate parent became a permanent zombie:
+# the 2026-09-11 interactive-design runs accumulated 1533 zombies (pids.current
+# 1672 of a 2048 limit) and the harness wedged mid-step -- twice, silently,
+# burning the wall-clock budget until the watchdog fired. Prompts that drive a
+# browser repeatedly hit this; the others never spawn enough processes to
+# notice.
+exec docker run --rm --init \
   --name "ovc-$(printf '%s' "$RUN_ID" | tr -c 'A-Za-z0-9_.-' '-' | cut -c1-100)" \
   --user "$HOST_UID:$HOST_GID" \
   --memory "$MEM" --cpus "$CPUS" --pids-limit "$PIDS" --shm-size "$SHM" \
