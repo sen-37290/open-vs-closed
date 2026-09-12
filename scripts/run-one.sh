@@ -528,17 +528,26 @@ if [ "$DIRECTIONAL_REQUIRED" = "1" ]; then
   if [ "$RUN_STATUS_NOW" = "OK" ]; then
     log "running directional-control browser gate"
     record_intervention "directional_gate" "post_ok_verification" "start"
-    # Probe the host browser first: on a host that will not start Chromium's
-    # namespace sandbox as a non-root user, every attempt below would otherwise
-    # abort with SIGABRT and condemn a good artifact.
-    ensure_gate_browser "$RUN_DIR/.harness-tmp/gate-browser"
     # Retry ONLY when the browser itself failed to start. Chromium can abort
     # under resource contention when several runs finish together, and a
     # crashed browser previously condemned a perfectly good artifact with
     # zero checks attempted. A genuine check failure (keys inverted, probe
     # missing) is never retried: that is the model's result, not a flake.
+    # The backoff escalates because a flat 15s is demonstrably too short. Both
+    # gated astra runs of 2026-09-11 burned all three attempts on
+    # "browser exited before opening its debugging port (-6)" with zero checks
+    # run -- and the very same gate then passed 4/4 against the same frozen
+    # artifact, with the same bare browser, when re-run against an idle host a
+    # few minutes later. The browser recovers on its own; the old schedule
+    # simply gave up first and condemned two good artifacts.
+    #
+    # Waits apply after attempts 1-4, so a run gets ~225s to outlast a
+    # transient abort before the gate is recorded as failed.
     DIRECTIONAL_RC=1
-    for attempt in 1 2 3; do
+    GATE_WAITS="15 30 60 120"
+    attempt=0
+    while :; do
+      attempt=$((attempt + 1))
       set +e
       "$ONESHOT_WEBSITES_PYTHON" "$SKILL_DIR/scripts/verify_directional_controls.py" \
         --run "$RUN_DIR" > "$RUN_DIR/directional-controls.txt" 2>&1
@@ -547,9 +556,11 @@ if [ "$DIRECTIONAL_REQUIRED" = "1" ]; then
       [ "$DIRECTIONAL_RC" -eq 0 ] && break
       grep -q 'debugging port\|browser exited\|no compatible Chromium' \
         "$RUN_DIR/directional-controls.txt" 2>/dev/null || break
-      log "directional gate: browser failed to start (attempt $attempt/3), retrying"
-      record_intervention "directional_gate" "browser_start_failure" "attempt=$attempt"
-      sleep 15
+      gate_wait="$(printf '%s\n' $GATE_WAITS | sed -n "${attempt}p")"
+      [ -n "$gate_wait" ] || break
+      log "directional gate: browser failed to start (attempt $attempt), retrying in ${gate_wait}s"
+      record_intervention "directional_gate" "browser_start_failure" "attempt=$attempt wait=${gate_wait}s"
+      sleep "$gate_wait"
     done
     record_intervention "directional_gate" "post_ok_verification" "rc=$DIRECTIONAL_RC"
     [ "$DIRECTIONAL_RC" -eq 0 ] && log "directional gate PASSED" \

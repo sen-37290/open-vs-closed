@@ -199,66 +199,6 @@ assert_model_visible() {
   die "could not retrieve the '$provider' model list after 4 attempts; refusing to dispatch without confirming the model is addressable"
 }
 
-# Ensure the directional-control gate has a browser that can actually start.
-#
-# verify_directional_controls.py appends --no-sandbox ONLY when euid == 0. Runs
-# execute as a non-root user, so on a host that forbids unprivileged user
-# namespaces Chromium aborts with SIGABRT and the gate records
-#   "browser exited before opening its debugging port (-6)"
-# with zero checks run -- an infrastructure failure that reads as a model
-# failure. It cost both gated astra runs of 2026-09-11 their gate, and the
-# skill's own start-failure retry cannot help because every attempt hits the
-# same wall.
-#
-# The skill is vendored unmodified, so the supported lever is
-# ONESHOT_WEBSITES_BROWSER, which selects the executable: point it at a wrapper
-# that supplies the flag. This is PROBED, never assumed -- --no-sandbox drops a
-# real security boundary, so it is used only on a host that cannot start the
-# browser without it, and a host that works is left alone.
-#
-# $1 = directory to write the wrapper into (run-local, preserved with the run).
-ensure_gate_browser() {
-  local wrap_dir="$1" br="" c probe
-
-  # An explicit choice by the caller always wins.
-  if [ -n "${ONESHOT_WEBSITES_BROWSER:-}" ]; then
-    export ONESHOT_WEBSITES_BROWSER
-    return 0
-  fi
-
-  for c in chromium chromium-browser google-chrome google-chrome-stable chrome; do
-    if command -v "$c" >/dev/null 2>&1; then br="$(command -v "$c")"; break; fi
-  done
-  # No browser at all is the skill's error to report, with its own message.
-  [ -n "$br" ] || return 0
-
-  probe="$(mktemp -d 2>/dev/null)" || return 0
-
-  # --dump-dom exits as soon as the page loads, so this is a cheap, decisive
-  # "can this browser start here" test rather than a guess about the kernel.
-  # $1 is deliberately unquoted: empty must expand to no argument at all.
-  _gate_browser_starts() {
-    "$br" --headless=new --disable-gpu --user-data-dir="$probe/$2" \
-      $1 --dump-dom about:blank >/dev/null 2>&1
-  }
-
-  if _gate_browser_starts "" bare; then
-    rm -rf "$probe"
-    return 0                     # host is fine; change nothing
-  fi
-
-  if _gate_browser_starts "--no-sandbox" ns; then
-    mkdir -p "$wrap_dir"
-    printf '#!/bin/sh\nexec "%s" --no-sandbox "$@"\n' "$br" > "$wrap_dir/chromium-nosandbox"
-    chmod +x "$wrap_dir/chromium-nosandbox"
-    export ONESHOT_WEBSITES_BROWSER="$wrap_dir/chromium-nosandbox"
-    log "gate browser: $br cannot start its own sandbox on this host; using a --no-sandbox wrapper"
-  else
-    warn "gate browser: $br fails to start with AND without --no-sandbox; the directional gate will report a browser failure"
-  fi
-  rm -rf "$probe"
-}
-
 # --- prompt sealing ---------------------------------------------------------
 # Strict UTF-8 read; rejects mojibake/replacement characters. Prints sha256.
 prompt_digest() {
