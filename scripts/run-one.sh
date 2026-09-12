@@ -528,6 +528,10 @@ if [ "$DIRECTIONAL_REQUIRED" = "1" ]; then
   if [ "$RUN_STATUS_NOW" = "OK" ]; then
     log "running directional-control browser gate"
     record_intervention "directional_gate" "post_ok_verification" "start"
+    # Probe the host browser first: on a host that will not start Chromium's
+    # namespace sandbox as a non-root user, every attempt below would otherwise
+    # abort with SIGABRT and condemn a good artifact.
+    ensure_gate_browser "$RUN_DIR/.harness-tmp/gate-browser"
     # Retry ONLY when the browser itself failed to start. Chromium can abort
     # under resource contention when several runs finish together, and a
     # crashed browser previously condemned a perfectly good artifact with
