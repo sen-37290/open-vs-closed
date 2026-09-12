@@ -95,10 +95,35 @@ mkdir -p "$KILO_HOME" "$RUN_DIR/.harness-tmp"
 # inventory, which would reveal every sibling run.
 RUNS_ROOT="$(cd "$(dirname "$RUN_DIR")" && pwd)"
 PROV="$RUNS_ROOT/.oneshot-provenance"
-PROV_MOUNTS=""
+
+# The provenance DIRECTORY must be writable inside the container, not just
+# populated. verify_directional_controls.py writes its digest-bound evidence as
+# a temp file BESIDE the receipts, so a read-only parent kills the gate.
+#
+# Mounting only the receipt files had Docker auto-create their parent as
+# root:root while the container runs as the host uid, so the gate died with
+# "[Errno 13] Permission denied: .../.<run>.directional-controls.json.<hash>.tmp"
+# before running a single check -- an infrastructure failure that reads as a
+# model failure. It cost both gated astra runs of 2026-09-11 their gate, and
+# each correctly recorded BLOCKED rather than claim an unevidenced pass.
+#
+# Mounting the real directory would expose every sibling run's receipts, so the
+# container gets a per-run VIEW holding copies of only this run's, mounted
+# read-write; the receipts themselves are then re-mounted read-only ON TOP, so
+# a run can write evidence but cannot alter its own provenance. Docker orders
+# mounts by path depth, so the file mounts land inside the directory mount.
+#
+# run-one.sh promotes any evidence written here back into the real provenance
+# directory after the run, which is where catalogue validation looks for it.
+PROV_VIEW="$RUN_DIR/.provenance-view"
+mkdir -p "$PROV_VIEW"
+PROV_MOUNTS="-v $PROV_VIEW:/work/runs/.oneshot-provenance"
 for suffix in json commit; do
   f="$PROV/$RUN_ID.$suffix"
-  [ -e "$f" ] && PROV_MOUNTS="$PROV_MOUNTS -v $f:/work/runs/.oneshot-provenance/$RUN_ID.$suffix:ro"
+  if [ -e "$f" ]; then
+    cp -p "$f" "$PROV_VIEW/$RUN_ID.$suffix"
+    PROV_MOUNTS="$PROV_MOUNTS -v $PROV_VIEW/$RUN_ID.$suffix:/work/runs/.oneshot-provenance/$RUN_ID.$suffix:ro"
+  fi
 done
 
 exec docker run --rm \

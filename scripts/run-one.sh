@@ -480,6 +480,24 @@ if [ "$TIMEOUT_HIT" = "1" ]; then
 fi
 log "coordinator exited: rc=$EXIT_CODE"
 
+# Promote gate evidence out of the per-run provenance view into the real
+# provenance directory, which is where catalogue validation looks for it. The
+# two receipts are skipped: they are mounted read-only and the host copies are
+# authoritative, so only files the run actually produced move across.
+if [ "$SANDBOX" = "1" ] && [ -d "$RUN_DIR/.provenance-view" ]; then
+  for _pf in "$RUN_DIR/.provenance-view"/*; do
+    [ -f "$_pf" ] || continue
+    _pb="$(basename "$_pf")"
+    case "$_pb" in
+      "$RUN_ID.json"|"$RUN_ID.commit") continue ;;
+      .*) continue ;;   # in-flight temp files the gate did not finish writing
+    esac
+    cp -p "$_pf" "$RUNS_ROOT/.oneshot-provenance/$_pb" 2>/dev/null \
+      && log "promoted gate evidence: $_pb" \
+      || warn "could not promote gate evidence $_pb into the provenance directory"
+  done
+fi
+
 # Capture the coordinator session id for telemetry.
 grep -o 'ses_[A-Za-z0-9]\{20,\}' "$AGENT_LOG" 2>/dev/null | head -1 > "$RUN_DIR/.session-id" || true
 
